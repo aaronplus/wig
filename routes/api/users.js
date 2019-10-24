@@ -12,6 +12,7 @@ const User = require("../../models/User");
 // @desc Login user and return JWT token
 // @access Public
 router.post("/login", (req, res) => {
+  console.log("Login api called");
   // Form validation
 const { errors, isValid } = validateLoginInput(req.body);
 // Check validation
@@ -24,7 +25,7 @@ const email = req.body.email;
   User.findOne({ email }).then(user => {
     // Check if user exists
     if (!user) {
-      return res.status(404).json({ emailnotfound: "Email not found" });
+      return res.status(400).json({ error: "Email not found" });
     }
 // Check password
     bcrypt.compare(password, user.password).then(isMatch => {
@@ -52,7 +53,7 @@ const email = req.body.email;
       } else {
         return res
           .status(400)
-          .json({ passwordincorrect: "Password incorrect" });
+          .json({ error: "Password incorrect" });
       }
     });
   });
