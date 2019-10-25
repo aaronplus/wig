@@ -221,6 +221,11 @@ const routes = [
     Component: loadable(() => import('pages/tables/antd')),
     exact: true,
   },
+  {
+    path: '/contacts',
+    Component: loadable(() => import('pages/contacts')),
+    exact: true,
+  },
   // Charts
   {
     path: '/charts/chartistjs',

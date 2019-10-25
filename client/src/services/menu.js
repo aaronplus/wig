@@ -293,6 +293,12 @@ export default async function getMenuData() {
       ],
     },
     {
+      title: 'Contacts',
+      key: 'contacts',
+      icon: 'fe fe-inbox',
+      url: '/contacts',
+    },
+    {
       title: 'Charts',
       key: 'charts',
       icon: 'fe fe-home',
