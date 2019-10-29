@@ -7,6 +7,8 @@ const passport = require("passport");
 const users = require("./routes/api/users");
 const contacts = require("./routes/api/contacts");
 const cors = require('cors')
+const User = require('./models/User');
+const bcrypt = require("bcryptjs");
 
 app.use(cors());
 
@@ -40,3 +42,32 @@ app.use("/api/users", users);
 app.use("/api/contacts", contacts);
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
+
+
+// Seeding
+
+var email = "admin@wig.com";
+var password = "123456"
+User.findOne({ email: email }).then(user => {
+    if (user) {
+      console.log("Admin exists");
+    } else {
+      const newUser = new User({
+        first_name: 'Admin',
+        last_name: 'Admin',
+        email,
+        password
+      });
+// Hash password before saving in database
+      bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(newUser.password, salt, (err, hash) => {
+          if (err) throw err;
+          newUser.password = hash;
+          newUser
+            .save()
+            .then(user => console.log("Admin added"))
+            .catch(err => console.log(err));
+        });
+      });
+    }
+  });
