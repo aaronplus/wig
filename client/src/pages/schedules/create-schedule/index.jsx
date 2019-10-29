@@ -266,7 +266,7 @@ class CreateSchedule extends React.Component {
               )}
 
               <button type="submit" className="btn btn-success px-5">
-                Send Data
+                Create Schedule
               </button>
             </Form>
           </div>
