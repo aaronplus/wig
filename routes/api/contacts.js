@@ -1,33 +1,68 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const keys = require("../../config/keys");
 const fs = require('fs');
 const csv = require('csv-parser');
+const multer = require('multer');
+const validateContactInput = require("../../validation/contact");
+const validateToken = require("../validateToken").validateToken;
+const Campaign = require('../../models/Campaign');
 
+const upload = multer({ dest: 'uploads/' });
 // Load Contact model
 
 
 // @route POST api/contacts/upload
 // @desc Upload contacts by csv
-// @access Private
+// @access Private, validateToken
+
+router.post('/upload', validateToken, upload.single('file'), async function (req, res, next) {
+  var userId = req.decoded.id;
+  const { errors, isValid } = validateContactInput(Object.assign({}, req.body, req.file));
+  // Check validation
+    if (!isValid) {
+      return res.status(400).json(errors);
+    }
+
+// Create Campaign
+let campaign = req.body.campaign;
+var campaignId;
+  try {
+    campaignId = await new Campaign({campaign,userId: mongoose.Types.ObjectId(userId)}).save();
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({error: "Error in save Campaign"});
+  }
+
+  var fileRows = [], fileHeader;
+   fs.createReadStream(req.file.path)
+     .pipe(csv())
+     .on('data', (data) => fileRows.push(data))
+     .on('end', () => {
+
+       // Create contacts
+       // var rowData = [];
+       // fileRows.each(row,index=>{
+       //   let data = {};
+       //   data['internal'] = ;
+       //   data['campaign'] = ;
+       //
+       // });
 
 
 
-router.post('/upload', (req, res) =>{
-  var results = [];
-  fs.createReadStream('./data.csv')
-    .pipe(csv())
-    .on('data', (data) => results.push(data))
-    .on('end', () => {
-      return res.json(results);
-      //console.log(results);
-      // [
-      //   { NAME: 'Daffy Duck', AGE: '24' },
-      //   { NAME: 'Bugs Bunny', AGE: '22' }
-      // ]
-    });
+
+
+
+
+
+
+
+       return res.json({"Headers":Object.keys(fileRows[0]), fileRows});
+     });
 });
 // -> Import CSV File to MongoDB database
 function importCsvData2MongoDB(filePath){
