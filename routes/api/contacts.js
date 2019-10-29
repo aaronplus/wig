@@ -10,6 +10,7 @@ const multer = require('multer');
 const validateContactInput = require("../../validation/contact");
 const validateToken = require("../validateToken").validateToken;
 const Campaign = require('../../models/Campaign');
+const Contact = require('../../models/Contact');
 
 const upload = multer({ dest: 'uploads/' });
 // Load Contact model
@@ -19,8 +20,8 @@ const upload = multer({ dest: 'uploads/' });
 // @desc Upload contacts by csv
 // @access Private, validateToken
 
-router.post('/upload', validateToken, upload.single('file'), async function (req, res, next) {
-  var userId = req.decoded.id;
+router.post('/upload', upload.single('file'), async function (req, res, next) {
+  var userId = '5db7c018187b180bd5d96017';
   const { errors, isValid } = validateContactInput(Object.assign({}, req.body, req.file));
   // Check validation
     if (!isValid) {
@@ -42,40 +43,39 @@ var campaignId;
      .pipe(csv())
      .on('data', (data) => fileRows.push(data))
      .on('end', () => {
-
        /*Create contacts*/
        var rowData = [];
-       fileRows.each((row,index)=>{
+       fileRows.map((row,index)=>{
          let data = {};
-         data['internal'] = '';
-         data['campaign'] = '';
+         data['internal'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
+         data['campaign'] = mongoose.Types.ObjectId(campaignId._id);
          data['firstNameOne'] = '';
          data['lastNameOne'] = '';
          data['correctPhone'] = '';
          data['firstNameTwo'] = '';
          data['lastNameTwo'] = '';
-         data['mailingName'] = row['OWNER_MAILING_NAME'];
+         data['mailingName'] = row['OWNER_MAILING_NAME'] || row['OWNER MAILING NAME'];
          data['occupancy'] = '';
          data['ownershipType'] = '';
-         data['mailingAddress'] = row['MAILING_STREET_ADDRESS'];
-         data['mailingCity'] = row['MAIL_CITY'];
-         data['mailingState'] = row['MAIL_STATE'];
-         data['mailingZipCode'] = row['MAIL_ZIP'];
-         data['mailingCounty'] = row['MAIL_COUNTRY'];
-         data['propertyAddress'] = row['SITUS_STREET_ADDRESS'];
-         data['propertyCity'] = row['SITUS_CITY'];
-         data['propertyState'] = row['SITUS_STATE'];
-         data['propertyZipCode'] = row['SITUS_ZIP_CODE'];
+         data['mailingAddress'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
+         data['mailingCity'] = row['MAIL_CITY'] || row['MAIL CITY'];
+         data['mailingState'] = row['MAIL_STATE'] || row['MAIL STATE'];
+         data['mailingZipCode'] = row['MAIL_ZIP'] || row['MAIL ZIP'];
+         data['mailingCounty'] = row['MAIL_COUNTRY'] || row['MAIL COUNTRY'];
+         data['propertyAddress'] = row['SITUS_STREET_ADDRESS'] || row['SITUS STREET ADDRESS'];
+         data['propertyCity'] = row['SITUS_CITY'] || row['SITUS CITY'];
+         data['propertyState'] = row['SITUS_STATE'] || row['SITUS STATE'];
+         data['propertyZipCode'] = row['SITUS_ZIP_CODE'] || row['SITUS ZIP CODE'];
          data['propertyCounty'] = '';
          data['apn'] = row['APN'];
-         data['equityValue'] = row['EQUITY_VALUE'];
-         data['equityPercentage'] = row['EQUITY_PERCENTAGE'];
+         data['equityValue'] = row['EQUITY_VALUE'] || row['EQUITY VALUE'];
+         data['equityPercentage'] = row['EQUITY_PERCENTAGE'] || row['EQUITY PERCENTAGE'];
          data['estimatedValue'] = '';
-         data['recordingDateOT'] = row['OT_RECORDING_DATE'];
+         data['recordingDateOT'] = row['OT_RECORDING_DATE'] || row['OT RECORDING DATE'];
          data['salePriceOT'] = '';
-         data['deedTypeOT'] = row['OT_DEED_TYPE'];
+         data['deedTypeOT'] = row['OT_DEED_TYPE'] || row['OT DEED TYPE'];
          data['recordingDateLMS'] = '';
-         data['salePriceLMS'] = row['LMS_SALE_PRICE'];
+         data['salePriceLMS'] = row['LMS_SALE_PRICE'] || row['LMS SALE PRICE'];
          data['deedTypeLMS'] = '';
          data['dateOfDeath'] = '';
          data['dateOfBirth'] = '';
@@ -144,11 +144,15 @@ var campaignId;
          data['offerSentDate']='';
          data['offerViewedDate']='';
          data['offerSignedDate']='';
-         data['Market']=row['Market_VALUE'];
+         data['Market']=row['Market_VALUE'] || row['Market VALUE'];
          data['marketExport']='';
          data['sellerLead']='';
+         data['internal'] = data['internal'].replace(/[^A-Z0-9]/ig, "");
          rowData.push(data);
        });
+       Contact.insertMany(rowData,function(err, docs){
+        return res.json(docs);
+       })
 
 
 
@@ -159,7 +163,7 @@ var campaignId;
 
 
 
-       return res.json(rowData);
+
      });
 });
 // -> Import CSV File to MongoDB database

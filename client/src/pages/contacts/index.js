@@ -2,7 +2,7 @@ import React from 'react'
 import { Table, Button } from 'antd'
 import data from './data.json'
 
-class TablesAntdFilterSorter extends React.Component {
+class ContactsList extends React.Component {
   state = {
     filteredInfo: null,
     sortedInfo: null,
@@ -96,4 +96,4 @@ class TablesAntdFilterSorter extends React.Component {
   }
 }
 
-export default TablesAntdFilterSorter
+export default ContactsList

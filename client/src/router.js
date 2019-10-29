@@ -226,6 +226,11 @@ const routes = [
     Component: loadable(() => import('pages/contacts')),
     exact: true,
   },
+  {
+    path: '/contacts/import',
+    Component: loadable(() => import('pages/contacts/import')),
+    exact: true,
+  },
   // Charts
   {
     path: '/charts/chartistjs',

@@ -8,7 +8,7 @@ const ContactSchema = new Schema({
         required: true
     },
     campaign: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: true
     },
     firstNameOne: {

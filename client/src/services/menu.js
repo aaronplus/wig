@@ -295,8 +295,19 @@ export default async function getMenuData() {
     {
       title: 'Contacts',
       key: 'contacts',
-      icon: 'fe fe-inbox',
-      url: '/contacts',
+      icon: 'fe fe-user',
+      children: [
+        {
+          title: 'List',
+          key: 'list_contacts',
+          url: '/contacts',
+        },
+        {
+          title: 'Import',
+          key: 'import_contacts',
+          url: '/contacts/import',
+        }
+      ],
     },
     {
       title: 'Charts',
