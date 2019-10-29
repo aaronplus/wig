@@ -6,6 +6,7 @@ const app = express();
 const passport = require("passport");
 const users = require("./routes/api/users");
 const contacts = require("./routes/api/contacts");
+const schedule = require("./routes/api/schedule");
 const cors = require('cors')
 const User = require('./models/User');
 const Message = require('./models/Message');
@@ -42,6 +43,7 @@ require("./config/passport")(passport);
 // Routes
 app.use("/api/users", users);
 app.use("/api/contacts", contacts);
+app.use("/api/schedule", schedule);
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
 
