@@ -18,6 +18,12 @@ const loadable = loader =>
   })
 
 const routes = [
+  // Schedules
+  {
+    path: '/schedules/create',
+    Component: loadable(() => import('pages/schedules/create-schedule')),
+    exact: true,
+  },
   // Dashboards
   {
     path: '/dashboard/analytics',

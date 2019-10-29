@@ -5,6 +5,19 @@ export default async function getMenuData() {
       title: 'Dashboards',
     },
     {
+      title: 'Schedules',
+      key: 'Schedules',
+      icon: 'fe fe-home',
+      count: 1,
+      children: [
+        {
+          title: 'Create Schedule',
+          key: 'createSchedule',
+          url: '/schedules/create',
+        },
+      ],
+    },
+    {
       title: 'Dashboards',
       key: 'dashboards',
       icon: 'fe fe-home',
