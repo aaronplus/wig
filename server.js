@@ -8,6 +8,8 @@ const users = require("./routes/api/users");
 const contacts = require("./routes/api/contacts");
 const cors = require('cors')
 const User = require('./models/User');
+const Message = require('./models/Message');
+const PhoneNumber = require('./models/PhoneNumber');
 const bcrypt = require("bcryptjs");
 
 app.use(cors());
@@ -71,3 +73,46 @@ User.findOne({ email: email }).then(user => {
       });
     }
   });
+
+  // Message Seeder
+  Message.countDocuments({}, function( err, count){
+    console.log(err, count);
+    if (count == 0) {
+      const newMessage = [{
+        name: Math.random().toString(36).substring(5),
+        message: Math.random().toString(36).substring(2)
+      },{
+        name: Math.random().toString(36).substring(5),
+        message: Math.random().toString(36).substring(2)
+      },{
+        name: Math.random().toString(36).substring(5),
+        message: Math.random().toString(36).substring(2)
+      }];
+      Message.insertMany(newMessage, function(error, docs) {
+        console.log(error, docs);
+
+      });
+    }
+})
+
+// Phone Number Seeder
+PhoneNumber.countDocuments({}, function( err, count){
+  console.log(err, count);
+  if (count == 0) {
+    const newRecord = [{
+      name: 'first',
+      type: 'twilio',
+      phone_number: '+61 447 725 755',
+      voice_forward_number: 'PN25062b26f66d4b00242375354009819a'
+    },{
+      name: 'second',
+      type: 'twilio',
+      phone_number: '+61 427 287 920',
+      voice_forward_number: 'PN5959bb608ccf2e743b2f33d213b99558'
+    }];
+    PhoneNumber.insertMany(newRecord, function(error, docs) {
+      console.log(error, docs);
+
+    });
+  }
+})
