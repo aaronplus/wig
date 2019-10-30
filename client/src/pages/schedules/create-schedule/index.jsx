@@ -1,22 +1,9 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
-import {
-  Form,
-  Input,
-  Slider,
-  // Cascader,
-  // Upload,
-  // Icon,
-  // message,
-  Checkbox,
-  Radio,
-  Select,
-  // Button,
-  DatePicker,
-  TimePicker,
-} from 'antd'
+import { Form, Input, Slider, Checkbox, Radio, Select, DatePicker, TimePicker } from 'antd'
 
-// const { Dragger } = Upload
+import timezones from '../../../assets/timezones.json'
+
 const { Option } = Select
 
 @Form.create()
@@ -62,24 +49,7 @@ class CreateSchedule extends React.Component {
 
   render() {
     const { form } = this.props
-    console.log('Form: ', form.getFieldValue('message'))
-
-    // const opts = {
-    //   name: 'file',
-    //   multiple: true,
-    //   action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-    //   onChange(info) {
-    //     const { status } = info.file
-    //     if (status !== 'uploading') {
-    //       console.log(info.file, info.fileList)
-    //     }
-    //     if (status === 'done') {
-    //       message.success(`${info.file.name} file uploaded successfully.`)
-    //     } else if (status === 'error') {
-    //       message.error(`${info.file.name} file upload failed.`)
-    //     }
-    //   },
-    // }
+    console.log('Timezones: ', timezones)
 
     const formItemLayout = {
       labelCol: {
@@ -106,41 +76,6 @@ class CreateSchedule extends React.Component {
       10000: '10000',
     }
 
-    // const residences = [
-    //   {
-    //     value: 'zhejiang',
-    //     label: 'Zhejiang',
-    //     children: [
-    //       {
-    //         value: 'hangzhou',
-    //         label: 'Hangzhou',
-    //         children: [
-    //           {
-    //             value: 'xihu',
-    //             label: 'West Lake',
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     value: 'jiangsu',
-    //     label: 'Jiangsu',
-    //     children: [
-    //       {
-    //         value: 'nanjing',
-    //         label: 'Nanjing',
-    //         children: [
-    //           {
-    //             value: 'zhonghuamen',
-    //             label: 'Zhong Hua Men',
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   },
-    // ]
-
     return (
       <div>
         <Helmet title="Create Campaign Schedule" />
@@ -149,9 +84,6 @@ class CreateSchedule extends React.Component {
         </div>
         <div className="card">
           <div className="card-body">
-            {/* <h4 className="mb-4">
-              <strong>Basic Form</strong>
-            </h4> */}
             <Form {...formItemLayout} labelAlign="left">
               <Form.Item label="Select Campaign">
                 {form.getFieldDecorator('campaign', {
@@ -238,7 +170,9 @@ class CreateSchedule extends React.Component {
                   rules: [{ message: 'Please select your timezone!' }],
                 })(
                   <Select placeholder="Select timezone" onChange={this.handleSelectChange}>
-                    <Option value="campaign">Timezones list</Option>
+                    {timezones.map(timezone => (
+                      <Option value={timezone.utc[0]}>{timezone.text}</Option>
+                    ))}
                   </Select>,
                 )}
               </Form.Item>
