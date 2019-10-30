@@ -1,11 +1,22 @@
 import React from 'react'
+import { connect } from 'react-redux'
 import { Table, Button } from 'antd'
-import data from './data.json'
+// import data from './data.json'
 
+const mapStateToProps = ({ contacts }) => ({ contacts })
+@connect(mapStateToProps)
 class ContactsList extends React.Component {
   state = {
     filteredInfo: null,
     sortedInfo: null,
+  }
+
+  componentDidMount(){
+    const { dispatch } = this.props
+    dispatch({
+      type: 'contacts/GET_CONTACTS',
+      payload: localStorage.getItem('setAuthToken'),
+    })
   }
 
   handleChange = (pagination, filters, sorter) => {
@@ -37,35 +48,37 @@ class ContactsList extends React.Component {
   }
 
   render() {
+    const { contacts } = this.props;
+    const data = contacts.list;
     let { sortedInfo, filteredInfo } = this.state
     sortedInfo = sortedInfo || {}
     filteredInfo = filteredInfo || {}
     const columns = [
       {
         title: 'Name',
-        dataIndex: 'name',
+        dataIndex: 'mailingName',
         key: 'name',
         filters: [{ text: 'Joe', value: 'Joe' }, { text: 'Jim', value: 'Jim' }],
         filteredValue: filteredInfo.name || null,
         onFilter: (value, record) => record.name.includes(value),
-        sorter: (a, b) => a.name.length - b.name.length,
+        sorter: (a, b) => a.mailingName.length - b.mailingName.length,
         sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
       },
       {
         title: 'Zip',
-        dataIndex: 'zip',
+        dataIndex: 'propertyZipCode',
         key: 'zip',
-        sorter: (a, b) => a.age - b.age,
+        sorter: (a, b) => a.propertyZipCode - b.propertyZipCode,
         sortOrder: sortedInfo.columnKey === 'zip' && sortedInfo.order,
       },
       {
         title: 'State',
-        dataIndex: 'state',
+        dataIndex: 'propertyState',
         key: 'state',
         filters: [{ text: 'London', value: 'London' }, { text: 'New York', value: 'New York' }],
         filteredValue: filteredInfo.address || null,
-        onFilter: (value, record) => record.address.includes(value),
-        sorter: (a, b) => a.address.length - b.address.length,
+        onFilter: (value, record) => record.propertyState.includes(value),
+        sorter: (a, b) => a.propertyState.length - b.propertyState.length,
         sortOrder: sortedInfo.columnKey === 'state' && sortedInfo.order,
       },
     ]

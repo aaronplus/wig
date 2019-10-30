@@ -2,7 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 // Create Schema
 const ContactSchema = new Schema({
-
+    userId:{
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
     internal: {
         type: String,
         required: true

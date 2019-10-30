@@ -32,6 +32,7 @@
     "import/no-unresolved": 0,
     "no-console": 0,
     "react/no-multi-comp": 0,
+    "no-underscore-dangle": 'off'
   },
   "parserOptions": {
     "ecmaFeatures": {
