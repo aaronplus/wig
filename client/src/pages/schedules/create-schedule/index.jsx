@@ -1,7 +1,8 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
-import { Form, Input, Slider, Checkbox, Radio, Select, DatePicker, TimePicker } from 'antd'
-
+import { Alert, Form, Input, Slider, Checkbox, Radio, Select, DatePicker, TimePicker } from 'antd'
+import axios from 'axios'
+import moment from 'moment'
 import timezones from '../../../assets/timezones.json'
 
 const { Option } = Select
@@ -10,6 +11,44 @@ const { Option } = Select
 class CreateSchedule extends React.Component {
   state = {
     confirmDirty: false,
+    messages: [],
+    campaigns: [],
+    phoneNumbers: [],
+    success: null,
+    error: null,
+  }
+
+  componentDidMount() {
+    this.getAllMessages()
+    this.getAllCampaigns()
+    this.getAllPhoneNumbers()
+  }
+
+  getAllMessages = async () => {
+    const response = await axios('http://localhost:5000/api/messages/all', {
+      headers: {
+        Authorization: localStorage.getItem('jwtToken'),
+      },
+    })
+    this.setState({ messages: response.data })
+  }
+
+  getAllCampaigns = async () => {
+    const response = await axios('http://localhost:5000/api/campaigns/all', {
+      headers: {
+        Authorization: localStorage.getItem('jwtToken'),
+      },
+    })
+    this.setState({ campaigns: response.data })
+  }
+
+  getAllPhoneNumbers = async () => {
+    const response = await axios('http://localhost:5000/api/phoneNumbers/all', {
+      headers: {
+        Authorization: localStorage.getItem('jwtToken'),
+      },
+    })
+    this.setState({ phoneNumbers: response.data })
   }
 
   handleConfirmBlur = e => {
@@ -42,14 +81,67 @@ class CreateSchedule extends React.Component {
     const { form } = this.props
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        console.log('Received values of form: ', values)
+        axios('http://localhost:5000/api/schedule/add', {
+          method: 'POST',
+          data: this.formatData(values),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: localStorage.getItem('jwtToken'),
+          },
+        })
+          .then(() => {
+            form.resetFields()
+            this.setState({ success: 'Schedule created successfully' })
+          })
+          .catch(error => {
+            this.setState({ error: error.message })
+          })
       }
     })
   }
 
+  formatData = data => {
+    const { monday, tuesday, wednesday, thursday, friday, saturday, sunday } = data
+    const days = []
+    if (monday) {
+      days.push('Monday')
+    }
+    if (tuesday) {
+      days.push('Tuesday')
+    }
+    if (wednesday) {
+      days.push('Wednesday')
+    }
+    if (thursday) {
+      days.push('Thursday')
+    }
+    if (friday) {
+      days.push('Friday')
+    }
+    if (saturday) {
+      days.push('Saturday')
+    }
+    if (sunday) {
+      days.push('Sunday')
+    }
+    return {
+      campaign: data.campaign,
+      type: data.type,
+      phone_number: data.phoneNumber,
+      day_limit: data.day_limit,
+      start_date: moment(data.startDate).format('YYYY-MM-DD'),
+      end_date: moment(data.endDate).format('YYYY-MM-DD'),
+      start_time: data.startTime._i,
+      end_time: data.endTime._i,
+      timezone: data.timezone,
+      message: data.msg === 'template' ? data.template : data.message,
+      days,
+    }
+  }
+
   render() {
     const { form } = this.props
-    console.log('Timezones: ', timezones)
+    const { messages, campaigns, phoneNumbers, success, error } = this.state
 
     const formItemLayout = {
       labelCol: {
@@ -84,13 +176,17 @@ class CreateSchedule extends React.Component {
         </div>
         <div className="card">
           <div className="card-body">
-            <Form {...formItemLayout} labelAlign="left">
+            {success && <Alert message={success} type="success" />}
+            {error && <Alert message={error} type="error" />}
+            <Form {...formItemLayout} labelAlign="left" onSubmit={this.handleSubmit}>
               <Form.Item label="Select Campaign">
                 {form.getFieldDecorator('campaign', {
-                  rules: [{ message: 'Please select target campaign!' }],
+                  rules: [{ required: true, message: 'Please select target campaign!' }],
                 })(
                   <Select placeholder="Select target campaign" onChange={this.handleSelectChange}>
-                    <Option value="campaign">Campaign Title</Option>
+                    {campaigns.map(campaign => (
+                      <Option value={campaign._id}>{campaign.campaign}</Option>
+                    ))}
                   </Select>,
                 )}
               </Form.Item>
@@ -103,64 +199,69 @@ class CreateSchedule extends React.Component {
                   </Select>,
                 )}
               </Form.Item>
-              <Form.Item label="Limit">
-                {form.getFieldDecorator('limit', {
+              <Form.Item label="Select Phone Number">
+                {form.getFieldDecorator('phoneNumber', {
+                  rules: [{ message: 'Please select phone number!' }],
+                })(
+                  <Select placeholder="Select phone number" onChange={this.handleSelectChange}>
+                    {phoneNumbers.map(phone => (
+                      <Option value={phone._id}>{phone.phone_number}</Option>
+                    ))}
+                  </Select>,
+                )}
+              </Form.Item>
+              <Form.Item label="Daily Limit">
+                {form.getFieldDecorator('day_limit', {
                   initialValue: 3000,
                 })(<Slider tooltipVisible marks={marks} max={10000} />)}
               </Form.Item>
               <Form.Item label="Start Date">
                 {form.getFieldDecorator('startDate', {
-                  rules: [{ message: 'Please select start date!' }],
-                })(<DatePicker onChange={e => console.log(e.currentTarget.value)} />)}
+                  rules: [{ type: 'object', message: 'Please select start date!' }],
+                })(<DatePicker />)}
               </Form.Item>
               <Form.Item label="Start Time">
                 {form.getFieldDecorator('startTime', {
-                  rules: [{ message: 'Please select start time!' }],
+                  rules: [{ type: 'object', message: 'Please select start time!' }],
                 })(<TimePicker />)}
               </Form.Item>
               <Form.Item label="End Date">
                 {form.getFieldDecorator('endDate', {
-                  rules: [{ message: 'Please select end date!' }],
-                })(<DatePicker onChange={e => console.log(e.currentTarget.value)} />)}
+                  rules: [{ type: 'object', message: 'Please select end date!' }],
+                })(
+                  <DatePicker
+                    onChange={(date, dateString) => {
+                      console.log(date, dateString)
+                    }}
+                  />,
+                )}
               </Form.Item>
               <Form.Item label="End Time">
                 {form.getFieldDecorator('endTime', {
-                  rules: [{ message: 'Please select end time!' }],
+                  rules: [{ type: 'object', message: 'Please select end time!' }],
                 })(<TimePicker />)}
               </Form.Item>
               <Form.Item label="Days">
                 {form.getFieldDecorator('monday')(
-                  <Checkbox checked className="text-uppercase">
-                    Monday
-                  </Checkbox>,
+                  <Checkbox className="text-uppercase">Monday</Checkbox>,
                 )}
                 {form.getFieldDecorator('tuesday')(
-                  <Checkbox checked className="text-uppercase">
-                    Tuesday
-                  </Checkbox>,
+                  <Checkbox className="text-uppercase">Tuesday</Checkbox>,
                 )}
                 {form.getFieldDecorator('wednesday')(
-                  <Checkbox checked className="text-uppercase">
-                    Wednesday
-                  </Checkbox>,
+                  <Checkbox className="text-uppercase">Wednesday</Checkbox>,
                 )}
                 {form.getFieldDecorator('thursday')(
-                  <Checkbox checked className="text-uppercase">
-                    Thursday
-                  </Checkbox>,
+                  <Checkbox className="text-uppercase">Thursday</Checkbox>,
                 )}
                 {form.getFieldDecorator('friday')(
-                  <Checkbox checked className="text-uppercase">
-                    Friday
-                  </Checkbox>,
+                  <Checkbox className="text-uppercase">Friday</Checkbox>,
                 )}
                 {form.getFieldDecorator('saturday')(
-                  <Checkbox checked className="text-uppercase">
-                    Saturday
-                  </Checkbox>,
+                  <Checkbox className="text-uppercase">Saturday</Checkbox>,
                 )}
                 {form.getFieldDecorator('sunday')(
-                  <Checkbox checked className="text-uppercase" Monday>
+                  <Checkbox className="text-uppercase" Monday>
                     Sunday
                   </Checkbox>,
                 )}
@@ -193,7 +294,9 @@ class CreateSchedule extends React.Component {
                 <Form.Item label="Select Template">
                   {form.getFieldDecorator('template')(
                     <Select placeholder="Select Template" onChange={this.handleSelectChange}>
-                      <Option value="tamp1">Template 1</Option>
+                      {messages.map(msg => (
+                        <Option value={msg.message}>{msg.name}</Option>
+                      ))}
                     </Select>,
                   )}
                 </Form.Item>
