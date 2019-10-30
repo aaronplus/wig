@@ -11,6 +11,7 @@ const validateContactInput = require("../../validation/contact");
 const validateToken = require("../validateToken").validateToken;
 const Campaign = require('../../models/Campaign');
 const Contact = require('../../models/Contact');
+const stringify = require('csv-stringify');
 
 const upload = multer({ dest: 'uploads/' });
 // Load Contact model
@@ -28,6 +29,34 @@ router.get('/list', validateToken, async function(req, res, next){
   var userId = req.decoded.id;
   let contacts = await Contact.find({userId:mongoose.Types.ObjectId(userId)});
   return res.json(contacts);
+});
+
+/*
+@route: POST api/contacts/export
+@description: Export list of the contacts
+@access: Private
+*/
+router.post('/export', validateToken, function(req, res, next){
+   var userId = req.decoded.id;
+   var campaignId = req.body.campaign;
+   var filename   = "contacts.csv";
+   var dataArray;
+   Contact.find({userId:mongoose.Types.ObjectId(userId)}, function(err, contacts) {
+       if (err) res.send(err);
+                 // adding appropriate headers, so browsers can start downloading
+          // file as soon as this request starts to get served
+          res.setHeader('Content-Type', 'text/csv');
+          res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'download-' + Date.now() + '.csv\"');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.setHeader('Pragma', 'no-cache');
+
+          // ta-da! this is cool, right?
+          // stringify return a readable stream, that can be directly piped
+          // to a writeable stream which is "res" (the response object from express.js)
+          // since res is an abstraction over node http's response object which supports "streams"
+          stringify(contacts, { header: true })
+          .pipe(res);
+   });
 });
 
 // @route POST api/contacts/upload

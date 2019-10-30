@@ -1,14 +1,18 @@
 import React from 'react'
-import { connect } from 'react-redux'
-import { Table, Button } from 'antd'
+import { connect } from 'react-redux';
+import { Table, Button, Modal, Form, Select } from 'antd'
+
+const { Option } = Select;
 // import data from './data.json'
 
 const mapStateToProps = ({ contacts }) => ({ contacts })
 @connect(mapStateToProps)
+@Form.create()
 class ContactsList extends React.Component {
   state = {
     filteredInfo: null,
     sortedInfo: null,
+    visible:false
   }
 
   componentDidMount(){
@@ -47,10 +51,24 @@ class ContactsList extends React.Component {
     })
   }
 
+  handleOk = () =>{
+    // const {dispatch} = this.props;
+    // dispatch({
+    //   type: 'contacts/EXPORT',
+    //   payload: localStorage.getItem('setAuthToken'),
+    // })
+    this.setState({
+      visible: false
+    })
+
+
+  }
+
   render() {
-    const { contacts } = this.props;
-    const data = contacts.list;
-    let { sortedInfo, filteredInfo } = this.state
+    const { contacts:{campaignList, list}, form } = this.props;
+    const data = list;
+    let { sortedInfo, filteredInfo } = this.state;
+    const { visible } = this.state;
     sortedInfo = sortedInfo || {}
     filteredInfo = filteredInfo || {}
     const columns = [
@@ -81,8 +99,9 @@ class ContactsList extends React.Component {
         sorter: (a, b) => a.propertyState.length - b.propertyState.length,
         sortOrder: sortedInfo.columnKey === 'state' && sortedInfo.order,
       },
-    ]
+    ];
 
+    const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
     return (
       <div>
         <div className="mb-3">
@@ -95,6 +114,9 @@ class ContactsList extends React.Component {
           <Button onClick={this.clearAll} className="mr-3">
             Clear filters and sorters
           </Button>
+          <Button type="primary" shape="round" icon="download" onClick={()=> this.setState({visible:true})}>
+            Export
+          </Button>
         </div>
         <div className="mb-4 air__utils__scrollTable">
           <Table
@@ -104,6 +126,26 @@ class ContactsList extends React.Component {
             onChange={this.handleChange}
           />
         </div>
+        <Modal
+          title="Export Contacts"
+          visible={visible}
+          onOk={this.handleOk}
+          onCancel={()=> this.setState({visible:false})}
+        >
+          <Form>
+            <Form.Item label="Select Campaign">
+              {
+            form.getFieldDecorator('campaign',{ required: true, message: 'Please select a campaign'})
+            (
+              <Select placeholder="Please select a campaign" name="campaign">
+                {listData}
+              </Select>
+          )
+          }
+
+            </Form.Item>
+          </Form>
+        </Modal>
       </div>
     )
   }

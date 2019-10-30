@@ -33,12 +33,23 @@ export function* IMPORT_CONTACTS(postData) {
   //   },
   // })
 }
+export function* EXPORT_CONTACTS(postData) {
+  yield call(importContacts,postData);
+  // yield put({
+  //   type: 'contacts/SET_STATE',
+  //   payload: {
+  //     campaignList: success
+  //   },
+  // })
+}
+
 
 
 export default function* rootSaga() {
   yield all([
     takeEvery(actions.GET_CONTACTS, GET_CONTACTS),
     takeEvery(actions.GET_CAMPAIGN_LIST, GET_CAMPAIGN_LIST),
-    takeEvery(actions.IMPORT_CONTACTS, IMPORT_CONTACTS)
+    takeEvery(actions.IMPORT_CONTACTS, IMPORT_CONTACTS),
+    takeEvery(actions.EXPORT_CONTACTS, EXPORT_CONTACTS)
   ])
 }
