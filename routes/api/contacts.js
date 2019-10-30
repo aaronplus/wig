@@ -11,10 +11,53 @@ const validateContactInput = require("../../validation/contact");
 const validateToken = require("../validateToken").validateToken;
 const Campaign = require('../../models/Campaign');
 const Contact = require('../../models/Contact');
+const stringify = require('csv-stringify');
 
 const upload = multer({ dest: 'uploads/' });
 // Load Contact model
 
+
+/*
+**************
+@route: GET api/contacts/list
+@description: Get list of the contacts
+@access: Private
+**************
+*/
+
+router.get('/list', validateToken, async function(req, res, next){
+  var userId = req.decoded.id;
+  let contacts = await Contact.find({userId:mongoose.Types.ObjectId(userId)});
+  return res.json(contacts);
+});
+
+/*
+@route: POST api/contacts/export
+@description: Export list of the contacts
+@access: Private
+*/
+router.post('/export', validateToken, function(req, res, next){
+   var userId = req.decoded.id;
+   var campaignId = req.body.campaign;
+   var filename   = "contacts.csv";
+   var dataArray;
+   Contact.find({userId:mongoose.Types.ObjectId(userId)}, function(err, contacts) {
+       if (err) res.send(err);
+                 // adding appropriate headers, so browsers can start downloading
+          // file as soon as this request starts to get served
+          res.setHeader('Content-Type', 'text/csv');
+          res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'download-' + Date.now() + '.csv\"');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.setHeader('Pragma', 'no-cache');
+
+          // ta-da! this is cool, right?
+          // stringify return a readable stream, that can be directly piped
+          // to a writeable stream which is "res" (the response object from express.js)
+          // since res is an abstraction over node http's response object which supports "streams"
+          stringify(contacts, { header: true })
+          .pipe(res);
+   });
+});
 
 // @route POST api/contacts/upload
 // @desc Upload contacts by csv
@@ -22,31 +65,38 @@ const upload = multer({ dest: 'uploads/' });
 
 router.post('/upload', upload.single('file'), async function (req, res, next) {
   var userId = '5db7c018187b180bd5d96017';
-  const { errors, isValid } = validateContactInput(Object.assign({}, req.body, req.file));
-  // Check validation
-    if (!isValid) {
-      return res.status(400).json(errors);
-    }
-
+  // const { errors, isValid } = validateContactInput(Object.assign({}, req.body, req.file));
+  // // Check validation
+  //   if (!isValid) {
+  //     return res.status(400).json(errors);
+  //   }
 // Create Campaign
 let campaign = req.body.campaign;
-var campaignId;
+if (req.body.campaignType == 'new') {
+  var campaignId;
   try {
     campaignId = await new Campaign({campaign,userId: mongoose.Types.ObjectId(userId)}).save();
   } catch (e) {
     console.log(e);
     return res.status(500).json({error: "Error in save Campaign"});
   }
+}else {
+  var campaignId = req.body.campaign;
+}
 
-  var fileRows = [], fileHeader;
-   fs.createReadStream(req.file.path)
-     .pipe(csv())
-     .on('data', (data) => fileRows.push(data))
-     .on('end', () => {
+
+
+
+  var fileRows = JSON.parse(req.body.csvData), fileHeader;
+   // fs.createReadStream(req.file.path)
+   //   .pipe(csv())
+   //   .on('data', (data) => fileRows.push(data))
+   //   .on('end', () => {
        /*Create contacts*/
        var rowData = [];
        fileRows.map((row,index)=>{
          let data = {};
+         data['userId'] = mongoose.Types.ObjectId(userId);
          data['internal'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
          data['campaign'] = mongoose.Types.ObjectId(campaignId._id);
          data['firstNameOne'] = '';
@@ -164,7 +214,21 @@ var campaignId;
 
 
 
-     });
+     // });
+});
+router.post('/uploadFile', upload.single('file'), async function (req, res, next) {
+  var fileRows = [];
+  fs.createReadStream(req.file.path)
+    .pipe(csv())
+    .on('data', (data) => fileRows.push(data))
+    .on('end', () => {
+      return res.json(fileRows);
+    });
+
+
+
+
+  //return res.json({message:"Save Successfully"});
 });
 // -> Import CSV File to MongoDB database
 function importCsvData2MongoDB(filePath){
