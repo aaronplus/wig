@@ -1,54 +1,61 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 // Create Schema
 const ScheduleSchema = new Schema({
   campaign: {
     type: mongoose.Schema.Types.ObjectId,
-    required: false
+    ref: 'Comapaign',
+    required: false,
   },
-  type:{
+  type: {
     type: String,
-    required: false
+    required: false,
   },
-  start_date:{
+  start_date: {
     type: Date,
-    required: false
+    required: false,
   },
-  end_date:{
+  end_date: {
     type: Date,
-    required: false
+    required: false,
   },
-  day_limit:{
+  day_limit: {
     type: String,
-    required: false
+    required: false,
   },
-  start_time:{
-    type: Date,
-    required: false
-  },
-  days:{
+  start_time: {
     type: String,
-    required: false
+    required: false,
   },
-  time_zone:{
+  endTime: {
     type: String,
-    required: false
+    required: false,
   },
-  message:{
+  days: [
+    {
+      type: String,
+      required: false,
+    },
+  ],
+  time_zone: {
+    type: String,
+    required: false,
+  },
+  message: {
+    type: String,
+    required: false,
+  },
+  phone_number: {
     type: mongoose.Schema.Types.ObjectId,
-    required: false
+    required: false,
   },
-  phone_number:{
-    type: mongoose.Schema.Types.ObjectId,
-    required: false
-  },
-  fail_message:{
-    type: String,
-    required: false
-  },
+  // fail_message:{
+  //   type: String,
+  //   required: false
+  // },
   created: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
-module.exports = Schedule = mongoose.model("schedules", ScheduleSchema);
+module.exports = Schedule = mongoose.model('schedules', ScheduleSchema);
