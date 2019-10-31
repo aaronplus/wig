@@ -1,5 +1,5 @@
 const router = require('express').Router();
-
+const mongoose = require('mongoose');
 const validateToken = require('../validateToken').validateToken;
 
 const Campaign = require('../../models/Campaign');
@@ -14,6 +14,15 @@ router.get('/all', validateToken, async (req, res) => {
   } catch (error) {
     return res.status(400).json(error);
   }
+});
+
+// @route GET api/campaign/list
+// @desc Get Campaign List
+// @access Private
+router.get("/list", validateToken, async(req, res) => {
+  var userId = req.decoded.id;
+  let campaigns = await Campaign.find({userId: mongoose.Types.ObjectId(userId)});
+  return res.json(campaigns);
 });
 
 module.exports = router;

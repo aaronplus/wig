@@ -18,7 +18,7 @@ export function getContacts() {
 
 export function getCampaignList() {
   return axios
-    .get(`${apiUrl}/api/campaign/list`)
+    .get(`${apiUrl}/api/campaigns/list`)
     .then((res) => {
       return res.data;
     })
