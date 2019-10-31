@@ -63,8 +63,8 @@ router.post('/export', validateToken, function(req, res, next){
 // @desc Upload contacts by csv
 // @access Private, validateToken
 
-router.post('/upload', upload.single('file'), async function (req, res, next) {
-  var userId = '5db7c018187b180bd5d96017';
+router.post('/upload', validateToken, upload.single('file'), async function (req, res, next) {
+  var userId = req.decoded.id;
   // const { errors, isValid } = validateContactInput(Object.assign({}, req.body, req.file));
   // // Check validation
   //   if (!isValid) {
@@ -110,22 +110,22 @@ if (req.body.campaignType == 'new') {
          data['mailingAddress'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
          data['mailingCity'] = row['MAIL_CITY'] || row['MAIL CITY'];
          data['mailingState'] = row['MAIL_STATE'] || row['MAIL STATE'];
-         data['mailingZipCode'] = row['MAIL_ZIP'] || row['MAIL ZIP'];
+         data['mailingZipCode'] = row['MAIL_ZIP'] || row['MAIL ZIP/ZIP+4'];
          data['mailingCounty'] = row['MAIL_COUNTRY'] || row['MAIL COUNTRY'];
          data['propertyAddress'] = row['SITUS_STREET_ADDRESS'] || row['SITUS STREET ADDRESS'];
          data['propertyCity'] = row['SITUS_CITY'] || row['SITUS CITY'];
          data['propertyState'] = row['SITUS_STATE'] || row['SITUS STATE'];
          data['propertyZipCode'] = row['SITUS_ZIP_CODE'] || row['SITUS ZIP CODE'];
          data['propertyCounty'] = '';
-         data['apn'] = row['APN'];
+         data['apn'] = row['APN'] || row['APN - FORMATTED'];
          data['equityValue'] = row['EQUITY_VALUE'] || row['EQUITY VALUE'];
          data['equityPercentage'] = row['EQUITY_PERCENTAGE'] || row['EQUITY PERCENTAGE'];
          data['estimatedValue'] = '';
-         data['recordingDateOT'] = row['OT_RECORDING_DATE'] || row['OT RECORDING DATE'];
+         data['recordingDateOT'] = row['OT_RECORDING_DATE'] || row['OT-RECORDING DATE'];
          data['salePriceOT'] = '';
-         data['deedTypeOT'] = row['OT_DEED_TYPE'] || row['OT DEED TYPE'];
+         data['deedTypeOT'] = row['OT_DEED_TYPE'] || row['OT-DEED TYPE'];
          data['recordingDateLMS'] = '';
-         data['salePriceLMS'] = row['LMS_SALE_PRICE'] || row['LMS SALE PRICE'];
+         data['salePriceLMS'] = row['LMS_SALE_PRICE'] || row['LMS-SALE PRICE'];
          data['deedTypeLMS'] = '';
          data['dateOfDeath'] = '';
          data['dateOfBirth'] = '';

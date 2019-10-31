@@ -19,7 +19,7 @@ class ContactsList extends React.Component {
     const { dispatch } = this.props
     dispatch({
       type: 'contacts/GET_CONTACTS',
-      payload: localStorage.getItem('setAuthToken'),
+      payload: localStorage.getItem('jwtToken'),
     })
   }
 
