@@ -42,7 +42,9 @@ export async function exportContacts(postData) {
   data: {campaign},
   // responseType: 'stream'
 }).then((response) => {
-  // const headers = Object.keys(response.data[0]);
+  const headers = Object.keys(response.data[0]);
+  delete(headers[0]);
+  response.data.unshift(headers);
   const csv = response.data.map((d, key) =>{
     console.log(key);
     delete d._id;
