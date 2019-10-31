@@ -41,7 +41,7 @@ router.post('/export', validateToken, function(req, res, next){
    var campaignId = req.body.campaign;
    var filename   = "contacts.csv";
    var dataArray;
-   Contact.find({userId:mongoose.Types.ObjectId(userId)}, {
+   Contact.find({userId:mongoose.Types.ObjectId(userId), campaign: mongoose.Types.ObjectId(campaignId)}, {
      mailingName:1,
     mailingAddress:1,
     mailingCity:1,

@@ -34,48 +34,30 @@ export function importContacts(postData) {
     })
 }
 export async function exportContacts(postData) {
-//   console.log(postData);
-//   const response = await axios({
-//   method: 'GET',
-//   url: 'http://localhost:3000/resources/images/avatars/avatar.png',
-//   responseType: 'stream'
-// });
-//
-//
-// response.data.pipe(fs.createWriteStream('ada_lovelace.jpg'));
-//
-//   return new Promise((resolve,reject)=>{
-//     response.data.on('end',()=>{
-//       resolve();
-//     });
-//     response.data.on('error',(err)=>{
-//       reject(err);
-//     });
-//   });
-//   // return axios
-//   //   .post(`${apiUrl}/api/contacts/export`, postData)
-//   //   .then((res) => {
-//   //     return res.data;
-//   //   })
-//
+  console.log(postData);
+  const {payload: {campaign}} = postData;
   return axios({
   method: 'post',
   url: `${apiUrl}/api/contacts/export`,
-  data: postData,
+  data: {campaign},
   // responseType: 'stream'
 }).then((response) => {
-  console.log(response.data);
+  // const headers = Object.keys(response.data[0]);
   const csv = response.data.map((d, key) =>{
-
+    console.log(key);
     delete d._id;
-    if (key === 0) {
-      const headers = Object.keys(d);
-      return JSON.stringify(headers);
-    }
-    return JSON.stringify(Object.values(d));
+    const exportedData = Object.values(d);
+
+    // if (key === 0) {
+    //   const headers = Object.keys(d);
+    //   exportedData.unshift(headers);
+    //
+    // }
+    // console.log(exportedData);
+    return JSON.stringify(exportedData);
 })
 .join('\n')
 .replace(/(^\[)|(\]$)/mg, '');
-     fileDownload(csv, 'filename.csv');
+     fileDownload(csv, `contact_${Math.random().toString(36).substring(7)}.csv`);
   });
 }
