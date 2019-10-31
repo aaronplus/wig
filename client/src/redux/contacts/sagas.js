@@ -1,6 +1,6 @@
 import { all, takeEvery, put, call } from 'redux-saga/effects'
 
-import {getContacts, getCampaignList, importContacts} from 'services/contact'
+import {getContacts, getCampaignList, importContacts, exportContacts} from 'services/contact'
 import actions from './actions'
 
 
@@ -34,7 +34,7 @@ export function* IMPORT_CONTACTS(postData) {
   // })
 }
 export function* EXPORT_CONTACTS(postData) {
-  yield call(importContacts,postData);
+  yield call(exportContacts,postData);
   // yield put({
   //   type: 'contacts/SET_STATE',
   //   payload: {

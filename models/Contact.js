@@ -9,8 +9,8 @@ const ContactSchema = new Schema({
     internal: {
         type: String,
         required: true,
-        unique : true,
-        dropDups: true
+        // unique : true,
+        // dropDups: true
     },
     campaign: {
         type: mongoose.Schema.Types.ObjectId,
