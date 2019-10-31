@@ -63,3 +63,10 @@ export async function exportContacts(postData) {
      fileDownload(csv, `contact_${Math.random().toString(36).substring(7)}.csv`);
   });
 }
+export function getSchema() {
+  return axios
+    .get(`${apiUrl}/api/contacts/getSchema`)
+    .then((res) => {
+      return res.data;
+    })
+}

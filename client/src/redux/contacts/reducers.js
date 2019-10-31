@@ -4,6 +4,7 @@ const initialState = {
   list:'',
   authorized: false,
   loading: false,
+  schema: false
 }
 
 export default function contactsReducer(state = initialState, action) {
