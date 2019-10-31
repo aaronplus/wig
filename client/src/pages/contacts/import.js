@@ -13,6 +13,7 @@ import {
 } from 'antd'
 
 const { Option } = Select;
+const axios = require('axios').default;
 
 // @Form.create()
 const mapStateToProps = ({ contacts }) => ({ contacts })
@@ -44,6 +45,7 @@ class ImportContacts extends React.Component {
   }
 
   handleSubmit(ev) {
+    axios.defaults.headers.common.Authorization = `${localStorage.getItem("jwtToken")}`;
     const { form } = this.props;
     const { campaignType } = this.state;
     ev.preventDefault();
@@ -54,19 +56,30 @@ class ImportContacts extends React.Component {
         data.append('csvData', JSON.stringify(values.import.file.response));
         data.append('campaign', values.campaign);
         data.append('campaignType', campaignType);
-        fetch('http://localhost:5000/api/contacts/upload', {
-          method: 'POST',
-          body: data,
-          headers:{
-            'Authorization': localStorage.getItem('jwtToken')
-          }
+         axios
+          .post(`http://localhost:5000/api/contacts/upload`, data)
+          .then((res) => {
+            console.log(res);
+            if (res.status === 200) {
+              message.success("Uploaded Successfully");
+              form.resetFields(['campaign']);
+            }
 
-        }).then((response) => {
-          response.json().then(() => {
-             message.success("Uploaded Successfully");
-             form.resetFields(['campaign']);
-          });
-        });
+          })
+        // fetch('http://localhost:5000/api/contacts/upload', {
+        //   method: 'POST',
+        //   body: data,
+        //   headers:{
+        //     'Authorization': localStorage.getItem('jwtToken')
+        //   }
+        //
+        // }).then((response) => {
+        //   console.log(response);
+        //   response.json().then(() => {
+        //      message.success("Uploaded Successfully");
+        //      form.resetFields(['campaign']);
+        //   });
+        // });
       }
     });
   }

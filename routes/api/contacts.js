@@ -197,10 +197,15 @@ if (req.body.campaignType == 'new') {
          data['Market']=row['Market_VALUE'] || row['Market VALUE'];
          data['marketExport']='';
          data['sellerLead']='';
-         data['internal'] = data['internal'].replace(/[^A-Z0-9]/ig, "");
+         let uniqueStr = data['internal']+data['mailingName'];
+
+         data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
          rowData.push(data);
        });
        Contact.insertMany(rowData,function(err, docs){
+         if (err) {
+           return res.status(400).json(err)
+         }
         return res.json(docs);
        })
 
