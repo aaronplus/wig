@@ -21,8 +21,13 @@ router.get('/all', validateToken, async (req, res) => {
 // @access Private
 router.get("/list", validateToken, async(req, res) => {
   var userId = req.decoded.id;
-  let campaigns = await Campaign.find({userId: mongoose.Types.ObjectId(userId)});
-  return res.json(campaigns);
+  try {
+    let campaigns = await Campaign.find({userId: mongoose.Types.ObjectId(userId)});
+    return res.json(campaigns);
+  } catch (e) {
+    return res.status(400).json(error);
+  }
+
 });
 
 module.exports = router;

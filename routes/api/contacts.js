@@ -41,8 +41,20 @@ router.post('/export', validateToken, function(req, res, next){
    var campaignId = req.body.campaign;
    var filename   = "contacts.csv";
    var dataArray;
-   Contact.find({userId:mongoose.Types.ObjectId(userId)}, function(err, contacts) {
+   Contact.find({userId:mongoose.Types.ObjectId(userId), campaign: mongoose.Types.ObjectId(campaignId)}, {
+    firstNameOne:1,
+    lastNameOne:1,
+    mailingAddress:1,
+    mailingCity:1,
+    mailingState:1,
+    mailingZipCode:1,
+    propertyAddress:1,
+    propertyCity:1,
+    propertyState:1,
+    propertyZipCode:1
+  },function(err, contacts) {
        if (err) res.send(err);
+       return res.send(contacts);
                  // adding appropriate headers, so browsers can start downloading
           // file as soon as this request starts to get served
           res.setHeader('Content-Type', 'text/csv');
@@ -99,11 +111,12 @@ if (req.body.campaignType == 'new') {
          data['userId'] = mongoose.Types.ObjectId(userId);
          data['internal'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
          data['campaign'] = mongoose.Types.ObjectId(campaignId._id);
-         data['firstNameOne'] = '';
-         data['lastNameOne'] = '';
+         data['firstNameOne'] = row['FIRST_NAME_1'] || row['OWNER 1 FIRST NAME'];
+         data['lastNameOne'] = row['LAST_NAME_1'] || row['OWNER 1 LAST NAME'];
+         data['phoneOne'] = row['phoneOne'];
          data['correctPhone'] = '';
-         data['firstNameTwo'] = '';
-         data['lastNameTwo'] = '';
+         data['firstNameTwo'] = row['FIRST_NAME_2'] || row['OWNER 2 FIRST NAME'];
+         data['lastNameTwo'] = row['LAST_NAME_2'] || row['OWNER 2 LAST NAME'];
          data['mailingName'] = row['OWNER_MAILING_NAME'] || row['OWNER MAILING NAME'];
          data['occupancy'] = '';
          data['ownershipType'] = '';
@@ -141,7 +154,7 @@ if (req.body.campaignType == 'new') {
          data['extraCityThree'] = '';
          data['extraStateThree']='';
          data['extraZipCodeThree']='';
-         data['phoneOne']='';
+         data['phoneOne']= row['phoneOne'];
          data['phoneOneType']='';
          data['phoneOneScore']='';
          data['phoneTwo']='';
