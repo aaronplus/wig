@@ -33,7 +33,7 @@ class ImportContacts extends React.Component {
     const {dispatch} = this.props;
     dispatch({
       type: 'contacts/GET_CAMPAIGN_LIST',
-      payload: localStorage.getItem('setAuthToken'),
+      payload: localStorage.getItem('jwtToken'),
     })
   }
 
@@ -57,7 +57,10 @@ class ImportContacts extends React.Component {
         fetch('http://localhost:5000/api/contacts/upload', {
           method: 'POST',
           body: data,
-          
+          headers:{
+            'Authorization': localStorage.getItem('jwtToken')
+          }
+
         }).then((response) => {
           response.json().then(() => {
              message.success("Uploaded Successfully");
