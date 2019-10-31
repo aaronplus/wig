@@ -41,8 +41,23 @@ router.post('/export', validateToken, function(req, res, next){
    var campaignId = req.body.campaign;
    var filename   = "contacts.csv";
    var dataArray;
-   Contact.find({userId:mongoose.Types.ObjectId(userId)}, function(err, contacts) {
+   Contact.find({userId:mongoose.Types.ObjectId(userId)}, {
+     mailingName:1,
+    mailingAddress:1,
+    mailingCity:1,
+    mailingState:1,
+    mailingZipCode:1,
+    propertyAddress:1,
+    propertyCity:1,
+    propertyState:1,
+    propertyZipCode:1,
+    apn:1,
+    equityValue:1,
+    equityPercentage:1,
+    salePriceLMS:1
+  },function(err, contacts) {
        if (err) res.send(err);
+       return res.send(contacts);
                  // adding appropriate headers, so browsers can start downloading
           // file as soon as this request starts to get served
           res.setHeader('Content-Type', 'text/csv');

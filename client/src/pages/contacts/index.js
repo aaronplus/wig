@@ -20,7 +20,12 @@ class ContactsList extends React.Component {
     dispatch({
       type: 'contacts/GET_CONTACTS',
       payload: localStorage.getItem('jwtToken'),
-    })
+    });
+    dispatch({
+      type: 'contacts/GET_CAMPAIGN_LIST',
+      payload: false,
+    });
+
   }
 
   handleChange = (pagination, filters, sorter) => {
@@ -52,11 +57,15 @@ class ContactsList extends React.Component {
   }
 
   handleOk = () =>{
-    // const {dispatch} = this.props;
-    // dispatch({
-    //   type: 'contacts/EXPORT',
-    //   payload: localStorage.getItem('setAuthToken'),
-    // })
+    const { dispatch, form} = this.props;
+    form.validateFieldsAndScroll((err, values) => {
+      const {campaign} = values;
+      dispatch({
+        type: 'contacts/EXPORT_CONTACTS',
+        payload: {campaign},
+      })
+    });
+
     this.setState({
       visible: false
     })
