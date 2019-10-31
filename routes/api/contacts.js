@@ -42,7 +42,8 @@ router.post('/export', validateToken, function(req, res, next){
    var filename   = "contacts.csv";
    var dataArray;
    Contact.find({userId:mongoose.Types.ObjectId(userId), campaign: mongoose.Types.ObjectId(campaignId)}, {
-     mailingName:1,
+    firstNameOne:1,
+    lastNameOne:1,
     mailingAddress:1,
     mailingCity:1,
     mailingState:1,
@@ -50,11 +51,7 @@ router.post('/export', validateToken, function(req, res, next){
     propertyAddress:1,
     propertyCity:1,
     propertyState:1,
-    propertyZipCode:1,
-    apn:1,
-    equityValue:1,
-    equityPercentage:1,
-    salePriceLMS:1
+    propertyZipCode:1
   },function(err, contacts) {
        if (err) res.send(err);
        return res.send(contacts);
@@ -114,11 +111,11 @@ if (req.body.campaignType == 'new') {
          data['userId'] = mongoose.Types.ObjectId(userId);
          data['internal'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
          data['campaign'] = mongoose.Types.ObjectId(campaignId._id);
-         data['firstNameOne'] = '';
-         data['lastNameOne'] = '';
-         data['correctPhone'] = '';
-         data['firstNameTwo'] = '';
-         data['lastNameTwo'] = '';
+         data['firstNameOne'] = row['FIRST_NAME_1'] || row['OWNER 1 FIRST NAME'];
+         data['lastNameOne'] = row['LAST_NAME_1'] || row['OWNER 1 LAST NAME'];
+         data['correctPhone'] = row['phoneOne'];
+         data['firstNameTwo'] = row['FIRST_NAME_2'] || row['OWNER 2 FIRST NAME'];
+         data['lastNameTwo'] = row['LAST_NAME_2'] || row['OWNER 2 LAST NAME'];
          data['mailingName'] = row['OWNER_MAILING_NAME'] || row['OWNER MAILING NAME'];
          data['occupancy'] = '';
          data['ownershipType'] = '';

@@ -124,7 +124,7 @@ class ContactsList extends React.Component {
             Clear filters and sorters
           </Button>
           <Button type="primary" shape="round" icon="download" onClick={()=> this.setState({visible:true})}>
-            Export
+            Export for Skip Tracing
           </Button>
         </div>
         <div className="mb-4 air__utils__scrollTable">
