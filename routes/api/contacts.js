@@ -114,6 +114,7 @@ if (req.body.campaignType == 'new') {
          data['firstNameOne'] = row['FIRST_NAME_1'] || row['OWNER 1 FIRST NAME'];
          data['lastNameOne'] = row['LAST_NAME_1'] || row['OWNER 1 LAST NAME'];
          data['phoneOne'] = row['phoneOne'];
+         data['correctPhone'] = '';
          data['firstNameTwo'] = row['FIRST_NAME_2'] || row['OWNER 2 FIRST NAME'];
          data['lastNameTwo'] = row['LAST_NAME_2'] || row['OWNER 2 LAST NAME'];
          data['mailingName'] = row['OWNER_MAILING_NAME'] || row['OWNER MAILING NAME'];
@@ -153,7 +154,7 @@ if (req.body.campaignType == 'new') {
          data['extraCityThree'] = '';
          data['extraStateThree']='';
          data['extraZipCodeThree']='';
-         data['phoneOne']='';
+         data['phoneOne']= row['phoneOne'];
          data['phoneOneType']='';
          data['phoneOneScore']='';
          data['phoneTwo']='';
