@@ -150,7 +150,7 @@ class CreateSchedule extends React.Component {
       },
       wrapperCol: {
         xs: { span: 24 },
-        sm: { span: 12 },
+        sm: { span: 16 },
       },
     }
 
@@ -215,17 +215,15 @@ class CreateSchedule extends React.Component {
                   initialValue: 3000,
                 })(<Slider tooltipVisible marks={marks} max={10000} />)}
               </Form.Item>
-              <Form.Item label="Start Date">
+              <Form.Item label="Start Date / Time">
                 {form.getFieldDecorator('startDate', {
                   rules: [{ type: 'object', message: 'Please select start date!' }],
                 })(<DatePicker />)}
-              </Form.Item>
-              <Form.Item label="Start Time">
                 {form.getFieldDecorator('startTime', {
                   rules: [{ type: 'object', message: 'Please select start time!' }],
                 })(<TimePicker />)}
               </Form.Item>
-              <Form.Item label="End Date">
+              <Form.Item label="End Date / Time">
                 {form.getFieldDecorator('endDate', {
                   rules: [{ type: 'object', message: 'Please select end date!' }],
                 })(
@@ -235,33 +233,43 @@ class CreateSchedule extends React.Component {
                     }}
                   />,
                 )}
-              </Form.Item>
-              <Form.Item label="End Time">
                 {form.getFieldDecorator('endTime', {
                   rules: [{ type: 'object', message: 'Please select end time!' }],
                 })(<TimePicker />)}
               </Form.Item>
               <Form.Item label="Days">
                 {form.getFieldDecorator('monday')(
-                  <Checkbox className="text-uppercase">Monday</Checkbox>,
+                  <Checkbox className="text-uppercase" checked>
+                    Monday
+                  </Checkbox>,
                 )}
                 {form.getFieldDecorator('tuesday')(
-                  <Checkbox className="text-uppercase">Tuesday</Checkbox>,
+                  <Checkbox className="text-uppercase" checked>
+                    Tuesday
+                  </Checkbox>,
                 )}
                 {form.getFieldDecorator('wednesday')(
-                  <Checkbox className="text-uppercase">Wednesday</Checkbox>,
+                  <Checkbox className="text-uppercase" checked>
+                    Wednesday
+                  </Checkbox>,
                 )}
                 {form.getFieldDecorator('thursday')(
-                  <Checkbox className="text-uppercase">Thursday</Checkbox>,
+                  <Checkbox className="text-uppercase" checked>
+                    Thursday
+                  </Checkbox>,
                 )}
                 {form.getFieldDecorator('friday')(
-                  <Checkbox className="text-uppercase">Friday</Checkbox>,
+                  <Checkbox className="text-uppercase" checked>
+                    Friday
+                  </Checkbox>,
                 )}
                 {form.getFieldDecorator('saturday')(
-                  <Checkbox className="text-uppercase">Saturday</Checkbox>,
+                  <Checkbox className="text-uppercase" checked>
+                    Saturday
+                  </Checkbox>,
                 )}
                 {form.getFieldDecorator('sunday')(
-                  <Checkbox className="text-uppercase" Monday>
+                  <Checkbox className="text-uppercase" checked>
                     Sunday
                   </Checkbox>,
                 )}

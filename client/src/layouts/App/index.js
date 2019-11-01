@@ -4,12 +4,9 @@ import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import classNames from 'classnames'
 import TopBar from 'components/layout/TopBar'
-import SubBar from 'components/layout/SubBar'
 import MenuLeft from 'components/layout/MenuLeft'
 import MenuTop from 'components/layout/MenuTop'
 import Footer from 'components/layout/Footer'
-import Sidebar from 'components/layout/Sidebar'
-import SupportChat from 'components/layout/SupportChat'
 
 const mapStateToProps = ({ settings }) => ({ settings })
 
@@ -43,8 +40,6 @@ class AppLayout extends React.PureComponent {
           air__layout__borderless: isBorderless,
         })}
       >
-        <Sidebar />
-        <SupportChat />
         {menuLayoutType === 'left' && <MenuLeft />}
         {menuLayoutType === 'top' && <MenuTop />}
         <Layout>
@@ -55,7 +50,6 @@ class AppLayout extends React.PureComponent {
             })}
           >
             <TopBar />
-            <SubBar />
           </Layout.Header>
           <Layout.Content style={{ height: '100%', position: 'relative' }}>
             <div className="air__utils__content">{children}</div>

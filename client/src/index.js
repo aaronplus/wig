@@ -14,6 +14,7 @@ import * as serviceWorker from './serviceWorker'
 
 // app styles
 import './global.scss'
+import './assets/styles/custom.css'
 
 // middlewared
 const history = createHashHistory()

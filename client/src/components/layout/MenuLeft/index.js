@@ -332,15 +332,14 @@ class MenuLeft extends React.Component {
               <span />
             </a>
             <a href="javascript: void(0);" className={style.air__menuLeft__logo}>
-              <img src="resources/images/air-logo.png" alt="Air UI" />
-              <div className={style.air__menuLeft__logo__name}>AIR UI</div>
-              <div className={style.air__menuLeft__logo__descr}>Admin Template</div>
+              <img src="resources/images/logo-d.png" alt="LOGO" width="30px" />
+              <div className={style.air__menuLeft__logo__name}>Thapp</div>
             </a>
             <a href="javascript: void(0);" className={style.air__menuLeft__user}>
               <div className={style.air__menuLeft__user__avatar}>
-                <img src="resources/images/avatars/avatar.png" alt="David Beckham" />
+                <img src="resources/images/avatars/avatar.png" alt="Aaron Busary" />
               </div>
-              <div className={style.air__menuLeft__user__name}>David Beckham</div>
+              <div className={style.air__menuLeft__user__name}>Aaron Busary</div>
               <div className={style.air__menuLeft__user__role}>Administrator</div>
             </a>
             <Scrollbars
@@ -358,39 +357,7 @@ class MenuLeft extends React.Component {
               )}
             >
               <div id="menu-left-container" className={style.air__menuLeft__container}>
-                <ul className={style.air__menuLeft__list}>
-                  <li className={style.air__menuLeft__category}>
-                    <span>Information</span>
-                  </li>
-                  <li className={style.air__menuLeft__item}>
-                    <a
-                      href="javascript: void(0);"
-                      className={style.air__menuLeft__link}
-                      onClick={this.toggleSettings}
-                    >
-                      <i className={`fe fe-settings ${style.air__menuLeft__icon}`} />
-                      <span>Settings</span>
-                    </a>
-                  </li>
-                  <li className={style.air__menuLeft__item}>
-                    <a
-                      href="https://docs.airuitemplate.com/"
-                      className={style.air__menuLeft__link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <i className={`fe fe-compass ${style.air__menuLeft__icon}`} />
-                      <span>Documentation</span>
-                    </a>
-                  </li>
-                  {items}
-                </ul>
-                <div className={style.air__menuLeft__banner}>
-                  <p>More components, more styles, more themes, and premium support!</p>
-                  <a href="javascript: void();" className="btn btn-white text-center d-block">
-                    Buy Air UI
-                  </a>
-                </div>
+                <ul className={style.air__menuLeft__list}>{items}</ul>
               </div>
             </Scrollbars>
           </div>
