@@ -1,6 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cron = require('cron');
 const app = express();
 
 const passport = require('passport');
@@ -16,6 +18,7 @@ const Message = require('./models/Message');
 const PhoneNumber = require('./models/PhoneNumber');
 const Campaign = require('./models/Campaign');
 const bcrypt = require('bcryptjs');
+const messageCronJob = require('./config/messagesCronJob');
 
 app.use(cors());
 
@@ -52,6 +55,17 @@ app.use('/api/campaigns', campaigns);
 app.use('/api/phoneNumbers', phoneNumbers);
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
+
+// Initialize cronJob
+const CronJob = cron.CronJob;
+const job = new CronJob(
+  '0 30 * * * *',
+  () => {
+    messageCronJob().catch(console.error);
+  },
+  null,
+  true,
+);
 
 // Seeding
 
