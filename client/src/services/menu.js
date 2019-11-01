@@ -20,6 +20,11 @@ export default async function getMenuData() {
           key: 'createSchedule',
           url: '/schedules/create',
         },
+        {
+          title: 'Messaging',
+          key: 'messaging',
+          url: '/schedules/messaging',
+        },
       ],
     },
     {
