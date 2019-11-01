@@ -21,17 +21,17 @@ const initialState = {
     isMenuUnfixed: false,
     menuLayoutType: 'left', // left, top, nomenu
     menuType: 'default', // default, flyout, compact
-    menuColor: 'gray', // dark, blue, gray, white
+    menuColor: 'dark', // dark, blue, gray, white
     flyoutMenuColor: 'dark', // dark, blue, gray, white
     systemLayoutColor: 'gray', // white, dark, blue, gray, image
     isTopbarFixed: false,
-    isContentNoMaxWidth: false,
+    isContentNoMaxWidth: true,
     isAppMaxWidth: false,
-    isGrayBackground: false,
+    isGrayBackground: true,
     isGrayTopbar: false,
     isCardShadow: false,
     isSquaredBorders: false,
-    isBorderless: false,
+    isBorderless: true,
     routerAnimation: 'slide-fadein-up', // none, slide-fadein-up, slide-fadein-right, fadein, zoom-fadein
   }),
 }

@@ -9,6 +9,7 @@ import {
   Icon,
   Select,
   Radio,
+  Modal,
   message
 } from 'antd'
 
@@ -23,7 +24,9 @@ class ImportContacts extends React.Component {
     super(props);
 
     this.state = {
-      campaignType: 'new'
+      campaignType: 'new',
+      fileHeaders: null,
+      showModal: false
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -35,8 +38,39 @@ class ImportContacts extends React.Component {
     dispatch({
       type: 'contacts/GET_CAMPAIGN_LIST',
       payload: localStorage.getItem('jwtToken'),
+    });
+    dispatch({
+      type: 'contacts/GET_SCHEMA_COLUMNS',
+      payload: false,
     })
   }
+
+  onUploadFile = (info)=> {
+    const { status, response } = info.file
+    if (status !== 'uploading') {
+      console.log(info.file, info.fileList)
+    }
+    if (status === 'done') {
+      console.log(response);
+      if (response && response.length) {
+        const headers = Object.keys(response[0]);
+        this.setState({
+          fileHeaders: headers,
+          showModal: true
+        });
+        console.log(headers);
+      }
+      message.success(`${info.file.name} file uploaded successfully.`)
+    } else if (status === 'error') {
+      message.error(`${info.file.name} file upload failed.`)
+    }
+  }
+  // onUploadFile = () =>{
+  //   const { form } = this.props;
+  //   form.validateFieldsAndScroll((err, values) => {
+  //     console.log(values.import.file.response);
+  //   });
+  // }
 
   handleOnChangeCampaign = (e) =>{
     const {form} = this.props;
@@ -90,28 +124,33 @@ class ImportContacts extends React.Component {
       labelCol: { span: 6 },
       wrapperCol: { span: 14 },
     };
-    const {campaignType} = this.state;
-    const { form, contacts:{campaignList} } = this.props;
+    const {campaignType, fileHeaders, showModal} = this.state;
+    const excludeHeaders = [
+      "userId","internal","campaign","_id","_v"
+    ];
+    console.log(fileHeaders);
+    const { form, contacts:{campaignList, schema} } = this.props;
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
     return (
-      <Form {...formItemLayout} onSubmit={this.handleSubmit}>
+      <div>
+        <Form {...formItemLayout} onSubmit={this.handleSubmit}>
 
-        <Form.Item label="Campaign">
-          <Radio.Group onChange={this.handleOnChangeCampaign} defaultValue={campaignType}>
-            <Radio value="new">New Campaign</Radio>
-            <Radio value="existing">Existing Campaign</Radio>
-          </Radio.Group>
-        </Form.Item>
-        {(campaignType === 'new')?
-          <Form.Item label="Campaign Name">
-            {
+          <Form.Item label="Campaign">
+            <Radio.Group onChange={this.handleOnChangeCampaign} defaultValue={campaignType}>
+              <Radio value="new">New Campaign</Radio>
+              <Radio value="existing">Existing Campaign</Radio>
+            </Radio.Group>
+          </Form.Item>
+          {(campaignType === 'new')?
+            <Form.Item label="Campaign Name">
+              {
               form.getFieldDecorator('campaign',{ required: true, message: 'Please enter a campaign name'})
               (<Input name="campaign" />)
             }
 
-          </Form.Item>:
-          <Form.Item label="Select Campaign">
-            {
+            </Form.Item>:
+            <Form.Item label="Select Campaign">
+              {
             form.getFieldDecorator('campaign',{ required: true, message: 'Please select a campaign'})
             (
               <Select placeholder="Please select a campaign" name="campaign">
@@ -120,15 +159,15 @@ class ImportContacts extends React.Component {
           )
           }
 
-          </Form.Item>
+            </Form.Item>
       }
 
 
-        <Form.Item label="Import">
-          {
+          <Form.Item label="Import">
+            {
           form.getFieldDecorator('import',{ required: true, message: 'Please upload a csv file'})
           (
-            <Upload name="file" listType="csv" accept="csv" action="http://localhost:5000/api/contacts/uploadFile">
+            <Upload multiple={false} name="file" listType="csv" accept="csv" action="http://localhost:5000/api/contacts/uploadFile" onChange={this.onUploadFile}>
               <Button>
                 <Icon type="upload" /> Click to upload
               </Button>
@@ -136,13 +175,29 @@ class ImportContacts extends React.Component {
         )
         }
 
-        </Form.Item>
-        <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
-          <Button type="primary" htmlType="submit">
+          </Form.Item>
+
+          <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
+            <Button type="primary" htmlType="submit">
            Submit
-          </Button>
-        </Form.Item>
-      </Form>
+            </Button>
+          </Form.Item>
+        </Form>
+        <Modal
+          title="Export Contacts"
+          visible={showModal}
+          onOk={this.handleOk}
+          onCancel={()=> this.setState({showModal:false})}
+        >
+          <div className="col-md-4">
+            {schema ?schema.map((item) => <li key={item}>{!excludeHeaders.includes(item)?item:''}</li>): ''}
+
+          </div>
+          <div className="col-md-4">
+            {fileHeaders ?fileHeaders.map((item) => <li key={item}>{!excludeHeaders.includes(item)?item:''}</li>): ''}
+          </div>
+        </Modal>
+      </div>
     )
   }
 }

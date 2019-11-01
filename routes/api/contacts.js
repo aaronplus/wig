@@ -76,6 +76,7 @@ router.post('/export', validateToken, function(req, res, next){
 // @access Private, validateToken
 
 router.post('/upload', validateToken, upload.single('file'), async function (req, res, next) {
+
   var userId = req.decoded.id;
   // const { errors, isValid } = validateContactInput(Object.assign({}, req.body, req.file));
   // // Check validation
@@ -247,6 +248,20 @@ router.post('/uploadFile', upload.single('file'), async function (req, res, next
 
 
   //return res.json({message:"Save Successfully"});
+});
+
+/*
+**************
+@route: GET api/contacts/getSchema
+@description: Get schema columns
+@access: Public
+**************
+*/
+
+router.get('/getSchema', async function (req, res, next) {
+  var props = Object.keys(Contact.schema.paths);
+
+  return res.json(props);
 });
 // -> Import CSV File to MongoDB database
 function importCsvData2MongoDB(filePath){
