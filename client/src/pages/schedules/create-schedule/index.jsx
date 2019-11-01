@@ -131,9 +131,9 @@ class CreateSchedule extends React.Component {
       day_limit: data.day_limit,
       start_date: moment(data.startDate).format('YYYY-MM-DD'),
       end_date: moment(data.endDate).format('YYYY-MM-DD'),
-      start_time: data.startTime._i,
-      end_time: data.endTime._i,
-      timezone: data.timezone,
+      start_time: moment(data.startTime).format('HH:mm:ss'),
+      end_time: moment(data.endTime).format('HH:mm:ss'),
+      time_zone: data.timezone,
       message: data.msg === 'template' ? data.template : data.message,
       days,
     }
