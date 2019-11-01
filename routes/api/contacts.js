@@ -14,6 +14,9 @@ const Contact = require('../../models/Contact');
 const stringify = require('csv-stringify');
 
 const upload = multer({ dest: 'uploads/' });
+multer({
+  limits: { fieldSize: 25 * 1024 * 1024 }
+})
 // Load Contact model
 
 
@@ -27,7 +30,23 @@ const upload = multer({ dest: 'uploads/' });
 
 router.get('/list', validateToken, async function(req, res, next){
   var userId = req.decoded.id;
-  let contacts = await Contact.find({userId:mongoose.Types.ObjectId(userId)});
+  let contacts = await Contact.aggregate([
+    {
+      $match:{
+        userId:mongoose.Types.ObjectId(userId)
+      }
+    },
+    {$lookup: {
+    from:"campaigns",
+    localField: "campaign",
+    foreignField: "_id",
+    as: "campaign_info"
+   }
+ },
+ {
+   $unwind: '$campaign_info'
+ }
+  ]);
   return res.json(contacts);
 });
 
@@ -38,10 +57,33 @@ router.get('/list', validateToken, async function(req, res, next){
 */
 router.post('/export', validateToken, function(req, res, next){
    var userId = req.decoded.id;
-   var campaignId = req.body.campaign;
+   var qry;
+   if (Array.isArray(req.body.campaign) || req.body.propertyAddress) {
+     qry = {
+       userId:mongoose.Types.ObjectId(userId)
+     };
+     if (req.body.campaign) {
+       let campaignIds = req.body.campaign.map(item=>{
+         return mongoose.Types.ObjectId(item);
+       });
+       qry['campaign'] = {
+        $in: campaignIds
+       }
+     }
+     if (req.body.propertyAddress) {
+       qry['propertyState'] = {
+         $in: req.body.propertyAddress
+       }
+     }
+   }else {
+     var campaignId = req.body.campaign;
+     qry = {userId:mongoose.Types.ObjectId(userId), campaign: mongoose.Types.ObjectId(campaignId)}
+   }
+   console.log(JSON.stringify(qry));
+
    var filename   = "contacts.csv";
    var dataArray;
-   Contact.find({userId:mongoose.Types.ObjectId(userId), campaign: mongoose.Types.ObjectId(campaignId)}, {
+   Contact.find(qry, {
     firstNameOne:1,
     lastNameOne:1,
     mailingAddress:1,
@@ -97,21 +139,102 @@ if (req.body.campaignType == 'new') {
   var campaignId = req.body.campaign;
 }
 
+var fileRows = JSON.parse(req.body.csvData), fileHeader;
+var rowData = [];
+//skipTraced
+if (req.body.skipTraced) {
+  console.log("skipTraced",req.body.skipTraced);
+  console.log(campaignId);
+  fileRows.map((row,index)=>{
+    let data = {};
+    data['userId'] = mongoose.Types.ObjectId(userId);
+    data['internal'] = row['INPUT_ADDRESS_LINE1'];
+    data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
+    data['firstNameOne'] = row['INPUT_FIRST_NAME'];
+    data['lastNameOne'] = row['INPUT_LAST_NAME'];
+    data['propertyAddress'] = row['INPUT_ADDRESS_LINE1'];
+    data['propertyCity'] = row['INPUT_ADDRESS_CITY'];
+    data['propertyState'] = row['INPUT_ADDRESS_STATE'];
+    data['propertyZipCode'] = row['INPUT_ADDRESS_ZIP'];
+
+    data['phoneOne']= row['PHONE1_PHONE'];
+    data['phoneOneType']=row['PHONE1_PHONE_TYPE'];
+    data['phoneOneScore']=row['PHONE1_PHONE_SCORE'];
+    data['phoneTwo']=row['PHONE2_PHONE'];
+    data['phoneTwoType']=row['PHONE2_PHONE_TYPE'];
+    data['phoneTwoScore']=row['PHONE2_PHONE_SCORE'];
+    data['phoneThree']=row['PHONE3_PHONE'];
+    data['phoneThreeType']=row['PHONE3_PHONE_TYPE'];
+    data['phoneThreeScore']=row['PHONE3_PHONE_SCORE'];
+    data['phoneFour']=row['PHONE4_PHONE'];
+    data['phoneFourType']=row['PHONE4_PHONE_TYPE'];
+    data['phoneFourScore']=row['PHONE4_PHONE_SCORE'];
+    data['phoneFive']=row['PHONE5_PHONE'];
+    data['phoneFiveType']=row['PHONE5_PHONE_TYPE'];
+    data['phoneFiveScore']=row['PHONE5_PHONE_SCORE'];
+    data['phoneSix']=row['PHONE6_PHONE'];
+    data['phoneSixType']=row['PHONE6_PHONE_TYPE'];
+    data['phoneSixScore']=row['PHONE6_PHONE_SCORE'];
+    data['phoneSeven']=row['PHONE7_PHONE'];
+    data['phoneSevenType']=row['PHONE7_PHONE_TYPE'];
+    data['phoneSevenScore']=row['PHONE7_PHONE_SCORE'];
+    data['phoneEight']=row['PHONE8_PHONE'];
+    data['phoneEightType']=row['PHONE8_PHONE_TYPE'];
+    data['phoneEightScore']=row['PHONE8_PHONE_SCORE'];
+    data['phoneNine']=row['PHONE9_PHONE'];
+    data['phoneNineType']=row['PHONE9_PHONE_TYPE'];
+    data['phoneNineScore']=row['PHONE9_PHONE_SCORE'];
+    data['phoneTen']=row['PHONE10_PHONE'];
+    data['phoneTenType']=row['PHONE10_PHONE_TYPE'];
+    data['phoneTenScore']=row['PHONE10_PHONE_SCORE'];
+    let uniqueStr = row['INPUT_ADDRESS_LINE1'].concat(row['INPUT_LAST_NAME']);
+    console.log(uniqueStr);
+    data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
+
+    console.log(JSON.stringify(data));
+    //let campaign = campaignId._id? mongoose.Types.ObjectId(campaignId._id): campaignId;
+    Contact.updateOne({internal: data['internal']}, data, {upsert: true}, function (err,docs) {
+      if (err) {
+        return res.status(500).json({'error': err});
+      }else {
+        //return res.status(200).json(docs);
+      }
+
+      });
+
+    rowData.push(data);
+  });
+  return res.json({'message':'Updated Successfully'});
+  // let campaign = campaignId._id? mongoose.Types.ObjectId(campaignId._id): campaignId;
+  // Contact.updateMany({userId: mongoose.Types.ObjectId(userId), campaign: mongoose.Types.ObjectId(campaign)}, rowData, {$upsert: true}, function (err,docs) {
+  //   if (err) {
+  //     return res.status(500).json({'error': err});
+  //   }else {
+  //     return res.status(200).json(docs);
+  //   }
+  //
+  //   });
 
 
 
-  var fileRows = JSON.parse(req.body.csvData), fileHeader;
+  //Model.update({_id: id}, obj, {upsert: true}, function (err) {...});
+}else {
+
+
+
+
+
    // fs.createReadStream(req.file.path)
    //   .pipe(csv())
    //   .on('data', (data) => fileRows.push(data))
    //   .on('end', () => {
        /*Create contacts*/
-       var rowData = [];
+
        fileRows.map((row,index)=>{
          let data = {};
          data['userId'] = mongoose.Types.ObjectId(userId);
          data['internal'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
-         data['campaign'] = mongoose.Types.ObjectId(campaignId._id);
+         data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
          data['firstNameOne'] = row['FIRST_NAME_1'] || row['OWNER 1 FIRST NAME'];
          data['lastNameOne'] = row['LAST_NAME_1'] || row['OWNER 1 LAST NAME'];
          data['phoneOne'] = row['phoneOne'];
@@ -211,7 +334,7 @@ if (req.body.campaignType == 'new') {
          data['Market']=row['Market_VALUE'] || row['Market VALUE'];
          data['marketExport']='';
          data['sellerLead']='';
-         let uniqueStr = data['internal']+data['mailingName'];
+         let uniqueStr = row['MAILING STREET ADDRESS'].concat(row['OWNER 1 LAST NAME']);
 
          data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
          rowData.push(data);
@@ -225,7 +348,7 @@ if (req.body.campaignType == 'new') {
 
 
 
-
+}
 
 
 
@@ -242,6 +365,9 @@ router.post('/uploadFile', upload.single('file'), async function (req, res, next
     .on('data', (data) => fileRows.push(data))
     .on('end', () => {
       return res.json(fileRows);
+    })
+    .on('error', (err) => {
+      return res.status(500).json({error: err});
     });
 
 
@@ -263,6 +389,30 @@ router.get('/getSchema', async function (req, res, next) {
 
   return res.json(props);
 });
+
+/*
+**************
+@route: GET api/contacts/getCounts
+@description: Get counts for total contacts,campaigns,skipped Records
+@access: Private
+**************
+*/
+
+router.get('/getCounts', validateToken, async function (req, res, next) {
+  var userId = req.decoded.id;
+  try {
+    var contactCount = await Contact.count({userId: mongoose.Types.ObjectId(userId)});
+    var skipContactCount = await Contact.count({userId: mongoose.Types.ObjectId(userId), skippedDate:{$exists: true}});
+    var campaignCount = await Campaign.count({userId: mongoose.Types.ObjectId(userId)});
+
+  } catch (e) {
+      return res.status(500).json({error: e, message: 'Error in getCounts api.'});
+  }
+
+  return res.json({contactCount,skipContactCount,campaignCount});
+});
+
+
 // -> Import CSV File to MongoDB database
 function importCsvData2MongoDB(filePath){
     csv()
