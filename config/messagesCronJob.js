@@ -158,7 +158,7 @@ async function getContactsAndSendMessages({
     const uniqueTo = Array.from(new Set(to));
     const msgPrimises = [];
     for (let i = 0; i < uniqueTo.length; i++) {
-      msgPrimises.push(sendMessage(from.phone_number, `923226655060`, message));
+      msgPrimises.push(sendMessage(from.phone_number, uniqueTo[i], message));
     }
     if (msgPrimises.length <= 0) {
       console.log('Error Sending messages...');
