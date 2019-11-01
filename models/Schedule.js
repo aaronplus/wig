@@ -27,7 +27,7 @@ const ScheduleSchema = new Schema({
     type: String,
     required: false,
   },
-  endTime: {
+  end_time: {
     type: String,
     required: false,
   },
