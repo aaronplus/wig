@@ -26,7 +26,82 @@ class ImportContacts extends React.Component {
     this.state = {
       campaignType: 'new',
       fileHeaders: null,
-      showModal: false
+      showModal: false,
+      headers: {},
+      mapSchema:{
+        firstName:{
+          key: 'First Name',
+          value:''
+        },
+        lastName:{
+          key: 'Last Name',
+          value:''
+        },
+        propertyAddress:{
+          key: 'Property Address',
+          value:''
+        },
+        propertyCity:{
+          key: 'Property City',
+          value:''
+        },
+        propertyState:{
+          key: 'Property State',
+          value:''
+        },
+        propertyZip:{
+          key: 'Property Zip',
+          value:''
+        },
+        mailingAddress:{
+          key: 'Mail Address',
+          value:''
+        },
+        mailingCity:{
+          key: 'Mail City',
+          value:''
+        },
+        mailingState:{
+          key: 'Mail State',
+          value:''
+        },
+        mailingZip:{
+          key: 'Mail Zip',
+          value:''
+        },
+        apn:{
+          key: 'APN',
+          value:''
+        },
+        market:{
+          key: 'Market Value',
+          value:''
+        },
+        equityValue:{
+          key: 'Equity Value',
+          value:''
+        },
+        equityPercentage:{
+          key: 'Equity Percentage',
+          value:''
+        },
+        recordingDateOT:{
+          key: 'Recording Date OT',
+          value:''
+        },
+        deedTypeOT:{
+          key: 'Deed Type OT',
+          value:''
+        },
+        recordingDateLMS:{
+          key: 'Recording Date LMS',
+          value:''
+        },
+        salePriceLMS:{
+          key: 'Sale Price LMS',
+          value:''
+        }
+      }
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -78,6 +153,17 @@ class ImportContacts extends React.Component {
     form.resetFields(['campaign']);
   }
 
+  handleOnChangeHeader = (mapTo, header) =>{
+    const {headers} = this.state;
+    headers[mapTo] = header;
+  //  this.setState({headers});
+  }
+
+  handleOk = () =>{
+    const {headers} = this.state;
+    console.log(headers);
+  }
+
   handleSubmit(ev) {
     axios.defaults.headers.common.Authorization = `${localStorage.getItem("jwtToken")}`;
     const { form } = this.props;
@@ -125,12 +211,83 @@ class ImportContacts extends React.Component {
       wrapperCol: { span: 14 },
     };
     const {campaignType, fileHeaders, showModal} = this.state;
-    const excludeHeaders = [
-      "userId","internal","campaign","_id","_v"
-    ];
+    // const excludeHeaders = [
+    //   "userId","internal","campaign","_id","__v"
+    // ];
     console.log(fileHeaders);
     const { form, contacts:{campaignList, schema} } = this.props;
+    console.log(schema);
+    const {mapSchema} = this.state;
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
+    const listHeaders = fileHeaders ?fileHeaders.map((item) => <Option key={item} value={item}>{item}</Option>): '';
+
+
+    const modalData = Object.keys(mapSchema).map((item) =>{
+      const headerKey = mapSchema[item].key;
+      let selectedHeader;
+      if (headerKey === 'First Name') {
+        selectedHeader = 'OWNER 1 FIRST NAME';
+      }else if (headerKey === 'Last Name') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+      else if (headerKey === 'Last Name') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+      else if (headerKey === 'Property Address') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+      else if (headerKey === 'Property City') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+      else if (headerKey === 'Property State') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+      else if (headerKey === 'Property Zip') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+      else if (headerKey === 'Mail Address') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+      else if (headerKey === 'Mail City') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+      else if (headerKey === 'Mail State') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+      else if (headerKey === 'Mail Zip') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+      else if (headerKey === 'APN') {
+        selectedHeader = 'OWNER 1 LAST NAME';
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+    //  const selectedHeader = (fileHeaders && fileHeaders[key])?fileHeaders[key]:'';
+      // if (!excludeHeaders.includes(item))
+        return(
+          <div className="row">
+            <div className="col-md-4"> <Input value={mapSchema[item].key} disabled name="mapTo" /> </div>
+            <Select className="col-md-6" defaultValue={selectedHeader}>
+              {listHeaders}
+            </Select>
+          </div>
+        )
+
+        // return null;
+    //  }
+  });
+
+
     return (
       <div>
         <Form {...formItemLayout} onSubmit={this.handleSubmit}>
@@ -189,12 +346,8 @@ class ImportContacts extends React.Component {
           onOk={this.handleOk}
           onCancel={()=> this.setState({showModal:false})}
         >
-          <div className="col-md-4">
-            {schema ?schema.map((item) => <li key={item}>{!excludeHeaders.includes(item)?item:''}</li>): ''}
-
-          </div>
-          <div className="col-md-4">
-            {fileHeaders ?fileHeaders.map((item) => <li key={item}>{!excludeHeaders.includes(item)?item:''}</li>): ''}
+          <div className="col-md-12">
+            {modalData}
           </div>
         </Modal>
       </div>
