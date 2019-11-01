@@ -4,7 +4,8 @@ const actions = {
   GET_CAMPAIGN_LIST: 'contacts/GET_CAMPAIGN_LIST',
   IMPORT_CONTACTS: 'contacts/IMPORT_CONTACTS',
   EXPORT_CONTACTS: 'contacts/EXPORT_CONTACTS',
-  GET_SCHEMA_COLUMNS: 'contacts/GET_SCHEMA_COLUMNS'
+  GET_SCHEMA_COLUMNS: 'contacts/GET_SCHEMA_COLUMNS',
+  GET_COUNTS: 'contacts/GET_COUNTS'
 }
 
 export default actions

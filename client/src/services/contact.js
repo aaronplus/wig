@@ -35,11 +35,11 @@ export function importContacts(postData) {
 }
 export async function exportContacts(postData) {
   console.log(postData);
-  const {payload: {campaign}} = postData;
+  const {payload: {campaign, propertyAddress}} = postData;
   return axios({
   method: 'post',
   url: `${apiUrl}/api/contacts/export`,
-  data: {campaign},
+  data: {campaign,propertyAddress},
   // responseType: 'stream'
 }).then((response) => {
   const headers = Object.keys(response.data[0]);
@@ -66,6 +66,13 @@ export async function exportContacts(postData) {
 export function getSchema() {
   return axios
     .get(`${apiUrl}/api/contacts/getSchema`)
+    .then((res) => {
+      return res.data;
+    })
+}
+export function getCounts() {
+  return axios
+    .get(`${apiUrl}/api/contacts/getCounts`)
     .then((res) => {
       return res.data;
     })

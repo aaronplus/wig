@@ -166,7 +166,7 @@ class ImportContacts extends React.Component {
 
   handleSubmit(ev) {
     axios.defaults.headers.common.Authorization = `${localStorage.getItem("jwtToken")}`;
-    const { form } = this.props;
+    const { form, skipTraced } = this.props;
     const { campaignType } = this.state;
     ev.preventDefault();
     form.validateFieldsAndScroll((err, values) => {
@@ -176,6 +176,10 @@ class ImportContacts extends React.Component {
         data.append('csvData', JSON.stringify(values.import.file.response));
         data.append('campaign', values.campaign);
         data.append('campaignType', campaignType);
+        if (skipTraced) {
+          data.append('skipTraced', skipTraced);
+        }
+
          axios
           .post(`http://localhost:5000/api/contacts/upload`, data)
           .then((res) => {
@@ -186,20 +190,6 @@ class ImportContacts extends React.Component {
             }
 
           })
-        // fetch('http://localhost:5000/api/contacts/upload', {
-        //   method: 'POST',
-        //   body: data,
-        //   headers:{
-        //     'Authorization': localStorage.getItem('jwtToken')
-        //   }
-        //
-        // }).then((response) => {
-        //   console.log(response);
-        //   response.json().then(() => {
-        //      message.success("Uploaded Successfully");
-        //      form.resetFields(['campaign']);
-        //   });
-        // });
       }
     });
   }
@@ -215,8 +205,10 @@ class ImportContacts extends React.Component {
     //   "userId","internal","campaign","_id","__v"
     // ];
     console.log(fileHeaders);
-    const { form, contacts:{campaignList, schema} } = this.props;
-    console.log(schema);
+    // schema props will be used
+    const { form, contacts:{campaignList}, skipTraced } = this.props;
+    console.log(skipTraced);
+    // console.log(schema);
     const {mapSchema} = this.state;
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
     const listHeaders = fileHeaders ?fileHeaders.map((item) => <Option key={item} value={item}>{item}</Option>): '';
