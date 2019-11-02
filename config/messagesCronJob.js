@@ -43,21 +43,28 @@ module.exports = async () => {
       };
       if (status) {
         msg.page = status.pages;
-        if (status.sent_messages.find(x => x.date === toDate)) {
+        const sentToday = status.sent_messages.find(
+          x =>
+            new Date(x.date).toISOString() === new Date(toDate).toISOString(),
+        );
+        if (sentToday) {
+          console.log(
+            parseInt(sentToday.sent),
+            parseInt(activeSchedules[i].day_limit),
+          );
           if (
-            status.sent_messages.find(x => x.date === toDate).sent >=
-            activeSchedules[i].day_limit
+            parseInt(sentToday.sent) >= parseInt(activeSchedules[i].day_limit)
           ) {
             console.log('Limit reached...');
             continue;
           }
-          msg.sent = status.sent_messages.find(x => x.date === toDate).sent;
+          msg.sent = sentToday.sent;
         }
       }
       msgPromises.push(getContactsAndSendMessages(msg));
     }
     if (msgPromises <= 0) {
-      console.log('There is some error');
+      console.log('There are no messages to send...');
       return;
     }
     console.log(JSON.stringify(await Promise.all(msgPromises), undefined, 2));

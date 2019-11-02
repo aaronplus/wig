@@ -24,6 +24,11 @@ const routes = [
     Component: loadable(() => import('pages/schedules/create-schedule')),
     exact: true,
   },
+  {
+    path: '/schedules/messaging',
+    Component: loadable(() => import('pages/schedules/messaging')),
+    exact: true,
+  },
   // Dashboards
   {
     path: '/dashboard/analytics',

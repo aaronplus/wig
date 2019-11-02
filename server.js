@@ -12,6 +12,7 @@ const schedule = require('./routes/api/schedule');
 const messages = require('./routes/api/messages');
 const campaigns = require('./routes/api/campaigns');
 const phoneNumbers = require('./routes/api/phoneNumbers');
+const conversations = require('./routes/api/conversations');
 const cors = require('cors');
 const User = require('./models/User');
 const Message = require('./models/Message');
@@ -53,6 +54,7 @@ app.use('/api/schedule', schedule);
 app.use('/api/messages', messages);
 app.use('/api/campaigns', campaigns);
 app.use('/api/phoneNumbers', phoneNumbers);
+app.use('/api/twilio', conversations);
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
 
