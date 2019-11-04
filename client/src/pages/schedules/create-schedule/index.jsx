@@ -81,49 +81,28 @@ class CreateSchedule extends React.Component {
     const { form } = this.props
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        axios('http://localhost:5000/api/schedule/add', {
-          method: 'POST',
-          data: this.formatData(values),
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: localStorage.getItem('jwtToken'),
-          },
-        })
-          .then(() => {
-            form.resetFields()
-            this.setState({ success: 'Schedule created successfully' })
-          })
-          .catch(error => {
-            this.setState({ error: error.message })
-          })
+        console.log('Values: ', this.formatData(values))
+        // axios('http://localhost:5000/api/schedule/add', {
+        //   method: 'POST',
+        //   data: this.formatData(values),
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //     Authorization: localStorage.getItem('jwtToken'),
+        //   },
+        // })
+        //   .then(() => {
+        //     form.resetFields()
+        //     this.setState({ success: 'Schedule created successfully' })
+        //   })
+        //   .catch(error => {
+        //     this.setState({ error: error.message })
+        //   })
       }
     })
   }
 
   formatData = data => {
-    const { monday, tuesday, wednesday, thursday, friday, saturday, sunday } = data
-    const days = []
-    if (monday) {
-      days.push('Monday')
-    }
-    if (tuesday) {
-      days.push('Tuesday')
-    }
-    if (wednesday) {
-      days.push('Wednesday')
-    }
-    if (thursday) {
-      days.push('Thursday')
-    }
-    if (friday) {
-      days.push('Friday')
-    }
-    if (saturday) {
-      days.push('Saturday')
-    }
-    if (sunday) {
-      days.push('Sunday')
-    }
+    const { days } = data
     return {
       campaign: data.campaign,
       type: data.type,
@@ -131,8 +110,8 @@ class CreateSchedule extends React.Component {
       day_limit: data.day_limit,
       start_date: moment(data.startDate).format('YYYY-MM-DD'),
       end_date: moment(data.endDate).format('YYYY-MM-DD'),
-      start_time: moment(data.startTime).format('HH:mm:ss'),
-      end_time: moment(data.endTime).format('HH:mm:ss'),
+      start_time: moment(data.startTime).format('HH:mm:00'),
+      end_time: moment(data.endTime).format('HH:mm:00'),
       time_zone: data.timezone,
       message: data.msg === 'template' ? data.template : data.message,
       days,
@@ -167,6 +146,16 @@ class CreateSchedule extends React.Component {
       9000: '9000',
       10000: '10000',
     }
+
+    const daysOptions = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ]
 
     return (
       <div>
@@ -221,7 +210,7 @@ class CreateSchedule extends React.Component {
                 })(<DatePicker />)}
                 {form.getFieldDecorator('startTime', {
                   rules: [{ type: 'object', message: 'Please select start time!' }],
-                })(<TimePicker />)}
+                })(<TimePicker format="HH:mm" />)}
               </Form.Item>
               <Form.Item label="End Date / Time">
                 {form.getFieldDecorator('endDate', {
@@ -235,43 +224,11 @@ class CreateSchedule extends React.Component {
                 )}
                 {form.getFieldDecorator('endTime', {
                   rules: [{ type: 'object', message: 'Please select end time!' }],
-                })(<TimePicker />)}
+                })(<TimePicker format="HH:mm" />)}
               </Form.Item>
               <Form.Item label="Days">
-                {form.getFieldDecorator('monday')(
-                  <Checkbox className="text-uppercase" checked>
-                    Monday
-                  </Checkbox>,
-                )}
-                {form.getFieldDecorator('tuesday')(
-                  <Checkbox className="text-uppercase" checked>
-                    Tuesday
-                  </Checkbox>,
-                )}
-                {form.getFieldDecorator('wednesday')(
-                  <Checkbox className="text-uppercase" checked>
-                    Wednesday
-                  </Checkbox>,
-                )}
-                {form.getFieldDecorator('thursday')(
-                  <Checkbox className="text-uppercase" checked>
-                    Thursday
-                  </Checkbox>,
-                )}
-                {form.getFieldDecorator('friday')(
-                  <Checkbox className="text-uppercase" checked>
-                    Friday
-                  </Checkbox>,
-                )}
-                {form.getFieldDecorator('saturday')(
-                  <Checkbox className="text-uppercase" checked>
-                    Saturday
-                  </Checkbox>,
-                )}
-                {form.getFieldDecorator('sunday')(
-                  <Checkbox className="text-uppercase" checked>
-                    Sunday
-                  </Checkbox>,
+                {form.getFieldDecorator('days', { initialValue: daysOptions })(
+                  <Checkbox.Group className="text-uppercase" options={daysOptions} />,
                 )}
               </Form.Item>
               <Form.Item label="Timezone">
@@ -295,7 +252,9 @@ class CreateSchedule extends React.Component {
               </Form.Item>
               {form.getFieldValue('msg') === 'message' && (
                 <Form.Item label="Type Message">
-                  {form.getFieldDecorator('message')(<Input placeholder="Type your message" />)}
+                  {form.getFieldDecorator('message')(
+                    <Input.TextArea rows={4} placeholder="Type your message" />,
+                  )}
                 </Form.Item>
               )}
               {form.getFieldValue('msg') === 'template' && (
