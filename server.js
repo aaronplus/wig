@@ -61,7 +61,7 @@ app.listen(port, () => console.log(`Server up and running on port ${port} !`));
 // Initialize cronJob
 const CronJob = cron.CronJob;
 const job = new CronJob(
-  '0 30 * * * *',
+  '1 * * * * *',
   () => {
     messageCronJob().catch(console.error);
   },

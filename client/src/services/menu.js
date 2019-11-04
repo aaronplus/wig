@@ -11,19 +11,104 @@ export default async function getMenuData() {
       title: 'Marketing',
     },
     {
-      title: 'Schedules',
+      title: 'SMS',
       key: 'Schedules',
-      icon: 'fe fe-calendar',
+      icon: 'fe fe-message-square',
       children: [
+        {
+          title: 'Conversations',
+          key: 'messaging',
+          url: '/schedules/messaging',
+        },
+        {
+          title: 'Campaigns',
+          key: 'schedule',
+          url: 'schedules',
+        },
         {
           title: 'Create Schedule',
           key: 'createSchedule',
           url: '/schedules/create',
         },
         {
-          title: 'Messaging',
-          key: 'messaging',
-          url: '/schedules/messaging',
+          title: 'Messages',
+          key: 'messages',
+          url: '/message-templates',
+        },
+        {
+          title: 'Phone Numbers',
+          key: 'phone-numbers',
+          url: '/phone-numbers',
+        },
+      ],
+    },
+    {
+      title: 'xenCall',
+      key: 'xen',
+      icon: 'fe fe-phone-call',
+      children: [
+        {
+          title: 'TBA',
+        },
+        {
+          title: 'TBA',
+        },
+        {
+          title: 'TBA',
+        },
+        {
+          title: 'TBA',
+        },
+      ],
+    },
+    {
+      title: 'RVM',
+      key: 'rvm',
+      icon: 'fe fe-cast',
+      children: [
+        {
+          title: 'TBA',
+        },
+        {
+          title: 'TBA',
+        },
+        {
+          title: 'TBA',
+        },
+        {
+          title: 'TBA',
+        },
+      ],
+    },
+    {
+      title: 'Direct Mail',
+      key: 'mail',
+      icon: 'fe fe-mail',
+      children: [
+        {
+          title: 'TBA',
+        },
+        {
+          title: 'TBA',
+        },
+        {
+          title: 'TBA',
+        },
+        {
+          title: 'TBA',
+        },
+      ],
+    },
+    {
+      title: 'Social',
+      key: 'social',
+      icon: 'fe fe-share-2',
+      children: [
+        {
+          title: 'Facebook',
+        },
+        {
+          title: 'Instagram',
         },
       ],
     },
@@ -33,20 +118,47 @@ export default async function getMenuData() {
     },
     {
       title: 'Contacts',
-      key: 'contacts',
-      icon: 'fe fe-user',
-      children: [
-        {
-          title: 'List',
-          key: 'list_contacts',
-          url: '/contacts',
-        },
-        {
-          title: 'Import',
-          key: 'import_contacts',
-          url: '/contacts/import',
-        },
-      ],
+      key: 'list_contacts',
+      icon: 'fe fe-list',
+      url: '/contacts',
+    },
+    {
+      title: 'Leads',
+      key: 'leads',
+      icon: 'fe fe-users',
+    },
+    {
+      category: true,
+      title: 'Sales',
+    },
+    {
+      title: "MAO's",
+      key: 'mao',
+      icon: 'fe fe-file-text',
+    },
+    {
+      title: 'Dispositions',
+      key: 'dispositions',
+      icon: 'fe fe-navigation',
+    },
+    {
+      category: true,
+      title: 'Activity',
+    },
+    {
+      title: 'Tasks',
+      key: 'tasks',
+      icon: 'fe fe-check-square',
+    },
+    {
+      title: 'Notifications',
+      key: 'notifications',
+      icon: 'fe fe-bell',
+    },
+    {
+      title: 'Settings',
+      key: 'settings',
+      icon: 'fe fe-settings',
     },
     // {
     //   title: 'System Pages',
@@ -348,12 +460,12 @@ export default async function getMenuData() {
     //   category: true,
     //   title: 'Advanced',
     // },
-    {
-      title: 'Form Examples',
-      key: 'formExamples',
-      icon: 'fe fe-menu',
-      url: '/advanced/form-examples',
-    },
+    // {
+    //   title: 'Form Examples',
+    //   key: 'formExamples',
+    //   icon: 'fe fe-menu',
+    //   url: '/advanced/form-examples',
+    // },
     // {
     //   title: 'Email Templates',
     //   key: 'emailTemplates',
