@@ -195,46 +195,51 @@ class ImportContacts extends React.Component {
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
-        const headers = Object.assign({}, values);
-        delete(headers.import);
-        delete(headers.campaign);
-        const data = new FormData();
-        data.append('csvData', JSON.stringify(values.import.file.response));
-        data.append('campaign', values.campaign);
-        data.append('campaignType', campaignType);
-        data.append('headers', JSON.stringify(headers));
-        if (skipTraced) {
-          data.append('skipTraced', skipTraced);
+        if (!values.campaign ) {
+          message.warning("campaign is required");
+        }else {
+          const headers = Object.assign({}, values);
+          delete(headers.import);
+          delete(headers.campaign);
+          const data = new FormData();
+          data.append('csvData', JSON.stringify(values.import.file.response));
+          data.append('campaign', values.campaign);
+          data.append('campaignType', campaignType);
+          data.append('headers', JSON.stringify(headers));
+          if (skipTraced) {
+            data.append('skipTraced', skipTraced);
+          }
+
+           axios
+            .post(`http://localhost:5000/api/contacts/upload`, data)
+            .then((res) => {
+              console.log(res);
+              if (res.status === 200) {
+                message.success("Uploaded Successfully");
+                form.resetFields(['campaign']);
+
+                handleUploadFile();
+                this.setState({
+                  showModal: false
+                })
+              }
+
+            }).catch((error) =>{
+              console.log(error.response.data.code);
+              if (error.response.data.code && error.response.data.code === 11000) {
+                  message.error("Duplicate entry detected");
+              }else {
+                const errors=  Object.keys(error.response.data.errors).map((er)=>{
+                    return error.response.data.errors[er].message;
+                  });
+                  console.log(errors);
+                  message.error(errors[0]);
+              }
+
+
+            });
         }
 
-         axios
-          .post(`http://localhost:5000/api/contacts/upload`, data)
-          .then((res) => {
-            console.log(res);
-            if (res.status === 200) {
-              message.success("Uploaded Successfully");
-              form.resetFields(['campaign']);
-
-              handleUploadFile();
-              this.setState({
-                showModal: false
-              })
-            }
-
-          }).catch((error) =>{
-            console.log(error.response.data.code);
-            if (error.response.data.code && error.response.data.code === 11000) {
-                message.error("Duplicate entry detected");
-            }else {
-              const errors=  Object.keys(error.response.data.errors).map((er)=>{
-                  return error.response.data.errors[er].message;
-                });
-                console.log(errors);
-                message.error(errors[0]);
-            }
-
-
-          });
       }
     });
   }
