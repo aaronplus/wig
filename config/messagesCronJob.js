@@ -39,6 +39,7 @@ module.exports = async () => {
         phone_number_id: activeSchedules[i].phone_number,
         campaign_id: activeSchedules[i].campaign,
         page: 0,
+        limit: 10,
         date: toDate,
       };
       if (status) {
@@ -52,11 +53,14 @@ module.exports = async () => {
             parseInt(sentToday.sent),
             parseInt(activeSchedules[i].day_limit),
           );
-          if (
-            parseInt(sentToday.sent) >= parseInt(activeSchedules[i].day_limit)
-          ) {
+          const diff =
+            parseInt(activeSchedules[i].day_limit) - parseInt(sentToday.sent);
+          if (diff <= 0) {
             console.log('Limit reached...');
             continue;
+          }
+          if (diff < msg.limit) {
+            msg.limit = diff;
           }
           msg.sent = sentToday.sent;
         }
@@ -120,10 +124,11 @@ async function getContactsAndSendMessages({
   phone_number_id,
   campaign_id,
   page,
+  limit,
   date,
 }) {
   try {
-    const contacts = await getContacts(campaign_id, page);
+    const contacts = await getContacts(campaign_id, page, limit);
     if (contacts.length <= 0) {
       console.log('Message sent to all contacts.');
       return;
