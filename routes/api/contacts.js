@@ -76,7 +76,7 @@ router.post('/export', validateToken, function(req, res, next){
        }
      }
      if (req.body.propertyCity) {
-       qry['propertyState'] = {
+       qry['propertyCity'] = {
          $in: req.body.propertyCity
        }
      }

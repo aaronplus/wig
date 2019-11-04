@@ -301,9 +301,8 @@ class ContactsList extends React.Component {
             <Modal
               title="Export Contacts"
               visible={visible}
-              // onOk={this.handleOk}
-              // onCancel={() => this.setState({ visible: false })}
-              footer={false}
+              onOk={this.handleOk}
+              onCancel={() => this.setState({ visible: false })}
             >
               <Form>
                 <Form.Item label="Select Campaign">
@@ -323,7 +322,11 @@ class ContactsList extends React.Component {
               visible={visibleImportComponent}
               // onOk={() => this.setState({ visibleImportComponent: false })}
               // onCancel={() => this.setState({ visibleImportComponent: false })}
-              footer={false}
+              footer={[
+                <Button onClick={() => this.setState({ visibleImportComponent: false })} className="mr-3">
+                Cancel
+                </Button>
+            ]}
             >
               <ImportContacts skipTraced={false} handleUploadFile={this.handleUploadFile} />
             </Modal>
@@ -332,7 +335,11 @@ class ContactsList extends React.Component {
               visible={visibleImportSkipTracedComponent}
               // onOk={this.handleOkImportContacts}
               // onCancel={() => this.setState({ visibleImportSkipTracedComponent: false })}
-              footer={false}
+              footer={[
+                <Button onClick={() => this.setState({ visibleImportSkipTracedComponent: false })} className="mr-3">
+                Cancel
+                </Button>
+            ]}
             >
               <ImportContacts skipTraced handleUploadFile={this.handleUploadFile} />
             </Modal>

@@ -349,7 +349,11 @@ class ImportContacts extends React.Component {
           visible={showModal}
           // onOk={()=> this.setState({showModal:false})}
           // onCancel={()=> this.setState({showModal:false})}
-          footer={false}
+          footer={[
+            <Button onClick={() => this.setState({ showModal: false })} className="mr-3">
+            Cancel
+            </Button>
+        ]}
         >
           <div className="col-md-12">
             <Form onSubmit={this.handleSubmit}>
