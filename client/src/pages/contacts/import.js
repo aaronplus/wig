@@ -256,7 +256,7 @@ class ImportContacts extends React.Component {
             </Form.Item>
             <Form.Item className="col-md-6">
               {form.getFieldDecorator(`${item}`, {
-                initialValue: (fileHeaders && fileHeaders.includes(selectedHeader))?selectedHeader:'' ,
+                initialValue: (fileHeaders && fileHeaders.includes(selectedHeader))?selectedHeader:'Select Header' ,
               rules: [{ required: false}]
             })(
               <Select>
