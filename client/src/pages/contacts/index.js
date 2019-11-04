@@ -156,13 +156,7 @@ class ContactsList extends React.Component {
       },
     ]
 
-    const listData = campaignList
-      ? campaignList.map(item => (
-          <Option key={item._id} value={item._id}>
-            {item.campaign}
-          </Option>
-        ))
-      : ''
+    const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
     return (
       <div>
         <div className="row">
