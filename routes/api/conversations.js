@@ -17,18 +17,19 @@ router.post('/sms', async (req, res) => {
     });
     console.log(await conversationExists.save());
   } else {
+    const phone = `${From}`.substring(1);
     const contact = await Contact.findOne({
       $or: [
-        { phoneOne: From },
-        { phoneTwo: From },
-        { phoneThree: From },
-        { phoneFour: From },
-        { phoneFive: From },
-        { phoneSix: From },
-        { phoneSeven: From },
-        { phoneEight: From },
-        { phoneNine: From },
-        { phoneTen: From },
+        { phoneOne: phone },
+        { phoneTwo: phone },
+        { phoneThree: phone },
+        { phoneFour: phone },
+        { phoneFive: phone },
+        { phoneSix: phone },
+        { phoneSeven: phone },
+        { phoneEight: phone },
+        { phoneNine: phone },
+        { phoneTen: phone },
       ],
     });
     const conv = {
@@ -38,6 +39,7 @@ router.post('/sms', async (req, res) => {
       messages: [{ message: Body, sid: MessageSid, received: true }],
     };
     if (contact) {
+      console.log('Contact: ', JSON.stringify(contact, undefined, 2));
       let name = null;
       if (contact.firstNameTwo || contact.lastNameTwo) {
         name = `${contact.firstNameTwo ? contact.firstNameTwo : ''} ${
