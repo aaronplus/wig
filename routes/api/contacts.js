@@ -140,6 +140,7 @@ if (req.body.campaignType == 'new') {
 }
 
 var fileRows = JSON.parse(req.body.csvData), fileHeader;
+var headers = JSON.parse(req.body.headers);
 var rowData = [];
 //skipTraced
 if (req.body.skipTraced) {
@@ -235,8 +236,8 @@ if (req.body.skipTraced) {
          data['userId'] = mongoose.Types.ObjectId(userId);
          data['internal'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
          data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
-         data['firstNameOne'] = row['FIRST_NAME_1'] || row['OWNER 1 FIRST NAME'];
-         data['lastNameOne'] = row['LAST_NAME_1'] || row['OWNER 1 LAST NAME'];
+         data['firstNameOne'] = row[`${headers['firstName']}`] || row['OWNER 1 FIRST NAME'];
+         data['lastNameOne'] = row[`${headers['lastName']}`] || row['OWNER 1 LAST NAME'];
          data['phoneOne'] = row['phoneOne'];
          data['correctPhone'] = '';
          data['firstNameTwo'] = row['FIRST_NAME_2'] || row['OWNER 2 FIRST NAME'];
@@ -244,25 +245,25 @@ if (req.body.skipTraced) {
          data['mailingName'] = row['OWNER_MAILING_NAME'] || row['OWNER MAILING NAME'];
          data['occupancy'] = '';
          data['ownershipType'] = '';
-         data['mailingAddress'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
-         data['mailingCity'] = row['MAIL_CITY'] || row['MAIL CITY'];
-         data['mailingState'] = row['MAIL_STATE'] || row['MAIL STATE'];
-         data['mailingZipCode'] = row['MAIL_ZIP'] || row['MAIL ZIP/ZIP+4'];
+         data['mailingAddress'] = row[`${headers['mailingAddress']}`] || row['MAILING STREET ADDRESS'];
+         data['mailingCity'] = row[`${headers['mailingCity']}`] || row['MAIL CITY'];
+         data['mailingState'] = row[`${headers['mailingState']}`] || row['MAIL STATE'];
+         data['mailingZipCode'] = row[`${headers['MAIL ZIP/ZIP 4']}`] || row['MAIL ZIP/ZIP+4'];
          data['mailingCounty'] = row['MAIL_COUNTRY'] || row['MAIL COUNTRY'];
-         data['propertyAddress'] = row['SITUS_STREET_ADDRESS'] || row['SITUS STREET ADDRESS'];
-         data['propertyCity'] = row['SITUS_CITY'] || row['SITUS CITY'];
-         data['propertyState'] = row['SITUS_STATE'] || row['SITUS STATE'];
-         data['propertyZipCode'] = row['SITUS_ZIP_CODE'] || row['SITUS ZIP CODE'];
+         data['propertyAddress'] = row[`${headers['propertyAddress']}`] || row['SITUS STREET ADDRESS'];
+         data['propertyCity'] = row[`${headers['propertyCity']}`] || row['SITUS CITY'];
+         data['propertyState'] = row[`${headers['propertyState']}`] || row['SITUS STATE'];
+         data['propertyZipCode'] = row[`${headers['propertyZip']}`] || row['SITUS ZIP CODE'];
          data['propertyCounty'] = '';
-         data['apn'] = row['APN'] || row['APN - FORMATTED'];
-         data['equityValue'] = row['EQUITY_VALUE'] || row['EQUITY VALUE'];
-         data['equityPercentage'] = row['EQUITY_PERCENTAGE'] || row['EQUITY PERCENTAGE'];
+         data['apn'] = row[`${headers['APN - FORMATTED']}`] || row['APN - FORMATTED'];
+         data['equityValue'] = row[`${headers['equityValue']}`] || row['EQUITY VALUE'];
+         data['equityPercentage'] = row[`${headers['equityPercentage']}`] || row['EQUITY PERCENTAGE'];
          data['estimatedValue'] = '';
-         data['recordingDateOT'] = row['OT_RECORDING_DATE'] || row['OT-RECORDING DATE'];
+         data['recordingDateOT'] = row[`${headers['recordingDateOT']}`] || row['OT-RECORDING DATE'];
          data['salePriceOT'] = '';
-         data['deedTypeOT'] = row['OT_DEED_TYPE'] || row['OT-DEED TYPE'];
-         data['recordingDateLMS'] = '';
-         data['salePriceLMS'] = row['LMS_SALE_PRICE'] || row['LMS-SALE PRICE'];
+         data['deedTypeOT'] = row[`${headers['deedTypeOT']}`] || row['OT-DEED TYPE'];
+         data['recordingDateLMS'] = row[`${headers['LMS-RECORDING DATE']}`];
+         data['salePriceLMS'] = row[`${headers['salePriceLMS']}`] || row['LMS-SALE PRICE'];
          data['deedTypeLMS'] = '';
          data['dateOfDeath'] = '';
          data['dateOfBirth'] = '';

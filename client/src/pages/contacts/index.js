@@ -94,6 +94,14 @@ class ContactsList extends React.Component {
     }
   }
 
+  handleUploadFile = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'contacts/GET_CONTACTS',
+      payload: localStorage.getItem('jwtToken'),
+    })
+  }
+
   render() {
     const {
       contacts: { campaignList, list, countObj },
@@ -112,7 +120,7 @@ class ContactsList extends React.Component {
         })
       : []
 
-    const data = list
+    const data = list;
     let { sortedInfo, filteredInfo } = this.state
     const { visible, visibleImportComponent, visibleImportSkipTracedComponent } = this.state
     sortedInfo = sortedInfo || {}
@@ -126,6 +134,7 @@ class ContactsList extends React.Component {
         filters: campainFilterOptions,
         filterMultiple: true,
         onFilter: (value, record) => record.campaign_info._id.includes(value),
+        filteredValue: filteredInfo.campaign || null,
         // sorter: (a, b) => a.mailingName.length - b.mailingName.length,
         // sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
       },
@@ -148,12 +157,34 @@ class ContactsList extends React.Component {
         title: 'Property Address',
         dataIndex: 'propertyAddress',
         key: 'propertyAddress',
-        filters: stateFilterOptions,
-        filterMultiple: true,
-        onFilter: (value, record) => record.propertyState.includes(value),
         sorter: (a, b) => a.propertyAddress - b.propertyAddress,
         sortOrder: sortedInfo.columnKey === 'propertyAddress' && sortedInfo.order,
       },
+      {
+        title: 'Property City',
+        dataIndex: 'propertyCity',
+        key: 'propertyCity',
+        sorter: (a, b) => a.propertyCity - b.propertyCity,
+        sortOrder: sortedInfo.columnKey === 'propertyCity' && sortedInfo.order,
+      },
+      {
+        title: 'Property State',
+        dataIndex: 'propertyState',
+        key: 'propertyState',
+        filters: stateFilterOptions,
+        filterMultiple: true,
+        onFilter: (value, record) => record.propertyState.includes(value),
+        sorter: (a, b) => a.propertyState - b.propertyState,
+        sortOrder: sortedInfo.columnKey === 'propertyState' && sortedInfo.order,
+        filteredValue: filteredInfo.propertyState || null,
+      },
+      {
+        title: 'Property Zip',
+        dataIndex: 'propertyZipCode',
+        key: 'propertyZipCode',
+        sorter: (a, b) => a.propertyZipCode - b.propertyZipCode,
+        sortOrder: sortedInfo.columnKey === 'propertyZipCode' && sortedInfo.order,
+      }
     ]
 
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
@@ -273,7 +304,7 @@ class ContactsList extends React.Component {
               onOk={this.handleOkImportContacts}
               onCancel={() => this.setState({ visibleImportComponent: false })}
             >
-              <ImportContacts skipTraced={false} />
+              <ImportContacts skipTraced={false} handleUploadFile={this.handleUploadFile} />
             </Modal>
             <Modal
               title="Import Skip traced Contacts"
@@ -281,7 +312,7 @@ class ContactsList extends React.Component {
               onOk={this.handleOkImportContacts}
               onCancel={() => this.setState({ visibleImportSkipTracedComponent: false })}
             >
-              <ImportContacts skipTraced />
+              <ImportContacts skipTraced handleUploadFile={this.handleUploadFile} />
             </Modal>
           </div>
         </div>

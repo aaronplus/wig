@@ -31,75 +31,75 @@ class ImportContacts extends React.Component {
       mapSchema:{
         firstName:{
           key: 'First Name',
-          value:''
+          value:'OWNER 1 FIRST NAME'
         },
         lastName:{
           key: 'Last Name',
-          value:''
+          value:'OWNER 1 LAST NAME'
         },
         propertyAddress:{
           key: 'Property Address',
-          value:''
+          value:'SITUS FULL ADDRESS'
         },
         propertyCity:{
           key: 'Property City',
-          value:''
+          value:'SITUS CITY'
         },
         propertyState:{
           key: 'Property State',
-          value:''
+          value:'SITUS STATE'
         },
         propertyZip:{
           key: 'Property Zip',
-          value:''
+          value:'SITUS ZIP CODE'
         },
         mailingAddress:{
           key: 'Mail Address',
-          value:''
+          value:'MAILING FULL ADDRESS'
         },
         mailingCity:{
           key: 'Mail City',
-          value:''
+          value:'MAIL CITY'
         },
         mailingState:{
           key: 'Mail State',
-          value:''
+          value:'MAIL STATE'
         },
         mailingZip:{
           key: 'Mail Zip',
-          value:''
+          value:'MAIL ZIP/ZIP+4'
         },
         apn:{
           key: 'APN',
-          value:''
+          value:'APN - FORMATTED'
         },
         market:{
           key: 'Market Value',
-          value:''
+          value:'MARKET VALUE'
         },
         equityValue:{
           key: 'Equity Value',
-          value:''
+          value:'EQUITY VALUE'
         },
         equityPercentage:{
           key: 'Equity Percentage',
-          value:''
+          value:'EQUITY PERCENTAGE'
         },
         recordingDateOT:{
           key: 'Recording Date OT',
-          value:''
+          value:'OT-RECORDING DATE'
         },
         deedTypeOT:{
           key: 'Deed Type OT',
-          value:''
+          value:'OT-DEED TYPE'
         },
         recordingDateLMS:{
           key: 'Recording Date LMS',
-          value:''
+          value:'LMS-RECORDING DATE'
         },
         salePriceLMS:{
           key: 'Sale Price LMS',
-          value:''
+          value:'LMS-SALE PRICE'
         }
       }
     };
@@ -131,11 +131,11 @@ class ImportContacts extends React.Component {
         const headers = Object.keys(response[0]);
         this.setState({
           fileHeaders: headers,
-          showModal: true
+        //  showModal: true
         });
         console.log(headers);
       }
-      message.success(`${info.file.name} file uploaded successfully.`)
+      // message.success(`${info.file.name} file uploaded successfully.`)
     } else if (status === 'error') {
       message.error(`${info.file.name} file upload failed.`)
     }
@@ -164,18 +164,45 @@ class ImportContacts extends React.Component {
     console.log(headers);
   }
 
+  // handleSubmitMapAndImport = (e) => {
+  //   e.preventDefault();
+  //   const {form} = this.props;
+  //   form.validateFields((err, values) => {
+  //     if (!err) {
+  //       const headers = Object.assign({}, values);
+  //
+  //       console.log('Received values of form: ', values);
+  //     }
+  //   });
+  // }
+
+  changeImportKeyValue = (key, val) => {
+    const {mapSchema} =  this.state;
+
+    const newState = Object.assign({},mapSchema);
+    newState[key] = val;
+    this.setState({
+      mapSchema: newState
+    })
+  }
+
   handleSubmit(ev) {
     axios.defaults.headers.common.Authorization = `${localStorage.getItem("jwtToken")}`;
-    const { form, skipTraced } = this.props;
+    const { form, skipTraced, handleUploadFile } = this.props;
+    console.log(this.props);
     const { campaignType } = this.state;
     ev.preventDefault();
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
+        const headers = Object.assign({}, values);
+        delete(headers.import);
+        delete(headers.campaign);
         const data = new FormData();
         data.append('csvData', JSON.stringify(values.import.file.response));
         data.append('campaign', values.campaign);
         data.append('campaignType', campaignType);
+        data.append('headers', JSON.stringify(headers));
         if (skipTraced) {
           data.append('skipTraced', skipTraced);
         }
@@ -187,12 +214,17 @@ class ImportContacts extends React.Component {
             if (res.status === 200) {
               message.success("Uploaded Successfully");
               form.resetFields(['campaign']);
+              handleUploadFile();
             }
 
           })
       }
     });
   }
+
+
+
+
 
   render() {
     console.log("Render Here");
@@ -201,10 +233,6 @@ class ImportContacts extends React.Component {
       wrapperCol: { span: 14 },
     };
     const {campaignType, fileHeaders, showModal} = this.state;
-    // const excludeHeaders = [
-    //   "userId","internal","campaign","_id","__v"
-    // ];
-    console.log(fileHeaders);
     // schema props will be used
     const { form, contacts:{campaignList}, skipTraced } = this.props;
     console.log(skipTraced);
@@ -215,71 +243,29 @@ class ImportContacts extends React.Component {
 
 
     const modalData = Object.keys(mapSchema).map((item) =>{
-      const headerKey = mapSchema[item].key;
-      let selectedHeader;
-      if (headerKey === 'First Name') {
-        selectedHeader = 'OWNER 1 FIRST NAME';
-      }else if (headerKey === 'Last Name') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-      else if (headerKey === 'Last Name') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-      else if (headerKey === 'Property Address') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-      else if (headerKey === 'Property City') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-      else if (headerKey === 'Property State') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-      else if (headerKey === 'Property Zip') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-      else if (headerKey === 'Mail Address') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-      else if (headerKey === 'Mail City') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-      else if (headerKey === 'Mail State') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-      else if (headerKey === 'Mail Zip') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-      else if (headerKey === 'APN') {
-        selectedHeader = 'OWNER 1 LAST NAME';
-      }
-
-
-
-
-
-
-
-
-
-
-
-
-    //  const selectedHeader = (fileHeaders && fileHeaders[key])?fileHeaders[key]:'';
-      // if (!excludeHeaders.includes(item))
+      const headerKey = mapSchema[item] ? mapSchema[item].key : '';
+      const selectedHeader = mapSchema[item] ? mapSchema[item].value: '';
         return(
           <div className="row">
-            <div className="col-md-4"> <Input value={mapSchema[item].key} disabled name="mapTo" /> </div>
-            <Select className="col-md-6" defaultValue={selectedHeader}>
-              {listHeaders}
-            </Select>
+            <Form.Item className="col-md-4">
+              <Input value={headerKey} disabled name="mapTo" />
+            </Form.Item>
+            <Form.Item className="col-md-6">
+              {form.getFieldDecorator(`${item}`, {
+                initialValue: selectedHeader,
+              rules: [{ required: false}]
+            })(
+              <Select>
+                {listHeaders}
+              </Select>
+              )}
+            </Form.Item>
           </div>
         )
 
         // return null;
     //  }
   });
-
-
     return (
       <div>
         <Form {...formItemLayout} onSubmit={this.handleSubmit}>
@@ -327,8 +313,11 @@ class ImportContacts extends React.Component {
           </Form.Item>
 
           <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
-            <Button type="primary" htmlType="submit">
-           Submit
+            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders}>
+           Import
+            </Button>
+            <Button type="primary" htmlType="button" className="ant-btn mr-3" onClick={()=> this.setState({showModal:true})} disabled={!fileHeaders}>
+           Map & Import
             </Button>
           </Form.Item>
         </Form>
@@ -339,7 +328,13 @@ class ImportContacts extends React.Component {
           onCancel={()=> this.setState({showModal:false})}
         >
           <div className="col-md-12">
-            {modalData}
+            <Form onSubmit={this.handleSubmit}>
+              {modalData}
+
+              <Form.Item>
+                <Button type="primary" htmlType="submit" className="ant-btn mr-3">Submit</Button>
+              </Form.Item>
+            </Form>
           </div>
         </Modal>
       </div>
