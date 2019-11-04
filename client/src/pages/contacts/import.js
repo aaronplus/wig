@@ -195,7 +195,7 @@ class ImportContacts extends React.Component {
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
-        if (!values.campaign ) {
+        if (!skipTraced && !values.campaign ) {
           message.warning("campaign is required");
         }else {
           const headers = Object.assign({}, values);
@@ -203,8 +203,12 @@ class ImportContacts extends React.Component {
           delete(headers.campaign);
           const data = new FormData();
           data.append('csvData', JSON.stringify(values.import.file.response));
-          data.append('campaign', values.campaign);
-          data.append('campaignType', campaignType);
+          if (!skipTraced) {
+            data.append('campaign', values.campaign);
+            data.append('campaignType', campaignType);
+          }
+
+
           data.append('headers', JSON.stringify(headers));
           if (skipTraced) {
             data.append('skipTraced', skipTraced);
@@ -289,17 +293,66 @@ class ImportContacts extends React.Component {
         // return null;
     //  }
   });
+  if (skipTraced) {
+    return(
+      <div>
+        <Form {...formItemLayout} onSubmit={this.handleSubmit}>
+          <Form.Item label="Import">
+            {
+          form.getFieldDecorator('import',{ required: true, message: 'Please upload a csv file'})
+          (
+            <Upload multiple={false} name="file" listType="csv" accept="csv" action="http://localhost:5000/api/contacts/uploadFile" onChange={this.onUploadFile}>
+              <Button>
+                <Icon type="upload" /> Click to upload
+              </Button>
+            </Upload>
+        )
+        }
+
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders}>
+           Import
+            </Button>
+            <Button type="primary" htmlType="button" className="ant-btn mr-3" onClick={()=> this.setState({showModal:true})} disabled={!fileHeaders}>
+           Import And Map
+            </Button>
+          </Form.Item>
+        </Form>
+        <Modal
+          title="Map Contacts"
+          visible={showModal}
+          // onOk={()=> this.setState({showModal:false})}
+          // onCancel={()=> this.setState({showModal:false})}
+          footer={[
+            <Button onClick={() => this.setState({ showModal: false })} className="mr-3">
+            Cancel
+            </Button>
+        ]}
+        >
+          <div className="col-md-12">
+            <Form onSubmit={this.handleSubmit}>
+              {modalData}
+
+              <Form.Item>
+                <Button type="primary" htmlType="submit" className="ant-btn mr-3">Submit</Button>
+              </Form.Item>
+            </Form>
+          </div>
+        </Modal>
+      </div>
+    )
+  }
     return (
       <div>
         <Form {...formItemLayout} onSubmit={this.handleSubmit}>
-          {!skipTraced ?
-            <Form.Item label="Campaign">
-              <Radio.Group onChange={this.handleOnChangeCampaign} defaultValue={campaignType}>
-                <Radio value="new">New Campaign</Radio>
-                <Radio value="existing">Existing Campaign</Radio>
-              </Radio.Group>
-            </Form.Item>
-        :''}
+          <Form.Item label="Campaign">
+            <Radio.Group onChange={this.handleOnChangeCampaign} defaultValue={campaignType}>
+              <Radio value="new">New Campaign</Radio>
+              <Radio value="existing">Existing Campaign</Radio>
+            </Radio.Group>
+          </Form.Item>
           {(campaignType === 'new')?
             <Form.Item label="Campaign Name">
               {

@@ -155,7 +155,7 @@ if (req.body.skipTraced) {
     let data = {};
     data['userId'] = mongoose.Types.ObjectId(userId);
     data['internal'] = row['INPUT_ADDRESS_LINE1'];
-    data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
+  //  data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
     data['firstNameOne'] = row['INPUT_FIRST_NAME'];
     data['lastNameOne'] = row['INPUT_LAST_NAME'];
     data['propertyAddress'] = row['INPUT_ADDRESS_LINE1'];
