@@ -278,7 +278,7 @@ class ImportContacts extends React.Component {
               rules: [{ required: false}]
             })(
               <Select>
-                <Option value="">Donot Import</Option>
+                <Option value="">Do Not Import</Option>
                 {listHeaders}
               </Select>
               )}

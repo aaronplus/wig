@@ -84,12 +84,13 @@ class ContactsList extends React.Component {
   onClickExportFiltered = () => {
     const { dispatch } = this.props
     const { filteredInfo } = this.state
+    console.log(filteredInfo);
     if (filteredInfo) {
-      const { campaign, propertyAddress } = filteredInfo
-      if (campaign || propertyAddress) {
+      const { campaign, propertyState, propertyCity } = filteredInfo
+      if (campaign || propertyState || propertyCity) {
         dispatch({
           type: 'contacts/EXPORT_CONTACTS',
-          payload: { campaign, propertyAddress },
+          payload: { campaign, propertyState, propertyCity},
         })
       }
     }

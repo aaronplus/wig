@@ -58,7 +58,7 @@ router.get('/list', validateToken, async function(req, res, next){
 router.post('/export', validateToken, function(req, res, next){
    var userId = req.decoded.id;
    var qry;
-   if (Array.isArray(req.body.campaign) || req.body.propertyAddress) {
+   if (Array.isArray(req.body.campaign) || req.body.propertyCity|| req.body.propertyState) {
      qry = {
        userId:mongoose.Types.ObjectId(userId)
      };
@@ -70,9 +70,14 @@ router.post('/export', validateToken, function(req, res, next){
         $in: campaignIds
        }
      }
-     if (req.body.propertyAddress) {
+     if (req.body.propertyState) {
        qry['propertyState'] = {
-         $in: req.body.propertyAddress
+         $in: req.body.propertyState
+       }
+     }
+     if (req.body.propertyCity) {
+       qry['propertyState'] = {
+         $in: req.body.propertyCity
        }
      }
    }else {

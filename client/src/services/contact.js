@@ -35,11 +35,11 @@ export function importContacts(postData) {
 }
 export async function exportContacts(postData) {
   console.log(postData);
-  const {payload: {campaign, propertyAddress}} = postData;
+  const {payload: {campaign, propertyState, propertyCity}} = postData;
   return axios({
   method: 'post',
   url: `${apiUrl}/api/contacts/export`,
-  data: {campaign,propertyAddress},
+  data: {campaign,propertyState, propertyCity},
   // responseType: 'stream'
 }).then((response) => {
   const headers = Object.keys(response.data[0]);
