@@ -347,8 +347,9 @@ class ImportContacts extends React.Component {
         <Modal
           title="Map Contacts"
           visible={showModal}
-          onOk={()=> this.setState({showModal:false})}
-          onCancel={()=> this.setState({showModal:false})}
+          // onOk={()=> this.setState({showModal:false})}
+          // onCancel={()=> this.setState({showModal:false})}
+          footer={false}
         >
           <div className="col-md-12">
             <Form onSubmit={this.handleSubmit}>

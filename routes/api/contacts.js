@@ -242,7 +242,7 @@ if (req.body.skipTraced) {
          data['internal'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
          data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
          data['firstNameOne'] = row[`${headers['firstName']}`] || row['OWNER 1 FIRST NAME'];
-         data['lastNameOne'] = row[`${headers['lastName']}`] || row['OWNER 1 LAST NAME'];
+         data['lastNameOne'] = row[`${headers['lastName']}`] || '';
          data['phoneOne'] = row['phoneOne'];
          data['correctPhone'] = '';
          data['firstNameTwo'] = row['FIRST_NAME_2'] || row['OWNER 2 FIRST NAME'];
@@ -250,7 +250,7 @@ if (req.body.skipTraced) {
          data['mailingName'] = row['OWNER_MAILING_NAME'] || row['OWNER MAILING NAME'];
          data['occupancy'] = '';
          data['ownershipType'] = '';
-         data['mailingAddress'] = row[`${headers['mailingAddress']}`] || row['MAILING STREET ADDRESS'];
+         data['mailingAddress'] = row[`${headers['mailingAddress']}`] || '';
          data['mailingCity'] = row[`${headers['mailingCity']}`] || row['MAIL CITY'];
          data['mailingState'] = row[`${headers['mailingState']}`] || row['MAIL STATE'];
          data['mailingZipCode'] = row[`${headers['MAIL ZIP/ZIP 4']}`] || row['MAIL ZIP/ZIP+4'];
