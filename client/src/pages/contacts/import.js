@@ -214,7 +214,11 @@ class ImportContacts extends React.Component {
             if (res.status === 200) {
               message.success("Uploaded Successfully");
               form.resetFields(['campaign']);
+
               handleUploadFile();
+              this.setState({
+                showModal: false
+              })
             }
 
           })
@@ -252,10 +256,11 @@ class ImportContacts extends React.Component {
             </Form.Item>
             <Form.Item className="col-md-6">
               {form.getFieldDecorator(`${item}`, {
-                initialValue: selectedHeader,
+                initialValue: (fileHeaders && fileHeaders.includes(selectedHeader))?selectedHeader:'' ,
               rules: [{ required: false}]
             })(
               <Select>
+                <Option value="">Donot Import</Option>
                 {listHeaders}
               </Select>
               )}
@@ -312,19 +317,19 @@ class ImportContacts extends React.Component {
 
           </Form.Item>
 
-          <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
+          <Form.Item>
             <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders}>
            Import
             </Button>
             <Button type="primary" htmlType="button" className="ant-btn mr-3" onClick={()=> this.setState({showModal:true})} disabled={!fileHeaders}>
-           Map & Import
+           Import And Map
             </Button>
           </Form.Item>
         </Form>
         <Modal
-          title="Export Contacts"
+          title="Map Contacts"
           visible={showModal}
-          onOk={this.handleOk}
+          onOk={()=> this.setState({showModal:false})}
           onCancel={()=> this.setState({showModal:false})}
         >
           <div className="col-md-12">

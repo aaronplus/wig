@@ -62,6 +62,7 @@ class ContactsList extends React.Component {
     this.handleSubmit()
     this.setState({
       visibleImportComponent: false,
+      visibleImportSkipTracedComponent:false
     })
   }
 
@@ -100,6 +101,10 @@ class ContactsList extends React.Component {
       type: 'contacts/GET_CONTACTS',
       payload: localStorage.getItem('jwtToken'),
     })
+    this.setState({
+      visibleImportComponent:false,
+
+    })
   }
 
   render() {
@@ -113,13 +118,19 @@ class ContactsList extends React.Component {
           return { text: item.campaign, value: item._id }
         })
       : []
-    const statesArr = list ? [...new Set(list.map(x => x.propertyState))] : []
+    const statesArr = list ? [...new Set(list.map(x => x.propertyState))] : [];
+    const cityArr = list ? [...new Set(list.map(x => x.propertyCity))] : [];
     const stateFilterOptions = statesArr
       ? statesArr.map(item => {
           return { text: item, value: item }
         })
-      : []
-
+      : [];
+      const cityFilterOptions = cityArr
+        ? cityArr.map(item => {
+            return { text: item, value: item }
+          })
+        : []
+        console.log(cityFilterOptions);
     const data = list;
     let { sortedInfo, filteredInfo } = this.state
     const { visible, visibleImportComponent, visibleImportSkipTracedComponent } = this.state
@@ -153,19 +164,23 @@ class ContactsList extends React.Component {
         sorter: (a, b) => a.lastNameOne.length - b.lastNameOne.length,
         sortOrder: sortedInfo.columnKey === 'lastName' && sortedInfo.order,
       },
-      {
-        title: 'Property Address',
-        dataIndex: 'propertyAddress',
-        key: 'propertyAddress',
-        sorter: (a, b) => a.propertyAddress - b.propertyAddress,
-        sortOrder: sortedInfo.columnKey === 'propertyAddress' && sortedInfo.order,
-      },
+      // {
+      //   title: 'Property Address',
+      //   dataIndex: 'propertyAddress',
+      //   key: 'propertyAddress',
+      //   sorter: (a, b) => a.propertyAddress - b.propertyAddress,
+      //   sortOrder: sortedInfo.columnKey === 'propertyAddress' && sortedInfo.order,
+      // },
       {
         title: 'Property City',
         dataIndex: 'propertyCity',
         key: 'propertyCity',
         sorter: (a, b) => a.propertyCity - b.propertyCity,
         sortOrder: sortedInfo.columnKey === 'propertyCity' && sortedInfo.order,
+        filters: cityFilterOptions,
+        filterMultiple: true,
+        onFilter: (value, record) => record.propertyCity.includes(value),
+        filteredValue: filteredInfo.propertyCity || null,
       },
       {
         title: 'Property State',
@@ -188,6 +203,7 @@ class ContactsList extends React.Component {
     ]
 
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
+
     return (
       <div>
         <div className="row">
@@ -201,6 +217,7 @@ class ContactsList extends React.Component {
               className="mr-3 btn-outline-success"
               icon="download"
               onClick={() => this.setState({ visible: true })}
+              disabled={data.length === 0}
             >
               Export for Skip Tracing
             </Button>
@@ -208,6 +225,7 @@ class ContactsList extends React.Component {
               className="mr-3 btn-outline-success"
               icon="download"
               onClick={this.onClickExportFiltered}
+              disabled={Object.keys(filteredInfo).length === 0}
             >
               Export Filtered
             </Button>
@@ -301,7 +319,7 @@ class ContactsList extends React.Component {
             <Modal
               title="Import Contacts"
               visible={visibleImportComponent}
-              onOk={this.handleOkImportContacts}
+              onOk={() => this.setState({ visibleImportComponent: false })}
               onCancel={() => this.setState({ visibleImportComponent: false })}
             >
               <ImportContacts skipTraced={false} handleUploadFile={this.handleUploadFile} />
