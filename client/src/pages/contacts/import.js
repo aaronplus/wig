@@ -292,13 +292,14 @@ class ImportContacts extends React.Component {
     return (
       <div>
         <Form {...formItemLayout} onSubmit={this.handleSubmit}>
-
-          <Form.Item label="Campaign">
-            <Radio.Group onChange={this.handleOnChangeCampaign} defaultValue={campaignType}>
-              <Radio value="new">New Campaign</Radio>
-              <Radio value="existing">Existing Campaign</Radio>
-            </Radio.Group>
-          </Form.Item>
+          {!skipTraced ?
+            <Form.Item label="Campaign">
+              <Radio.Group onChange={this.handleOnChangeCampaign} defaultValue={campaignType}>
+                <Radio value="new">New Campaign</Radio>
+                <Radio value="existing">Existing Campaign</Radio>
+              </Radio.Group>
+            </Form.Item>
+        :''}
           {(campaignType === 'new')?
             <Form.Item label="Campaign Name">
               {
