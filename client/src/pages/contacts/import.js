@@ -221,7 +221,20 @@ class ImportContacts extends React.Component {
               })
             }
 
-          })
+          }).catch((error) =>{
+            console.log(error.response.data.code);
+            if (error.response.data.code && error.response.data.code === 11000) {
+                message.error("Duplicate entry detected");
+            }else {
+              const errors=  Object.keys(error.response.data.errors).map((er)=>{
+                  return error.response.data.errors[er].message;
+                });
+                console.log(errors);
+                message.error(errors[0]);
+            }
+
+
+          });
       }
     });
   }

@@ -9,12 +9,12 @@ const ContactSchema = new Schema({
     internal: {
         type: String,
         required: true,
-        // unique : true,
-        // dropDups: true
+        unique : true,
+        dropDups: true
     },
     campaign: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true
+        required: [true, "Campaign is Required"]
     },
     firstNameOne: {
         type: String,
@@ -22,7 +22,7 @@ const ContactSchema = new Schema({
     },
     lastNameOne: {
         type: String,
-        required: false
+        required: [true," Last name is required"]
     },
     correctPhone: {
         type: String,
@@ -70,19 +70,19 @@ const ContactSchema = new Schema({
     },
     propertyAddress: {
         type: String,
-        required: false
+        required: [true, "Property Address is required"]
     },
     propertyCity: {
         type: String,
-        required: false
+        required: [true, "Property City is required"]
     },
     propertyState: {
         type: String,
-        required: false
+        required: [true, "Property State is required"]
     },
     propertyZipCode: {
         type: String,
-        required: false
+        required: [true, "Property zip is required"]
     },
     propertyCounty: {
         type: String,

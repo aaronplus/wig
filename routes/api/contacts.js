@@ -335,7 +335,7 @@ if (req.body.skipTraced) {
          data['Market']=row['Market_VALUE'] || row['Market VALUE'];
          data['marketExport']='';
          data['sellerLead']='';
-         let uniqueStr = row['MAILING STREET ADDRESS'].concat(row['OWNER 1 LAST NAME']);
+         let uniqueStr = data['mailingAddress'].concat(data['lastNameOne']);
 
          data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
          rowData.push(data);
