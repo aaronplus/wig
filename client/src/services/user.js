@@ -1,15 +1,14 @@
-import jwtDeode from "jwt-decode";
-import firebase from 'firebase/app';
-import { notification } from 'antd';
-import setAuthToken from "../utils/setAuthToken";
-import 'firebase/auth';
-import 'firebase/database';
-import 'firebase/storage';
-import {
-  SET_CURRENT_USER
-} from "./types";
+import jwtDeode from 'jwt-decode'
+import firebase from 'firebase/app'
+import { notification } from 'antd'
+import setAuthToken from '../utils/setAuthToken'
+import 'firebase/auth'
+import 'firebase/database'
+import 'firebase/storage'
+import { SET_CURRENT_USER } from './types'
+import { SERVER_ADDRESS } from '../config/constants'
 
-const axios = require('axios').default;
+const axios = require('axios').default
 
 const firebaseConfig = {
   apiKey: 'AIzaSyA2LHKgdr2GQb_QUBYfhMOaxgOuGjw1z5E',
@@ -19,7 +18,6 @@ const firebaseConfig = {
   storageBucket: 'airui-a4b63.appspot.com',
   messagingSenderId: '1039460737420',
 }
- const apiUrl = "http://localhost:5000";
 // const headers = {
 //   'Content-Type': 'application/x-www-form-urlencoded'
 // };
@@ -28,22 +26,22 @@ const firebaseApp = firebase.initializeApp(firebaseConfig)
 export default firebaseApp
 
 export async function login(email, password) {
-  const postData = {email,password};
+  const postData = { email, password }
   return axios
-    .post(`${apiUrl}/api/users/login`,postData)
-    .then((res) => {
-      console.log(res);
-      const { token } = res.data;
-      localStorage.setItem("jwtToken", token);
+    .post(`${SERVER_ADDRESS}/users/login`, postData)
+    .then(res => {
+      console.log(res)
+      const { token } = res.data
+      localStorage.setItem('jwtToken', token)
       // Set token to Auth header
-      setAuthToken(token);
+      setAuthToken(token)
       // Decode token to get user data
-      const decoded = jwtDeode(token);
+      const decoded = jwtDeode(token)
       // Set current user
-      setCurrentUser(decoded);
-      return token;
+      setCurrentUser(decoded)
+      return token
     })
-    .catch((error) => {
+    .catch(error => {
       notification.warning({
         message: error.code || error.response.status,
         description: error.response.data.error,
@@ -52,7 +50,7 @@ export async function login(email, password) {
 }
 
 export async function currentAccount() {
-  return localStorage.getItem("jwtToken");
+  return localStorage.getItem('jwtToken')
   // let userLoaded = false
   // function getCurrentUser(auth) {
   //   return new Promise((resolve, reject) => {
@@ -70,12 +68,12 @@ export async function currentAccount() {
 }
 
 export async function logout() {
-  return  localStorage.removeItem("jwtToken");
+  return localStorage.removeItem('jwtToken')
 }
 // Set logged in user
 export const setCurrentUser = decoded => {
   return {
     type: SET_CURRENT_USER,
-    payload: decoded
-  };
-};
+    payload: decoded,
+  }
+}

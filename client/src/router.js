@@ -25,6 +25,11 @@ const routes = [
     exact: true,
   },
   {
+    path: '/schedules/list',
+    Component: loadable(() => import('pages/schedules/schedules-list')),
+    exact: true,
+  },
+  {
     path: '/schedules/messaging',
     Component: loadable(() => import('pages/schedules/messaging')),
     exact: true,
