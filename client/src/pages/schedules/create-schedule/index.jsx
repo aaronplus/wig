@@ -81,22 +81,21 @@ class CreateSchedule extends React.Component {
     const { form } = this.props
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        console.log('Values: ', this.formatData(values))
-        // axios('http://localhost:5000/api/schedule/add', {
-        //   method: 'POST',
-        //   data: this.formatData(values),
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //     Authorization: localStorage.getItem('jwtToken'),
-        //   },
-        // })
-        //   .then(() => {
-        //     form.resetFields()
-        //     this.setState({ success: 'Schedule created successfully' })
-        //   })
-        //   .catch(error => {
-        //     this.setState({ error: error.message })
-        //   })
+        axios('http://localhost:5000/api/schedule/add', {
+          method: 'POST',
+          data: this.formatData(values),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: localStorage.getItem('jwtToken'),
+          },
+        })
+          .then(() => {
+            form.resetFields()
+            this.setState({ success: 'Schedule created successfully' })
+          })
+          .catch(error => {
+            this.setState({ error: error.message })
+          })
       }
     })
   }
