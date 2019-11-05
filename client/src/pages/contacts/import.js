@@ -215,7 +215,7 @@ class ImportContacts extends React.Component {
     console.log(this.props);
     const { campaignType } = this.state;
     ev.preventDefault();
-    form.validateFieldsAndScroll((err, values) => {
+    form.validateFields((err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
         if (!skipTraced && !values.campaign ) {
@@ -375,6 +375,7 @@ class ImportContacts extends React.Component {
         <Modal
           title="Map Contacts"
           visible={showModal}
+          closable={false}
           // onOk={()=> this.setState({showModal:false})}
           // onCancel={()=> this.setState({showModal:false})}
           footer={[
@@ -408,7 +409,7 @@ class ImportContacts extends React.Component {
           {(campaignType === 'new')?
             <Form.Item label="Campaign Name">
               {
-              form.getFieldDecorator('campaign',{ required: true, message: 'Please enter a campaign name'})
+              form.getFieldDecorator('campaign',{ rules:[{required: true, message: 'Please enter a campaign name'}] })
               (<Input name="campaign" />)
             }
 
@@ -453,6 +454,7 @@ class ImportContacts extends React.Component {
         <Modal
           title="Map Contacts"
           visible={showModal}
+          closable={false}
           // onOk={()=> this.setState({showModal:false})}
           // onCancel={()=> this.setState({showModal:false})}
           footer={[

@@ -303,6 +303,7 @@ class ContactsList extends React.Component {
               visible={visible}
               onOk={this.handleOk}
               onCancel={() => this.setState({ visible: false })}
+              closable={false}
             >
               <Form>
                 <Form.Item label="Select Campaign">
@@ -320,6 +321,7 @@ class ContactsList extends React.Component {
             <Modal
               title="Import Contacts"
               visible={visibleImportComponent}
+              closable={false}
               // onOk={() => this.setState({ visibleImportComponent: false })}
               // onCancel={() => this.setState({ visibleImportComponent: false })}
               footer={[
@@ -333,6 +335,7 @@ class ContactsList extends React.Component {
             <Modal
               title="Import Skip traced Contacts"
               visible={visibleImportSkipTracedComponent}
+              closable={false}
               // onOk={this.handleOkImportContacts}
               // onCancel={() => this.setState({ visibleImportSkipTracedComponent: false })}
               footer={[
