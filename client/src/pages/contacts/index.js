@@ -104,7 +104,7 @@ class ContactsList extends React.Component {
     })
     this.setState({
       visibleImportComponent:false,
-
+      visibleImportSkipTracedComponent: false
     })
   }
 

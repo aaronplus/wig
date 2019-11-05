@@ -32,75 +32,93 @@ class ImportContacts extends React.Component {
       mapSchema:{
         firstName:{
           key: 'First Name',
-          value:'OWNER 1 FIRST NAME'
+          value:'OWNER 1 FIRST NAME',
+          skip:'INPUT_FIRST_NAME',
         },
         lastName:{
           key: 'Last Name',
-          value:'OWNER 1 LAST NAME'
+          value:'OWNER 1 LAST NAME',
+          skip:'INPUT_LAST_NAME',
         },
         propertyAddress:{
           key: 'Property Address',
-          value:'SITUS FULL ADDRESS'
+          value:'SITUS FULL ADDRESS',
+          skip:'INPUT_ADDRESS_LINE1',
         },
         propertyCity:{
           key: 'Property City',
-          value:'SITUS CITY'
+          value:'SITUS CITY',
+          skip:'INPUT_ADDRESS_CITY',
         },
         propertyState:{
           key: 'Property State',
-          value:'SITUS STATE'
+          value:'SITUS STATE',
+          skip:'INPUT_ADDRESS_STATE',
         },
         propertyZip:{
           key: 'Property Zip',
-          value:'SITUS ZIP CODE'
+          value:'SITUS ZIP CODE',
+          skip:'INPUT_ADDRESS_ZIP',
         },
         mailingAddress:{
           key: 'Mail Address',
-          value:'MAILING FULL ADDRESS'
+          value:'MAILING FULL ADDRESS',
+          skip:'INPUT_DEDUP_ADDRESS1_LINE',
         },
         mailingCity:{
           key: 'Mail City',
-          value:'MAIL CITY'
+          value:'MAIL CITY',
+          skip:'INPUT_DEDUP_ADDRESS1_CITY',
         },
         mailingState:{
           key: 'Mail State',
-          value:'MAIL STATE'
+          value:'MAIL STATE',
+          skip:'INPUT_DEDUP_ADDRESS1_STATE',
         },
         mailingZip:{
           key: 'Mail Zip',
-          value:'MAIL ZIP/ZIP+4'
+          value:'MAIL ZIP/ZIP+4',
+          skip:'INPUT_DEDUP_ADDRESS1_ZIP',
         },
         apn:{
           key: 'APN',
-          value:'APN - FORMATTED'
+          value:'APN - FORMATTED',
+          skip:'',
         },
         market:{
           key: 'Market Value',
-          value:'MARKET VALUE'
+          value:'MARKET VALUE',
+          skip:'',
         },
         equityValue:{
           key: 'Equity Value',
-          value:'EQUITY VALUE'
+          value:'EQUITY VALUE',
+          skip:'',
         },
         equityPercentage:{
           key: 'Equity Percentage',
-          value:'EQUITY PERCENTAGE'
+          value:'EQUITY PERCENTAGE',
+          skip:'',
         },
         recordingDateOT:{
           key: 'Recording Date OT',
-          value:'OT-RECORDING DATE'
+          value:'OT-RECORDING DATE',
+          skip:'',
         },
         deedTypeOT:{
           key: 'Deed Type OT',
-          value:'OT-DEED TYPE'
+          value:'OT-DEED TYPE',
+          skip:'',
         },
         recordingDateLMS:{
           key: 'Recording Date LMS',
-          value:'LMS-RECORDING DATE'
+          value:'LMS-RECORDING DATE',
+          skip:'',
         },
         salePriceLMS:{
           key: 'Sale Price LMS',
-          value:'LMS-SALE PRICE'
+          value:'LMS-SALE PRICE',
+          skip:''
         }
       }
     };
@@ -123,37 +141,47 @@ class ImportContacts extends React.Component {
 
   onUploadFile = (info)=> {
     const { status, response } = info.file
+    const {skipTraced} = this.props;
     if (status !== 'uploading') {
       console.log(info.file, info.fileList)
     }
     if (status === 'done') {
       if (response && response.length) {
         const headers = Object.keys(response[0]);
-
+        if (skipTraced) {
+          if ((headers.includes('INPUT_LAST_NAME') || headers.includes('LAST NAME'))
+              && (headers.includes('INPUT_ADDRESS_LINE1'))
+              && (headers.includes('INPUT_ADDRESS_CITY'))
+              && (headers.includes('INPUT_ADDRESS_STATE'))
+              && (headers.includes('INPUT_ADDRESS_ZIP'))) {
+                this.setState({
+                  fileHeaders: headers,
+                  showImportButton: true
+                //  showModal: true
+                });
+          }else {
+                this.setState({
+                  fileHeaders: headers,
+                  showImportButton: false
+                });
+          }
+        }else if ((headers.includes('OWNER 1 LAST NAME') || headers.includes('LAST NAME'))
+              && (headers.includes('SITUS STREET ADDRESS'))
+              && (headers.includes('SITUS CITY'))
+              && (headers.includes('SITUS STATE'))
+              && (headers.includes('SITUS ZIP CODE'))) {
+                this.setState({
+                  fileHeaders: headers,
+                  showImportButton: true
+                //  showModal: true
+                });
+          }else {
+                this.setState({
+                  fileHeaders: headers,
+                  showImportButton: false
+                });
+          }
         // Match Headers with static Headers
-
-        if ((headers.includes('OWNER 1 LAST NAME') || headers.includes('LAST NAME'))
-            && (headers.includes('SITUS STREET ADDRESS'))
-            && (headers.includes('SITUS CITY'))
-            && (headers.includes('SITUS STATE'))
-            && (headers.includes('SITUS ZIP CODE'))) {
-              this.setState({
-                fileHeaders: headers,
-                showImportButton: true
-              //  showModal: true
-              });
-        }else {
-              this.setState({
-                fileHeaders: headers,
-                showImportButton: false
-              });
-        }
-
-
-
-
-
-
         console.log(headers);
       }else {
         message.error(`You have uploaded the empty file, Please upload a valid file.`);
@@ -207,6 +235,24 @@ class ImportContacts extends React.Component {
     this.setState({
       mapSchema: newState
     })
+  }
+
+  onChangeCampaignName = (e) =>{
+    const campaign = e.target.value;
+    axios.defaults.headers.common.Authorization = `${localStorage.getItem("jwtToken")}`;
+
+    axios
+     .post(`http://localhost:5000/api/campaigns/verify`, {campaign})
+     .then((res) => {
+       console.log(res);
+       if (res.status === 200) {
+         console.log(res);
+       }
+
+     }).catch((err)=>{
+       message.error(err.response.data.message);
+       console.log(err.response.data.message);
+     })
   }
 
   handleSubmit(ev) {
@@ -321,7 +367,13 @@ class ImportContacts extends React.Component {
 
     const modalData = Object.keys(mapSchema).map((item) =>{
       const headerKey = mapSchema[item] ? mapSchema[item].key : '';
-      const selectedHeader = mapSchema[item] ? mapSchema[item].value: '';
+      let selectedHeader;
+      if (!skipTraced) {
+        selectedHeader = mapSchema[item] ? mapSchema[item].value: '';
+      }else {
+        selectedHeader = mapSchema[item] ? mapSchema[item].skip: '';
+      }
+
         return(
           <div className="row">
             <Form.Item className="col-md-4">
@@ -410,7 +462,7 @@ class ImportContacts extends React.Component {
             <Form.Item label="Campaign Name">
               {
               form.getFieldDecorator('campaign',{ rules:[{required: true, message: 'Please enter a campaign name'}] })
-              (<Input name="campaign" />)
+              (<Input name="campaign" onBlur={(e)=> this.onChangeCampaignName(e)} />)
             }
 
             </Form.Item>:

@@ -155,19 +155,20 @@ var headers = JSON.parse(req.body.headers);
 var rowData = [];
 //skipTraced
 if (req.body.skipTraced) {
-  console.log("skipTraced",req.body.skipTraced);
-  console.log(campaignId);
   fileRows.map((row,index)=>{
     let data = {};
+
+    data['lastNameOne'] = row[`${headers['lastName']}`] || row['INPUT_LAST_NAME'];
+    data['propertyAddress'] = row[`${headers['propertyAddress']}`] || row['INPUT_ADDRESS_LINE1'];
+
+    let uniqueStr = data['propertyAddress'].concat(data['lastNameOne']);
+    data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
     data['userId'] = mongoose.Types.ObjectId(userId);
-    data['internal'] = row['INPUT_ADDRESS_LINE1'];
   //  data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
     data['firstNameOne'] = row['INPUT_FIRST_NAME'];
-    data['lastNameOne'] = row['INPUT_LAST_NAME'];
-    data['propertyAddress'] = row['INPUT_ADDRESS_LINE1'];
-    data['propertyCity'] = row['INPUT_ADDRESS_CITY'];
-    data['propertyState'] = row['INPUT_ADDRESS_STATE'];
-    data['propertyZipCode'] = row['INPUT_ADDRESS_ZIP'];
+    data['propertyCity'] = row[`${headers['propertyCity']}`] || row['INPUT_ADDRESS_CITY'];
+    data['propertyState'] = row[`${headers['propertyState']}`] || row['INPUT_ADDRESS_STATE'];
+    data['propertyZipCode'] = row[`${headers['propertyZip']}`] || row['INPUT_ADDRESS_ZIP'];
 
     data['phoneOne']= row['PHONE1_PHONE'];
     data['phoneOneType']=row['PHONE1_PHONE_TYPE'];
@@ -199,11 +200,7 @@ if (req.body.skipTraced) {
     data['phoneTen']=row['PHONE10_PHONE'];
     data['phoneTenType']=row['PHONE10_PHONE_TYPE'];
     data['phoneTenScore']=row['PHONE10_PHONE_SCORE'];
-    let uniqueStr = row['INPUT_ADDRESS_LINE1'].concat(row['INPUT_LAST_NAME']);
-    console.log(uniqueStr);
-    data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
 
-    console.log(JSON.stringify(data));
     //let campaign = campaignId._id? mongoose.Types.ObjectId(campaignId._id): campaignId;
     Contact.updateOne({internal: data['internal']}, data, {upsert: true}, function (err,docs) {
       if (err) {

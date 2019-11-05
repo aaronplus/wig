@@ -30,4 +30,23 @@ router.get("/list", validateToken, async(req, res) => {
 
 });
 
+/**
+ * description:Verify Duplicate Campaign
+ * Params: campaign
+ *METHOD: POST
+ */
+router.post('/verify', validateToken, async (req, res) => {
+  if (!req.body.campaign) {
+    return res.status(400).json({message: "Campaign param is required"});
+  }
+  let campaign = req.body.campaign;
+  Campaign.findOne({campaign}, function(err, results){
+    if (results) {
+      return res.status(400).json({message:"A campaign with this name exist. Please enter a different campaign name"});
+    }else {
+      return res.status(200).json({message:"success"});
+    }
+  });
+});
+
 module.exports = router;
