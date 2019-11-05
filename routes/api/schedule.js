@@ -1,18 +1,39 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const keys = require('../../config/keys');
-const validateToken = require('../validateToken').validateToken;
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const keys = require("../../config/keys");
+const validateToken = require("../validateToken").validateToken;
 // Load input validation
 // const validateLoginInput = require("../../validation/login");
 // Load User model
-const Schedule = require('../../models/Schedule');
+const Schedule = require("../../models/Schedule");
+const SentMessages = require("../../models/SentMessages");
+
+router.get("/all", validateToken, async (req, res) => {
+  try {
+    const schedules = await Schedule.find().populate("campaign");
+    const sentMessages = await SentMessages.find();
+    const schedulesData = schedules.map(schedule => ({
+      ...schedule._doc,
+      sent: sentMessages.find(
+        sm => sm.schedule_id.toString() === schedule._id.toString()
+      )
+        ? sentMessages.find(
+            sm => sm.schedule_id.toString() === schedule._id.toString()
+          ).sent
+        : 0,
+    }));
+    return res.json(schedulesData);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
 
 // @route POST api/schedule
 // @desc Create Schedule api
 // @access Private
-router.post('/add', validateToken, (req, res) => {
+router.post("/add", validateToken, (req, res) => {
   // return res.json(req.body);
   const {
     campaign,
