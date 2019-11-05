@@ -27,6 +27,7 @@ class ImportContacts extends React.Component {
       campaignType: 'new',
       fileHeaders: null,
       showModal: false,
+      showImportButton: false,
       headers: {},
       mapSchema:{
         firstName:{
@@ -126,14 +127,36 @@ class ImportContacts extends React.Component {
       console.log(info.file, info.fileList)
     }
     if (status === 'done') {
-      console.log(response);
       if (response && response.length) {
         const headers = Object.keys(response[0]);
-        this.setState({
-          fileHeaders: headers,
-        //  showModal: true
-        });
+
+        // Match Headers with static Headers
+
+        if ((headers.includes('OWNER 1 LAST NAME') || headers.includes('LAST NAME'))
+            && (headers.includes('SITUS STREET ADDRESS'))
+            && (headers.includes('SITUS CITY'))
+            && (headers.includes('SITUS STATE'))
+            && (headers.includes('SITUS ZIP CODE'))) {
+              this.setState({
+                fileHeaders: headers,
+                showImportButton: true
+              //  showModal: true
+              });
+        }else {
+              this.setState({
+                fileHeaders: headers,
+                showImportButton: false
+              });
+        }
+
+
+
+
+
+
         console.log(headers);
+      }else {
+        message.error(`You have uploaded the empty file, Please upload a valid file.`);
       }
       // message.success(`${info.file.name} file uploaded successfully.`)
     } else if (status === 'error') {
@@ -199,6 +222,31 @@ class ImportContacts extends React.Component {
           message.warning("campaign is required");
         }else {
           const headers = Object.assign({}, values);
+          const {lastName, propertyAddress, propertyCity,propertyState,propertyZip} = headers;
+          if (!lastName || !propertyAddress || !propertyCity || !propertyState || !propertyZip) {
+            if (!lastName) {
+              message.error("Last Name is required");
+            }else if (!propertyAddress) {
+              message.error("Property Address is required");
+            }else if (!propertyCity) {
+              message.error("Property City is required");
+            }else if (!propertyState) {
+              message.error("Property State is required");
+            }else if (!propertyZip) {
+              message.error("Property Zip is required");
+            }
+
+
+            message.error("Please enter all the required fields");
+            return;
+          }
+
+
+
+
+
+
+
           delete(headers.import);
           delete(headers.campaign);
           const data = new FormData();
@@ -207,6 +255,8 @@ class ImportContacts extends React.Component {
             data.append('campaign', values.campaign);
             data.append('campaignType', campaignType);
           }
+
+
 
 
           data.append('headers', JSON.stringify(headers));
@@ -259,7 +309,7 @@ class ImportContacts extends React.Component {
       labelCol: { span: 6 },
       wrapperCol: { span: 14 },
     };
-    const {campaignType, fileHeaders, showModal} = this.state;
+    const {campaignType, fileHeaders, showModal, showImportButton} = this.state;
     // schema props will be used
     const { form, contacts:{campaignList}, skipTraced } = this.props;
     console.log(skipTraced);
@@ -279,10 +329,11 @@ class ImportContacts extends React.Component {
             </Form.Item>
             <Form.Item className="col-md-6">
               {form.getFieldDecorator(`${item}`, {
-                initialValue: (fileHeaders && fileHeaders.includes(selectedHeader))?selectedHeader:'Select Header' ,
+                initialValue: (fileHeaders && fileHeaders.includes(selectedHeader))?selectedHeader:0 ,
               rules: [{ required: false}]
             })(
               <Select>
+                <Option value={0}>Select Headers</Option>
                 <Option value="">Do Not Import</Option>
                 {listHeaders}
               </Select>
@@ -313,7 +364,7 @@ class ImportContacts extends React.Component {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders}>
+            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders || !showImportButton}>
            Import
             </Button>
             <Button type="primary" htmlType="button" className="ant-btn mr-3" onClick={()=> this.setState({showModal:true})} disabled={!fileHeaders}>
@@ -391,7 +442,7 @@ class ImportContacts extends React.Component {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders}>
+            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders || !showImportButton}>
            Import
             </Button>
             <Button type="primary" htmlType="button" className="ant-btn mr-3" onClick={()=> this.setState({showModal:true})} disabled={!fileHeaders}>

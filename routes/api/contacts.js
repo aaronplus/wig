@@ -244,11 +244,23 @@ if (req.body.skipTraced) {
 
        fileRows.map((row,index)=>{
          let data = {};
+         data['lastNameOne'] = row[`${headers['lastName']}`] || row['OWNER 1 LAST NAME'];
+         data['propertyAddress'] = row[`${headers['propertyAddress']}`] || row['SITUS STREET ADDRESS'];
+
+
+
+
+
+
+
+         console.log(JSON.stringify(data));
+         let uniqueStr = data['propertyAddress'].concat(data['lastNameOne']);
+         data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
          data['userId'] = mongoose.Types.ObjectId(userId);
-         data['internal'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
+        // data['internal'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
          data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
          data['firstNameOne'] = row[`${headers['firstName']}`] || row['OWNER 1 FIRST NAME'];
-         data['lastNameOne'] = row[`${headers['lastName']}`] || '';
+
          data['phoneOne'] = row['phoneOne'];
          data['correctPhone'] = '';
          data['firstNameTwo'] = row['FIRST_NAME_2'] || row['OWNER 2 FIRST NAME'];
@@ -261,7 +273,7 @@ if (req.body.skipTraced) {
          data['mailingState'] = row[`${headers['mailingState']}`] || row['MAIL STATE'];
          data['mailingZipCode'] = row[`${headers['MAIL ZIP/ZIP 4']}`] || row['MAIL ZIP/ZIP+4'];
          data['mailingCounty'] = row['MAIL_COUNTRY'] || row['MAIL COUNTRY'];
-         data['propertyAddress'] = row[`${headers['propertyAddress']}`] || row['SITUS STREET ADDRESS'];
+
          data['propertyCity'] = row[`${headers['propertyCity']}`] || row['SITUS CITY'];
          data['propertyState'] = row[`${headers['propertyState']}`] || row['SITUS STATE'];
          data['propertyZipCode'] = row[`${headers['propertyZip']}`] || row['SITUS ZIP CODE'];
@@ -346,13 +358,15 @@ if (req.body.skipTraced) {
          data['Market']=row['Market_VALUE'] || row['Market VALUE'];
          data['marketExport']='';
          data['sellerLead']='';
-         let uniqueStr = data['mailingAddress'].concat(data['lastNameOne']);
 
-         data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
          rowData.push(data);
        });
        Contact.insertMany(rowData,function(err, docs){
          if (err) {
+           if (campaignId._id) {
+             Campaign.deleteOne({_id: mongoose.Types.ObjectId(campaignId._id)})
+           }
+
            return res.status(400).json(err)
          }
         return res.json(docs);
@@ -373,7 +387,9 @@ if (req.body.skipTraced) {
 router.post('/uploadFile', upload.single('file'), async function (req, res, next) {
   var fileRows = [];
   fs.createReadStream(req.file.path)
-    .pipe(csv())
+    .pipe(csv({
+      //mapHeaders: ({ header, index }) => header.toLowerCase()
+    }))
     .on('data', (data) => fileRows.push(data))
     .on('end', () => {
       return res.json(fileRows);
