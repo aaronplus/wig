@@ -242,18 +242,11 @@ if (req.body.skipTraced) {
    //   .on('end', () => {
        /*Create contacts*/
 
-       fileRows.map((row,index)=>{
+       var promises = fileRows.map((row,index)=>{
          let data = {};
          data['lastNameOne'] = row[`${headers['lastName']}`] || row['OWNER 1 LAST NAME'];
          data['propertyAddress'] = row[`${headers['propertyAddress']}`] || row['SITUS STREET ADDRESS'];
 
-
-
-
-
-
-
-         console.log(JSON.stringify(data));
          let uniqueStr = data['propertyAddress'].concat(data['lastNameOne']);
          data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
          data['userId'] = mongoose.Types.ObjectId(userId);
@@ -360,17 +353,32 @@ if (req.body.skipTraced) {
          data['sellerLead']='';
 
          rowData.push(data);
-       });
-       Contact.insertMany(rowData,function(err, docs){
-         if (err) {
-           if (campaignId._id) {
-             Campaign.deleteOne({_id: mongoose.Types.ObjectId(campaignId._id)})
+         return Contact.updateOne({internal: data['internal']}, data, {upsert: true}, function(err, row){
+           if (err) {
+             return err;
            }
+           return row;
+         });
 
-           return res.status(400).json(err)
-         }
-        return res.json(docs);
-       })
+
+       });
+
+       Promise.all(promises).then(function(results) {
+          return res.json(results);
+      })
+
+
+
+       // Contact.insertMany(rowData,function(err, docs){
+       //   if (err) {
+       //     if (campaignId._id) {
+       //       Campaign.deleteOne({_id: mongoose.Types.ObjectId(campaignId._id)})
+       //     }
+       //
+       //     return res.status(400).json(err)
+       //   }
+       //  return res.json(docs);
+       // })
 
 
 
