@@ -228,17 +228,17 @@ class ImportContacts extends React.Component {
     const { mapSchema } = this.state
     const listData = campaignList
       ? campaignList.map(item => (
-          <Option key={item._id} value={item._id}>
-            {item.campaign}
-          </Option>
-        ))
+        <Option key={item._id} value={item._id}>
+          {item.campaign}
+        </Option>
+      ))
       : ''
     const listHeaders = fileHeaders
       ? fileHeaders.map(item => (
-          <Option key={item} value={item}>
-            {item}
-          </Option>
-        ))
+        <Option key={item} value={item}>
+          {item}
+        </Option>
+      ))
       : ''
 
     const modalData = Object.keys(mapSchema).map(item => {
