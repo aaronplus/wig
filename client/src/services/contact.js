@@ -41,7 +41,7 @@ export async function exportContacts(postData) {
   }
   return axios({
   method: 'post',
-  url: `${SERVER_ADDRESS}/api/contacts/export`,
+  url: `${SERVER_ADDRESS}/contacts/export`,
   data: {...postObj},
   // responseType: 'stream'
 }).then((response) => {
