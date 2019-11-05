@@ -135,7 +135,13 @@ let campaign = req.body.campaign;
 if (req.body.campaignType == 'new') {
   var campaignId;
   try {
-    campaignId = await new Campaign({campaign,userId: mongoose.Types.ObjectId(userId)}).save();
+    let checkIfAlreadyExists = await Campaign.findOne({campaign: campaign});
+    if (checkIfAlreadyExists) {
+      return res.status(400).json({message: "A campaign with this name exist. Please enter a different campaign name"});
+    }else {
+      campaignId = await new Campaign({campaign,userId: mongoose.Types.ObjectId(userId)}).save();
+    }
+
   } catch (e) {
     console.log(e);
     return res.status(500).json({error: "Error in save Campaign"});
