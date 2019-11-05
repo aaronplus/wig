@@ -165,7 +165,7 @@ if (req.body.skipTraced) {
     data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
     data['userId'] = mongoose.Types.ObjectId(userId);
   //  data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
-    data['firstNameOne'] = row['INPUT_FIRST_NAME'];
+    data['firstNameOne'] = row[`${headers['firstName']}`] || row['INPUT_FIRST_NAME'];
     data['propertyCity'] = row[`${headers['propertyCity']}`] || row['INPUT_ADDRESS_CITY'];
     data['propertyState'] = row[`${headers['propertyState']}`] || row['INPUT_ADDRESS_STATE'];
     data['propertyZipCode'] = row[`${headers['propertyZip']}`] || row['INPUT_ADDRESS_ZIP'];
