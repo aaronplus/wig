@@ -233,7 +233,7 @@ class ImportContacts extends React.Component {
     axios.defaults.headers.common.Authorization = `${localStorage.getItem("jwtToken")}`;
 
     axios
-     .post(`${SERVER_ADDRESS}/api/campaigns/verify`, {campaign})
+     .post(`${SERVER_ADDRESS}/campaigns/verify`, {campaign})
      .then((res) => {
        console.log(res);
        if (res.status === 200) {

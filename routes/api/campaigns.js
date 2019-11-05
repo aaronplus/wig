@@ -34,7 +34,7 @@ router.get("/list", validateToken, async(req, res) => {
  * description:Verify Duplicate Campaign
  * Params: campaign
  *METHOD: POST
- */
+  */
 router.post('/verify', validateToken, async (req, res) => {
   if (!req.body.campaign) {
     return res.status(400).json({message: "Campaign param is required"});
