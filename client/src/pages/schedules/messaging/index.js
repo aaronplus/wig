@@ -7,6 +7,7 @@ import moment from 'moment'
 
 // import dialogs from './data.json'
 import style from './style.module.scss'
+import { SERVER_ADDRESS } from '../../../config/constants'
 
 class Messaging extends React.Component {
   state = {
@@ -45,7 +46,7 @@ class Messaging extends React.Component {
 
   getConversations = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/twilio/conversations')
+      const response = await axios.get(`${SERVER_ADDRESS}/twilio/conversations`)
       const conversations = response.data.map(conv => this.formatConversation(conv))
       this.setState({ conversations })
     } catch (error) {
@@ -72,10 +73,9 @@ class Messaging extends React.Component {
 
   sendMessage = async (conversationId, message) => {
     try {
-      const response = await axios.post(
-        `http://localhost:5000/api/twilio/reply/${conversationId}`,
-        { message },
-      )
+      const response = await axios.post(`${SERVER_ADDRESS}/twilio/reply/${conversationId}`, {
+        message,
+      })
       const conversation = this.formatConversation(response.data)
       this.setState({ conversation, msg: '' })
     } catch (error) {
@@ -85,9 +85,7 @@ class Messaging extends React.Component {
 
   markConversationRead = async conversationId => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/twilio/conversations/${conversationId}`,
-      )
+      const response = await axios.put(`${SERVER_ADDRESS}/twilio/conversations/${conversationId}`)
       const conversations = response.data.map(conv => this.formatConversation(conv))
       const conversation = conversations.find(x => x.id === conversationId)
       this.setState({

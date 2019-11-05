@@ -1,139 +1,130 @@
 import React from 'react'
 import { connect } from 'react-redux'
 // import { Helmet } from 'react-helmet'
-import {
-  Form,
-  Input,
-  Upload,
-  Button,
-  Icon,
-  Select,
-  Radio,
-  Modal,
-  message
-} from 'antd'
+import { Form, Input, Upload, Button, Icon, Select, Radio, Modal, message } from 'antd'
+import { SERVER_ADDRESS } from '../../config/constants'
 
-const { Option } = Select;
-const axios = require('axios').default;
+const { Option } = Select
+const axios = require('axios').default
 
 // @Form.create()
 const mapStateToProps = ({ contacts }) => ({ contacts })
 @connect(mapStateToProps)
 class ImportContacts extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
 
     this.state = {
       campaignType: 'new',
       fileHeaders: null,
       showModal: false,
       headers: {},
-      mapSchema:{
-        firstName:{
+      mapSchema: {
+        firstName: {
           key: 'First Name',
-          value:'OWNER 1 FIRST NAME'
+          value: 'OWNER 1 FIRST NAME',
         },
-        lastName:{
+        lastName: {
           key: 'Last Name',
-          value:'OWNER 1 LAST NAME'
+          value: 'OWNER 1 LAST NAME',
         },
-        propertyAddress:{
+        propertyAddress: {
           key: 'Property Address',
-          value:'SITUS FULL ADDRESS'
+          value: 'SITUS FULL ADDRESS',
         },
-        propertyCity:{
+        propertyCity: {
           key: 'Property City',
-          value:'SITUS CITY'
+          value: 'SITUS CITY',
         },
-        propertyState:{
+        propertyState: {
           key: 'Property State',
-          value:'SITUS STATE'
+          value: 'SITUS STATE',
         },
-        propertyZip:{
+        propertyZip: {
           key: 'Property Zip',
-          value:'SITUS ZIP CODE'
+          value: 'SITUS ZIP CODE',
         },
-        mailingAddress:{
+        mailingAddress: {
           key: 'Mail Address',
-          value:'MAILING FULL ADDRESS'
+          value: 'MAILING FULL ADDRESS',
         },
-        mailingCity:{
+        mailingCity: {
           key: 'Mail City',
-          value:'MAIL CITY'
+          value: 'MAIL CITY',
         },
-        mailingState:{
+        mailingState: {
           key: 'Mail State',
-          value:'MAIL STATE'
+          value: 'MAIL STATE',
         },
-        mailingZip:{
+        mailingZip: {
           key: 'Mail Zip',
-          value:'MAIL ZIP/ZIP+4'
+          value: 'MAIL ZIP/ZIP+4',
         },
-        apn:{
+        apn: {
           key: 'APN',
-          value:'APN - FORMATTED'
+          value: 'APN - FORMATTED',
         },
-        market:{
+        market: {
           key: 'Market Value',
-          value:'MARKET VALUE'
+          value: 'MARKET VALUE',
         },
-        equityValue:{
+        equityValue: {
           key: 'Equity Value',
-          value:'EQUITY VALUE'
+          value: 'EQUITY VALUE',
         },
-        equityPercentage:{
+        equityPercentage: {
           key: 'Equity Percentage',
-          value:'EQUITY PERCENTAGE'
+          value: 'EQUITY PERCENTAGE',
         },
-        recordingDateOT:{
+        recordingDateOT: {
           key: 'Recording Date OT',
-          value:'OT-RECORDING DATE'
+          value: 'OT-RECORDING DATE',
         },
-        deedTypeOT:{
+        deedTypeOT: {
           key: 'Deed Type OT',
-          value:'OT-DEED TYPE'
+          value: 'OT-DEED TYPE',
         },
-        recordingDateLMS:{
+        recordingDateLMS: {
           key: 'Recording Date LMS',
-          value:'LMS-RECORDING DATE'
+          value: 'LMS-RECORDING DATE',
         },
-        salePriceLMS:{
+        salePriceLMS: {
           key: 'Sale Price LMS',
-          value:'LMS-SALE PRICE'
-        }
-      }
-    };
+          value: 'LMS-SALE PRICE',
+        },
+      },
+    }
 
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleOnChangeCampaign = this.handleOnChangeCampaign.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this)
+    this.handleOnChangeCampaign = this.handleOnChangeCampaign.bind(this)
   }
 
-  componentDidMount(){
-    const {dispatch} = this.props;
+  componentDidMount() {
+    const { dispatch } = this.props
     dispatch({
       type: 'contacts/GET_CAMPAIGN_LIST',
       payload: localStorage.getItem('jwtToken'),
-    });
+    })
     dispatch({
       type: 'contacts/GET_SCHEMA_COLUMNS',
       payload: false,
     })
   }
 
-  onUploadFile = (info)=> {
+  onUploadFile = info => {
     const { status, response } = info.file
     if (status !== 'uploading') {
       console.log(info.file, info.fileList)
     }
     if (status === 'done') {
-      console.log(response);
+      console.log(response)
       if (response && response.length) {
-        const headers = Object.keys(response[0]);
+        const headers = Object.keys(response[0])
         this.setState({
           fileHeaders: headers,
-        //  showModal: true
-        });
-        console.log(headers);
+          //  showModal: true
+        })
+        console.log(headers)
       }
       // message.success(`${info.file.name} file uploaded successfully.`)
     } else if (status === 'error') {
@@ -147,21 +138,21 @@ class ImportContacts extends React.Component {
   //   });
   // }
 
-  handleOnChangeCampaign = (e) =>{
-    const {form} = this.props;
-    this.setState({ campaignType: e.target.value });
-    form.resetFields(['campaign']);
+  handleOnChangeCampaign = e => {
+    const { form } = this.props
+    this.setState({ campaignType: e.target.value })
+    form.resetFields(['campaign'])
   }
 
-  handleOnChangeHeader = (mapTo, header) =>{
-    const {headers} = this.state;
-    headers[mapTo] = header;
-  //  this.setState({headers});
+  handleOnChangeHeader = (mapTo, header) => {
+    const { headers } = this.state
+    headers[mapTo] = header
+    //  this.setState({headers});
   }
 
-  handleOk = () =>{
-    const {headers} = this.state;
-    console.log(headers);
+  handleOk = () => {
+    const { headers } = this.state
+    console.log(headers)
   }
 
   // handleSubmitMapAndImport = (e) => {
@@ -177,147 +168,165 @@ class ImportContacts extends React.Component {
   // }
 
   changeImportKeyValue = (key, val) => {
-    const {mapSchema} =  this.state;
+    const { mapSchema } = this.state
 
-    const newState = Object.assign({},mapSchema);
-    newState[key] = val;
+    const newState = Object.assign({}, mapSchema)
+    newState[key] = val
     this.setState({
-      mapSchema: newState
+      mapSchema: newState,
     })
   }
 
   handleSubmit(ev) {
-    axios.defaults.headers.common.Authorization = `${localStorage.getItem("jwtToken")}`;
-    const { form, skipTraced, handleUploadFile } = this.props;
-    console.log(this.props);
-    const { campaignType } = this.state;
-    ev.preventDefault();
+    axios.defaults.headers.common.Authorization = `${localStorage.getItem('jwtToken')}`
+    const { form, skipTraced, handleUploadFile } = this.props
+    console.log(this.props)
+    const { campaignType } = this.state
+    ev.preventDefault()
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        console.log('Received values of form: ', values);
-        const headers = Object.assign({}, values);
-        delete(headers.import);
-        delete(headers.campaign);
-        const data = new FormData();
-        data.append('csvData', JSON.stringify(values.import.file.response));
-        data.append('campaign', values.campaign);
-        data.append('campaignType', campaignType);
-        data.append('headers', JSON.stringify(headers));
+        console.log('Received values of form: ', values)
+        const headers = Object.assign({}, values)
+        delete headers.import
+        delete headers.campaign
+        const data = new FormData()
+        data.append('csvData', JSON.stringify(values.import.file.response))
+        data.append('campaign', values.campaign)
+        data.append('campaignType', campaignType)
+        data.append('headers', JSON.stringify(headers))
         if (skipTraced) {
-          data.append('skipTraced', skipTraced);
+          data.append('skipTraced', skipTraced)
         }
 
-         axios
-          .post(`http://localhost:5000/api/contacts/upload`, data)
-          .then((res) => {
-            console.log(res);
-            if (res.status === 200) {
-              message.success("Uploaded Successfully");
-              form.resetFields(['campaign']);
-              handleUploadFile();
-            }
-
-          })
+        axios.post(`${SERVER_ADDRESS}/contacts/upload`, data).then(res => {
+          console.log(res)
+          if (res.status === 200) {
+            message.success('Uploaded Successfully')
+            form.resetFields(['campaign'])
+            handleUploadFile()
+          }
+        })
       }
-    });
+    })
   }
 
-
-
-
-
   render() {
-    console.log("Render Here");
+    console.log('Render Here')
     const formItemLayout = {
       labelCol: { span: 6 },
       wrapperCol: { span: 14 },
-    };
-    const {campaignType, fileHeaders, showModal} = this.state;
+    }
+    const { campaignType, fileHeaders, showModal } = this.state
     // schema props will be used
-    const { form, contacts:{campaignList}, skipTraced } = this.props;
-    console.log(skipTraced);
+    const {
+      form,
+      contacts: { campaignList },
+      skipTraced,
+    } = this.props
+    console.log(skipTraced)
     // console.log(schema);
-    const {mapSchema} = this.state;
-    const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
-    const listHeaders = fileHeaders ?fileHeaders.map((item) => <Option key={item} value={item}>{item}</Option>): '';
+    const { mapSchema } = this.state
+    const listData = campaignList
+      ? campaignList.map(item => (
+          <Option key={item._id} value={item._id}>
+            {item.campaign}
+          </Option>
+        ))
+      : ''
+    const listHeaders = fileHeaders
+      ? fileHeaders.map(item => (
+          <Option key={item} value={item}>
+            {item}
+          </Option>
+        ))
+      : ''
 
+    const modalData = Object.keys(mapSchema).map(item => {
+      const headerKey = mapSchema[item] ? mapSchema[item].key : ''
+      const selectedHeader = mapSchema[item] ? mapSchema[item].value : ''
+      return (
+        <div className="row">
+          <Form.Item className="col-md-4">
+            <Input value={headerKey} disabled name="mapTo" />
+          </Form.Item>
+          <Form.Item className="col-md-6">
+            {form.getFieldDecorator(`${item}`, {
+              initialValue: selectedHeader,
+              rules: [{ required: false }],
+            })(<Select>{listHeaders}</Select>)}
+          </Form.Item>
+        </div>
+      )
 
-    const modalData = Object.keys(mapSchema).map((item) =>{
-      const headerKey = mapSchema[item] ? mapSchema[item].key : '';
-      const selectedHeader = mapSchema[item] ? mapSchema[item].value: '';
-        return(
-          <div className="row">
-            <Form.Item className="col-md-4">
-              <Input value={headerKey} disabled name="mapTo" />
-            </Form.Item>
-            <Form.Item className="col-md-6">
-              {form.getFieldDecorator(`${item}`, {
-                initialValue: selectedHeader,
-              rules: [{ required: false}]
-            })(
-              <Select>
-                {listHeaders}
-              </Select>
-              )}
-            </Form.Item>
-          </div>
-        )
-
-        // return null;
-    //  }
-  });
+      // return null;
+      //  }
+    })
     return (
       <div>
         <Form {...formItemLayout} onSubmit={this.handleSubmit}>
-
           <Form.Item label="Campaign">
             <Radio.Group onChange={this.handleOnChangeCampaign} defaultValue={campaignType}>
               <Radio value="new">New Campaign</Radio>
               <Radio value="existing">Existing Campaign</Radio>
             </Radio.Group>
           </Form.Item>
-          {(campaignType === 'new')?
+          {campaignType === 'new' ? (
             <Form.Item label="Campaign Name">
-              {
-              form.getFieldDecorator('campaign',{ required: true, message: 'Please enter a campaign name'})
-              (<Input name="campaign" />)
-            }
-
-            </Form.Item>:
-            <Form.Item label="Select Campaign">
-              {
-            form.getFieldDecorator('campaign',{ required: true, message: 'Please select a campaign'})
-            (
-              <Select placeholder="Please select a campaign" name="campaign">
-                {listData}
-              </Select>
-          )
-          }
-
+              {form.getFieldDecorator('campaign', {
+                required: true,
+                message: 'Please enter a campaign name',
+              })(<Input name="campaign" />)}
             </Form.Item>
-      }
-
+          ) : (
+            <Form.Item label="Select Campaign">
+              {form.getFieldDecorator('campaign', {
+                required: true,
+                message: 'Please select a campaign',
+              })(
+                <Select placeholder="Please select a campaign" name="campaign">
+                  {listData}
+                </Select>,
+              )}
+            </Form.Item>
+          )}
 
           <Form.Item label="Import">
-            {
-          form.getFieldDecorator('import',{ required: true, message: 'Please upload a csv file'})
-          (
-            <Upload multiple={false} name="file" listType="csv" accept="csv" action="http://localhost:5000/api/contacts/uploadFile" onChange={this.onUploadFile}>
-              <Button>
-                <Icon type="upload" /> Click to upload
-              </Button>
-            </Upload>
-        )
-        }
-
+            {form.getFieldDecorator('import', {
+              required: true,
+              message: 'Please upload a csv file',
+            })(
+              <Upload
+                multiple={false}
+                name="file"
+                listType="csv"
+                accept="csv"
+                action={`${SERVER_ADDRESS}/contacts/uploadFile`}
+                onChange={this.onUploadFile}
+              >
+                <Button>
+                  <Icon type="upload" /> Click to upload
+                </Button>
+              </Upload>,
+            )}
           </Form.Item>
 
           <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
-            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders}>
-           Import
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="ant-btn mr-3"
+              disabled={!fileHeaders}
+            >
+              Import
             </Button>
-            <Button type="primary" htmlType="button" className="ant-btn mr-3" onClick={()=> this.setState({showModal:true})} disabled={!fileHeaders}>
-           Map & Import
+            <Button
+              type="primary"
+              htmlType="button"
+              className="ant-btn mr-3"
+              onClick={() => this.setState({ showModal: true })}
+              disabled={!fileHeaders}
+            >
+              Map & Import
             </Button>
           </Form.Item>
         </Form>
@@ -325,14 +334,16 @@ class ImportContacts extends React.Component {
           title="Export Contacts"
           visible={showModal}
           onOk={this.handleOk}
-          onCancel={()=> this.setState({showModal:false})}
+          onCancel={() => this.setState({ showModal: false })}
         >
           <div className="col-md-12">
             <Form onSubmit={this.handleSubmit}>
               {modalData}
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" className="ant-btn mr-3">Submit</Button>
+                <Button type="primary" htmlType="submit" className="ant-btn mr-3">
+                  Submit
+                </Button>
               </Form.Item>
             </Form>
           </div>

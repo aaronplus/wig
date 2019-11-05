@@ -3,6 +3,7 @@ import React from 'react'
 import { Table } from 'antd'
 import axios from 'axios'
 import moment from 'moment'
+import { SERVER_ADDRESS } from 'config/constants'
 
 // const mapStateToProps = ({ contacts }) => ({ contacts })
 // @connect(mapStateToProps)
@@ -16,7 +17,11 @@ class SchedulesList extends React.Component {
   }
 
   getSchedules = async () => {
-    const response = await axios.get('http://localhost:5000/api/schedule/all')
+    const response = await axios(`${SERVER_ADDRESS}/schedule/all`, {
+      headers: {
+        Authorization: localStorage.getItem('jwtToken'),
+      },
+    })
     console.log('Schedules: ', response.data)
     const schedules = response.data.map(schedule => ({
       campaign: schedule.campaign.campaign,

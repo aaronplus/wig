@@ -4,6 +4,7 @@ import { Alert, Form, Input, Slider, Checkbox, Radio, Select, DatePicker, TimePi
 import axios from 'axios'
 import moment from 'moment'
 import timezones from '../../../assets/timezones.json'
+import { SERVER_ADDRESS } from '../../../config/constants'
 
 const { Option } = Select
 
@@ -25,7 +26,7 @@ class CreateSchedule extends React.Component {
   }
 
   getAllMessages = async () => {
-    const response = await axios('http://localhost:5000/api/messages/all', {
+    const response = await axios(`${SERVER_ADDRESS}/messages/all`, {
       headers: {
         Authorization: localStorage.getItem('jwtToken'),
       },
@@ -34,7 +35,7 @@ class CreateSchedule extends React.Component {
   }
 
   getAllCampaigns = async () => {
-    const response = await axios('http://localhost:5000/api/campaigns/all', {
+    const response = await axios(`${SERVER_ADDRESS}/campaigns/all`, {
       headers: {
         Authorization: localStorage.getItem('jwtToken'),
       },
@@ -43,7 +44,7 @@ class CreateSchedule extends React.Component {
   }
 
   getAllPhoneNumbers = async () => {
-    const response = await axios('http://localhost:5000/api/phoneNumbers/all', {
+    const response = await axios(`${SERVER_ADDRESS}/phoneNumbers/all`, {
       headers: {
         Authorization: localStorage.getItem('jwtToken'),
       },
@@ -81,7 +82,7 @@ class CreateSchedule extends React.Component {
     const { form } = this.props
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        axios('http://localhost:5000/api/schedule/add', {
+        axios(`${SERVER_ADDRESS}/schedule/add`, {
           method: 'POST',
           data: this.formatData(values),
           headers: {
