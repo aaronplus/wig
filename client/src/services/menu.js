@@ -30,6 +30,11 @@ export default async function getMenuData() {
           url: '/schedules/create',
         },
         {
+          title: 'Schedules List',
+          key: 'schedulesList',
+          url: '/schedules/list',
+        },
+        {
           title: 'Messages',
           key: 'messages',
         },
