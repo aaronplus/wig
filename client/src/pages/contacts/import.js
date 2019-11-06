@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 // import { Helmet } from 'react-helmet'
-import { Form, Input, Upload, Button, Icon, Select, Radio, Modal, message } from 'antd'
+import { Form, Input, Upload, Button, Icon, Select, Radio, Modal, Spin,  message } from 'antd'
 import { SERVER_ADDRESS } from '../../config/constants'
 
 const { Option } = Select
@@ -20,6 +20,8 @@ class ImportContacts extends React.Component {
       showModal: false,
       showImportButton: false,
       headers: {},
+      fileObj:{},
+      spinner: false,
       mapSchema: {
         firstName: {
           key: 'First Name',
@@ -33,7 +35,7 @@ class ImportContacts extends React.Component {
         },
         propertyAddress: {
           key: 'Property Address',
-          value:'SITUS FULL ADDRESS',
+          value:'SITUS STREET ADDRESS',
           skip:'INPUT_ADDRESS_LINE1',
         },
         propertyCity: {
@@ -137,8 +139,8 @@ class ImportContacts extends React.Component {
       console.log(info.file, info.fileList)
     }
     if (status === 'done') {
-      if (response && response.length) {
-        const headers = Object.keys(response[0]);
+      if (response && response.headers && response.headers.length) {
+        const {headers, fileObj} = response;
         if (skipTraced) {
           if ((headers.includes('INPUT_LAST_NAME') || headers.includes('LAST NAME'))
               && (headers.includes('INPUT_ADDRESS_LINE1'))
@@ -147,13 +149,15 @@ class ImportContacts extends React.Component {
               && (headers.includes('INPUT_ADDRESS_ZIP'))) {
                 this.setState({
                   fileHeaders: headers,
-                  showImportButton: true
+                  showImportButton: true,
+                  fileObj
                 //  showModal: true
                 });
           }else {
                 this.setState({
                   fileHeaders: headers,
-                  showImportButton: false
+                  showImportButton: false,
+                  fileObj
                 });
           }
         }else if ((headers.includes('OWNER 1 LAST NAME') || headers.includes('LAST NAME'))
@@ -163,13 +167,15 @@ class ImportContacts extends React.Component {
               && (headers.includes('SITUS ZIP CODE'))) {
                 this.setState({
                   fileHeaders: headers,
-                  showImportButton: true
+                  showImportButton: true,
+                  fileObj
                 //  showModal: true
                 });
           }else {
                 this.setState({
                   fileHeaders: headers,
-                  showImportButton: false
+                  showImportButton: false,
+                  fileObj
                 });
           }
         // Match Headers with static Headers
@@ -250,7 +256,8 @@ class ImportContacts extends React.Component {
     axios.defaults.headers.common.Authorization = `${localStorage.getItem("jwtToken")}`;
     const { form, skipTraced, handleUploadFile } = this.props;
     console.log(this.props);
-    const { campaignType } = this.state;
+    const { campaignType, fileObj } = this.state;
+
     ev.preventDefault();
     form.validateFields((err, values) => {
       if (!err) {
@@ -280,16 +287,19 @@ class ImportContacts extends React.Component {
           delete(headers.import);
           delete(headers.campaign);
           const data = new FormData();
-          data.append('csvData', JSON.stringify(values.import.file.response));
+          // data.append('csvData', JSON.stringify(values.import.file.response));
           if (!skipTraced) {
             data.append('campaign', values.campaign);
             data.append('campaignType', campaignType);
           }
           data.append('headers', JSON.stringify(headers));
+          data.append('fileObj', JSON.stringify(fileObj));
           if (skipTraced) {
             data.append('skipTraced', skipTraced);
           }
-
+          this.setState({
+            spinner: true
+          })
            axios
             .post(`http://localhost:5000/api/contacts/upload`, data)
             .then((res) => {
@@ -300,7 +310,8 @@ class ImportContacts extends React.Component {
 
                 handleUploadFile();
                 this.setState({
-                  showModal: false
+                  showModal: false,
+                  spinner: false
                 })
               }
 
@@ -317,7 +328,9 @@ class ImportContacts extends React.Component {
                   message.error(errors[0]);
               }
 
-
+              this.setState({
+                spinner: false
+              })
             });
         }
       }
@@ -340,7 +353,7 @@ class ImportContacts extends React.Component {
     } = this.props
     console.log(skipTraced)
     // console.log(schema);
-    const {mapSchema} = this.state;
+    const {mapSchema, spinner} = this.state;
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
     const listHeaders = fileHeaders ?fileHeaders.map((item) => <Option key={item} value={item}>{item}</Option>): '';
 
@@ -377,9 +390,11 @@ class ImportContacts extends React.Component {
         // return null;
     //  }
   });
+  const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
   if (skipTraced) {
     return(
       <div>
+        {spinner?<Spin indicator={antIcon} />:''}
         <Form {...formItemLayout} onSubmit={this.handleSubmit}>
           <Form.Item label="Import">
             {
@@ -418,8 +433,8 @@ class ImportContacts extends React.Component {
         >
           <div className="col-md-12">
             <Form onSubmit={this.handleSubmit}>
-              {modalData}
 
+              {modalData}
               <Form.Item>
                 <Button type="primary" htmlType="submit" className="ant-btn mr-3">Submit</Button>
               </Form.Item>
@@ -431,7 +446,9 @@ class ImportContacts extends React.Component {
   }
     return (
       <div>
+
         <Form {...formItemLayout} onSubmit={this.handleSubmit}>
+          {spinner?<Spin indicator={antIcon} />:''}
           <Form.Item label="Campaign">
             <Radio.Group onChange={this.handleOnChangeCampaign} defaultValue={campaignType}>
               <Radio value="new">New Campaign</Radio>
@@ -501,6 +518,7 @@ class ImportContacts extends React.Component {
         >
           <div className="col-md-12">
             <Form onSubmit={this.handleSubmit}>
+
               {modalData}
 
               <Form.Item>

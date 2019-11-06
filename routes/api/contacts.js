@@ -5,7 +5,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const keys = require("../../config/keys");
 const fs = require('fs');
+const path = require('path');
 const csv = require('csv-parser');
+const csvtoJson=require('csvtojson');
 const multer = require('multer');
 const validateContactInput = require("../../validation/contact");
 const validateToken = require("../validateToken").validateToken;
@@ -150,7 +152,32 @@ if (req.body.campaignType == 'new') {
   var campaignId = req.body.campaign;
 }
 
-var fileRows = JSON.parse(req.body.csvData), fileHeader;
+// var fileData = new Promise((resolve, reject) => {
+//   fs.createReadStream(req.body.fileObj.path)
+//     .pipe(csv({
+//       //mapHeaders: ({ header, index }) => headers.push(header)
+//     }))
+//     .on('data', (data) => fileRows.push(data))
+//     .on('end', () => {
+//       resolve(fileRows)
+//       // return res.json({headers, fileObj:req.file});
+//     })
+//     .on('error', (err) => {
+//       reject(err)
+//     });
+// });
+//
+//
+// var fileRows = await fileData;
+
+var fileObj = JSON.parse(req.body.fileObj);
+const csvFilePath=path.join(__dirname, '../..', fileObj.path);
+const fileRows=await csvtoJson().fromFile(csvFilePath);
+
+
+
+
+var fileHeader;
 var headers = JSON.parse(req.body.headers);
 var rowData = [];
 //skipTraced
@@ -391,13 +418,14 @@ if (req.body.skipTraced) {
 });
 router.post('/uploadFile', upload.single('file'), async function (req, res, next) {
   var fileRows = [];
+  var headers = [];
   fs.createReadStream(req.file.path)
     .pipe(csv({
-      //mapHeaders: ({ header, index }) => header.toLowerCase()
+      mapHeaders: ({ header, index }) => headers.push(header)
     }))
     .on('data', (data) => fileRows.push(data))
     .on('end', () => {
-      return res.json(fileRows);
+      return res.json({headers, fileObj:req.file});
     })
     .on('error', (err) => {
       return res.status(500).json({error: err});
