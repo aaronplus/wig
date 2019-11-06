@@ -22,17 +22,13 @@ export default async function getMenuData() {
         },
         {
           title: 'Campaigns',
-          key: 'schedule',
-        },
-        {
-          title: 'Schedule',
-          key: 'createSchedule',
-          url: '/schedules/create',
-        },
-        {
-          title: 'Schedules List',
           key: 'schedulesList',
           url: '/schedules/list',
+        },
+        {
+          title: 'Schedule Campaign',
+          key: 'createSchedule',
+          url: '/schedules/create',
         },
         {
           title: 'Messages',
