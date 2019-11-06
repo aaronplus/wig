@@ -346,34 +346,34 @@ export default async function getMenuData() {
     //   icon: 'fe fe-bookmark',
     //   url: '/ui-kits/antd',
     // },
-    {
-      title: 'Widgets',
-      key: 'widgets',
-      icon: 'fe fe-image',
-      count: 47,
-      children: [
-        {
-          title: 'General',
-          key: 'widgetsGeneral',
-          url: '/widgets/general',
-        },
-        {
-          title: 'Lists',
-          key: 'widgetsLists',
-          url: '/widgets/lists',
-        },
-        {
-          title: 'Tables',
-          key: 'widgetsTables',
-          url: '/widgets/tables',
-        },
-        {
-          title: 'Charts',
-          key: 'widgetsCharts',
-          url: '/widgets/charts',
-        },
-      ],
-    },
+    // {
+    //   title: 'Widgets',
+    //   key: 'widgets',
+    //   icon: 'fe fe-image',
+    //   count: 47,
+    //   children: [
+    //     {
+    //       title: 'General',
+    //       key: 'widgetsGeneral',
+    //       url: '/widgets/general',
+    //     },
+    //     {
+    //       title: 'Lists',
+    //       key: 'widgetsLists',
+    //       url: '/widgets/lists',
+    //     },
+    //     {
+    //       title: 'Tables',
+    //       key: 'widgetsTables',
+    //       url: '/widgets/tables',
+    //     },
+    //     {
+    //       title: 'Charts',
+    //       key: 'widgetsCharts',
+    //       url: '/widgets/charts',
+    //     },
+    //   ],
+    // },
     // {
     //   title: 'Cards',
     //   key: 'cards',
@@ -498,11 +498,11 @@ export default async function getMenuData() {
     //   icon: 'fe fe-grid',
     //   url: '/advanced/grid',
     // },
-    {
-      title: 'Typography',
-      key: 'typography',
-      icon: 'fe fe-type',
-      url: '/advanced/typography',
-    },
+    // {
+    //   title: 'Typography',
+    //   key: 'typography',
+    //   icon: 'fe fe-type',
+    //   url: '/advanced/typography',
+    // },
   ]
 }

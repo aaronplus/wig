@@ -3,6 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cron = require('cron');
+const path = require('path');
+
 const app = express();
 
 const passport = require('passport');
@@ -34,10 +36,10 @@ app.use(bodyParser.json());
 //const db = require("./config/keys").mongoURI;
 // Connect to MongoDB
 const ip = 'localhost';
-const portNumber = 27017;
+const portNumber = process.env.portNumber || 27017;
 const appDB = 'wig';
 mongoose
-  .connect('mongodb://' + ip + ':' + portNumber + '/' + appDB, {
+    .connect( process.env.MONGODB_URI || 'mongodb://' + ip + ':' + portNumber + '/' + appDB, {
     useNewUrlParser: true,
   })
   .then(() => console.log('MongoDB successfully connected'))
@@ -55,6 +57,15 @@ app.use('/api/messages', messages);
 app.use('/api/campaigns', campaigns);
 app.use('/api/phoneNumbers', phoneNumbers);
 app.use('/api/twilio', conversations);
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static( 'client/build' ))
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+  });
+}
+
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
 
