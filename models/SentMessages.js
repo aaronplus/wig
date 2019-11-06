@@ -1,10 +1,10 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model } = require('mongoose');
 
 const sentMessageSchema = new Schema(
   {
     schedule_id: {
       type: Schema.Types.ObjectId,
-      ref: "Schedule",
+      ref: 'Schedule',
     },
     pages: {
       type: Number,
@@ -33,11 +33,11 @@ const sentMessageSchema = new Schema(
       },
     ],
   },
-  { toJSON: true, toObject: true }
+  { toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
 
-sentMessageSchema.virtual("sent", function getSent() {
+sentMessageSchema.virtual('sent', function getSent() {
   return this.sent_messages.reduce((acc, item) => acc + item.sent, 0);
 });
 
-module.exports = model("SentMessages", sentMessageSchema);
+module.exports = model('SentMessages', sentMessageSchema);
