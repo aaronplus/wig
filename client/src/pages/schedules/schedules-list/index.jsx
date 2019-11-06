@@ -24,6 +24,7 @@ class SchedulesList extends React.Component {
     })
     console.log('Schedules: ', response.data)
     const schedules = response.data.map(schedule => ({
+      key: schedule._id,
       campaign: schedule.campaign.campaign,
       type: schedule.type,
       startDateTime: `${moment(schedule.start_date).format(
