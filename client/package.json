@@ -23,7 +23,7 @@
       "git add"
     ],
     "src/**/*.{js,jsx}": [
-      "eslint"
+      "eslint --fix"
     ],
     "src/**/*.{scss,less}": [
       "stylelint"
