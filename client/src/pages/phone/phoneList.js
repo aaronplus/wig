@@ -38,7 +38,7 @@ const columns = [
 ]
 
 class PhoneList extends React.Component {
-
+  
 
   render() {
     const {data} = this.props;

@@ -301,7 +301,7 @@ class ImportContacts extends React.Component {
             spinner: true
           })
            axios
-            .post(`http://localhost:5000/api/contacts/upload`, data)
+            .post(`${SERVER_ADDRESS}/contacts/upload`, data)
             .then((res) => {
               console.log(res);
               if (res.status === 200) {
@@ -400,7 +400,7 @@ class ImportContacts extends React.Component {
             {
           form.getFieldDecorator('import',{ required: true, message: 'Please upload a csv file'})
           (
-            <Upload multiple={false} name="file" listType="csv" accept="csv" action="http://localhost:5000/api/contacts/uploadFile" onChange={this.onUploadFile}>
+            <Upload multiple={false} name="file" listType="csv" accept="csv" action={`${SERVER_ADDRESS}/contacts/uploadFile`} onChange={this.onUploadFile}>
               <Button>
                 <Icon type="upload" /> Click to upload
               </Button>
