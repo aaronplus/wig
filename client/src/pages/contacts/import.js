@@ -394,7 +394,7 @@ class ImportContacts extends React.Component {
   if (skipTraced) {
     return(
       <div>
-        {spinner?<Spin indicator={antIcon} />:''}
+
         <Form {...formItemLayout} onSubmit={this.handleSubmit}>
           <Form.Item label="Import">
             {
@@ -411,7 +411,7 @@ class ImportContacts extends React.Component {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders || !showImportButton}>
+            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders || !showImportButton || spinner}>
            Import
             </Button>
             <Button type="primary" htmlType="button" className="ant-btn mr-3" onClick={()=> this.setState({showModal:true})} disabled={!fileHeaders}>
@@ -436,8 +436,10 @@ class ImportContacts extends React.Component {
 
               {modalData}
               <Form.Item>
-                <Button type="primary" htmlType="submit" className="ant-btn mr-3">Submit</Button>
+                <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={spinner}>Submit</Button>
+                {spinner?<Spin indicator={antIcon} />:''}
               </Form.Item>
+
             </Form>
           </div>
         </Modal>
@@ -496,7 +498,7 @@ class ImportContacts extends React.Component {
             )}
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders || !showImportButton}>
+            <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={!fileHeaders || !showImportButton || spinner}>
            Import
             </Button>
             <Button type="primary" htmlType="button" className="ant-btn mr-3" onClick={()=> this.setState({showModal:true})} disabled={!fileHeaders}>
@@ -522,10 +524,12 @@ class ImportContacts extends React.Component {
               {modalData}
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" className="ant-btn mr-3">
+                <Button type="primary" htmlType="submit" className="ant-btn mr-3" disabled={spinner}>
                   Submit
                 </Button>
+                {spinner?<Spin indicator={antIcon} />:''}
               </Form.Item>
+
             </Form>
           </div>
         </Modal>

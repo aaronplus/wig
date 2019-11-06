@@ -4,6 +4,7 @@ import user from './user/reducers'
 import menu from './menu/reducers'
 import settings from './settings/reducers'
 import contacts from './contacts/reducers'
+import phoneNumbers from './phone/reducers'
 
 export default history =>
   combineReducers({
@@ -11,5 +12,6 @@ export default history =>
     user,
     menu,
     settings,
-    contacts
+    contacts,
+    phoneNumbers
   })

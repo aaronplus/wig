@@ -41,6 +41,7 @@ export default async function getMenuData() {
         {
           title: 'Phone Numbers',
           key: 'phone-numbers',
+          url: '/phone_numbers',
         },
       ],
     },

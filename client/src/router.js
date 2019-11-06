@@ -346,6 +346,11 @@ const routes = [
     Component: loadable(() => import('pages/system/404')),
     exact: true,
   },
+  {
+    path: '/phone_numbers',
+    Component: loadable(() => import('pages/phone')),
+    exact: true,
+  },
 ]
 
 const mapStateToProps = ({ settings }) => ({ settings })
