@@ -9,13 +9,19 @@ const validateToken = require("../validateToken").validateToken;
 // Load User model
 const Schedule = require("../../models/Schedule");
 const SentMessages = require("../../models/SentMessages");
+const Contact = require("../../models/Contact");
 
 router.get("/all", validateToken, async (req, res) => {
   try {
     const schedules = await Schedule.find().populate("campaign");
     const sentMessages = await SentMessages.find();
+    const contacts = await Contact.find();
     const schedulesData = schedules.map(schedule => ({
       ...schedule._doc,
+      total: contacts.filter(
+        contact =>
+          contact.campaign.toString() === schedule.campaign._id.toString()
+      ).length,
       sent: sentMessages.find(
         sm => sm.schedule_id.toString() === schedule._id.toString()
       )
