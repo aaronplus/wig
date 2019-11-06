@@ -4,6 +4,7 @@ import { Input, Icon, Tooltip } from 'antd'
 import { Scrollbars } from 'react-custom-scrollbars'
 import axios from 'axios'
 import moment from 'moment'
+import socketIO from 'socket.io-client'
 
 // import dialogs from './data.json'
 import style from './style.module.scss'
@@ -21,6 +22,23 @@ class Messaging extends React.Component {
 
   componentDidMount() {
     this.getConversations()
+    const socket = socketIO(SERVER_ADDRESS, { forceNew: true })
+    socket.on('new_sms', data => {
+      const { conversations, activeId, conversation } = this.state
+      const index = conversations.findIndex(conv => conv.id.toString() === data._id.toString())
+      if (index === -1) {
+        this.setState({ conversations: [...conversations, this.formatConversation(data)] })
+      } else {
+        const newConv = this.formatConversation(data)
+        const newConvs = conversations
+        newConvs[index] = newConv
+        this.setState({
+          conversations: newConvs,
+          conversation: newConv.id === activeId ? newConv : conversation,
+        })
+      }
+      console.log('New Message Received', data)
+    })
   }
 
   formatConversation = conv => {
@@ -101,7 +119,6 @@ class Messaging extends React.Component {
 
   render() {
     const { activeId, conversations, conversation, msg } = this.state
-    console.log('Conversation: ', conversations)
     const { name, position, messages, avatar } = conversation
     return (
       <div>
