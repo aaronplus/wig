@@ -36,7 +36,7 @@ const sentMessageSchema = new Schema(
   { toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
 
-sentMessageSchema.virtual('sent', function getSent() {
+sentMessageSchema.virtual('sent').get(function getSent() {
   return this.sent_messages.reduce((acc, item) => acc + item.sent, 0);
 });
 

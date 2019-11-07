@@ -34,7 +34,7 @@ class SchedulesList extends React.Component {
         'DD-MM-YYYY',
       )} - ${schedule.end_time.substring(0, 5)}`,
       dailyLimit: schedule.day_limit,
-      sent: schedule.sent,
+      sent: `${schedule.sent}/${schedule.total}`,
       status: 'Pending Feature',
     }))
     this.setState({ dataSource: schedules })

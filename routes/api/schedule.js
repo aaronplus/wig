@@ -1,32 +1,32 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const keys = require("../../config/keys");
-const validateToken = require("../validateToken").validateToken;
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const keys = require('../../config/keys');
+const validateToken = require('../validateToken').validateToken;
 // Load input validation
 // const validateLoginInput = require("../../validation/login");
 // Load User model
-const Schedule = require("../../models/Schedule");
-const SentMessages = require("../../models/SentMessages");
-const Contact = require("../../models/Contact");
+const Schedule = require('../../models/Schedule');
+const SentMessages = require('../../models/SentMessages');
+const Contact = require('../../models/Contact');
 
-router.get("/all", validateToken, async (req, res) => {
+router.get('/all', validateToken, async (req, res) => {
   try {
-    const schedules = await Schedule.find().populate("campaign");
+    const schedules = await Schedule.find().populate('campaign');
     const sentMessages = await SentMessages.find();
     const contacts = await Contact.find();
     const schedulesData = schedules.map(schedule => ({
       ...schedule._doc,
       total: contacts.filter(
         contact =>
-          contact.campaign.toString() === schedule.campaign._id.toString()
+          contact.campaign.toString() === schedule.campaign._id.toString(),
       ).length,
       sent: sentMessages.find(
-        sm => sm.schedule_id.toString() === schedule._id.toString()
+        sm => sm.schedule_id.toString() === schedule._id.toString(),
       )
         ? sentMessages.find(
-            sm => sm.schedule_id.toString() === schedule._id.toString()
+            sm => sm.schedule_id.toString() === schedule._id.toString(),
           ).sent
         : 0,
     }));
@@ -39,7 +39,7 @@ router.get("/all", validateToken, async (req, res) => {
 // @route POST api/schedule
 // @desc Create Schedule api
 // @access Private
-router.post("/add", validateToken, (req, res) => {
+router.post('/add', validateToken, (req, res) => {
   // return res.json(req.body);
   const {
     campaign,
