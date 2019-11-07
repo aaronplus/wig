@@ -1,19 +1,13 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Helmet } from 'react-helmet'
-import{Button, Modal} from 'antd'
 import PhoneList from './phoneList'
 import AddPhoneNumber from './add'
+
 
 const mapStateToProps = ({ phoneNumbers }) => ({ phoneNumbers })
 @connect(mapStateToProps)
 class PhoneNumber extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      visibleAddModal: false
-    }
-  }
 
   componentWillMount(){
     const{dispatch} = this.props;
@@ -23,9 +17,37 @@ class PhoneNumber extends React.Component {
     })
   }
 
+  handleSave = (data) => {
+    const{dispatch} = this.props;
+    dispatch({
+      type: 'phoneNumbers/ADD_NEW_RECORD',
+      payload: data
+    })
+  }
+
+  handleUpdate = (data, id) => {
+    const{dispatch} = this.props;
+    dispatch({
+      type: 'phoneNumbers/UPDATE_RECORD',
+      payload: {
+        id,
+        data
+      }
+    })
+  }
+
+  handleDelete = (id) => {
+    console.log(id,"Deleted");
+      const{dispatch} = this.props;
+      dispatch({
+        type: 'phoneNumbers/DELETE_RECORD',
+        payload: id
+      })
+
+  }
+
   render() {
     const{phoneNumbers:{list}} = this.props;
-    const {visibleAddModal} = this.state;
     return (
       <div>
         <Helmet title="Phone Numbers" />
@@ -34,21 +56,17 @@ class PhoneNumber extends React.Component {
         </div>
         <div className="card">
           <div className="card-body">
-            <div>
-              <Button type="primary" onClick={()=> this.setState({visibleAddModal:true})}>Add</Button>
-            </div>
-            <PhoneList data={list} />
+            <AddPhoneNumber
+              handleSave={(data) => this.handleSave(data)}
+            />
+            <PhoneList
+              data={list}
+              onPressDelete={(id) => this.handleDelete(id)}
+              handleUpdateRecord={(data, id) => this.handleUpdate(data, id)}
+            />
           </div>
         </div>
-        <Modal
-          title="Add Phone Numbers"
-          visible={visibleAddModal}
-          onOk={this.handleOk}
-          onCancel={() => this.handleCancel}
-        >
-          <AddPhoneNumber />
 
-        </Modal>
       </div>
     )
   }

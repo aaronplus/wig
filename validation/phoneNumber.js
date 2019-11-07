@@ -9,13 +9,13 @@ module.exports = function validatePhoneNumberInput(data) {
   data.voice_forward_number = !isEmpty(data.voice_forward_number) ? data.voice_forward_number : "";
 
   if (Validator.isEmpty(data.name)) {
-    errors.name = "Campaign field is required";
+    errors.name = "name field is required";
   }else if (Validator.isEmpty(data.phone_number)) {
-      errors.phone_number = "Phone number field is required";
+      errors.phone_number = "phone_number field is required";
   }else if (Validator.isEmpty(data.type)) {
-      errors.type = "Type field is required";
+      errors.type = "type field is required";
   }else if (Validator.isEmpty(data.voice_forward_number)) {
-      errors.voice_forward_number = "Voice forward number field is required";
+      errors.voice_forward_number = "voice_forward_number field is required";
   }
 return {
     errors,

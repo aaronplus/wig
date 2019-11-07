@@ -3,15 +3,14 @@ import{
   Form,
   Input,
   Modal,
-  Button
 } from 'antd'
 
 
-const CollectionCreateForm = Form.create({ name: 'add_phone_number' })(
+const CollectionCreateForm = Form.create({ name: 'edit_phone_number' })(
   // eslint-disable-next-line
   class extends React.Component {
     render() {
-      const { visible, onCancel, onCreate, form } = this.props;
+      const { visible, onCancel, onCreate, form, data } = this.props;
       const { getFieldDecorator } = form;
       const formItemLayout = {
       labelCol: {
@@ -23,33 +22,40 @@ const CollectionCreateForm = Form.create({ name: 'add_phone_number' })(
         sm: { span: 16 },
       },
     };
+
+
+
       return (
         <Modal
           visible={visible}
-          title="Create a new collection"
-          okText="Create"
+          title="Edit Phone Number"
+          okText="Update"
           onCancel={onCancel}
           onOk={onCreate}
         >
           <Form layout="vertical" {...formItemLayout}>
             <Form.Item label="Name">
               {getFieldDecorator('name', {
-                rules: [{ required: true, message: 'Please enter name input' }],
-              })(<Input />)}
+                rules: [{ required: true, message: 'Please enter name input'}],
+                initialValue:data.name,
+            })(<Input />)}
             </Form.Item>
             <Form.Item label="Phone Number">
               {getFieldDecorator('phone_number', {
                 rules: [{ required: true, message: 'Please enter phone number input' }],
+                initialValue:data.phone_number,
               })(<Input />)}
             </Form.Item>
             <Form.Item label="Type">
               {getFieldDecorator('type', {
                 rules: [{ required: true, message: 'Please enter type input' }],
+                initialValue:data.type,
               })(<Input />)}
             </Form.Item>
             <Form.Item label="Voice Forward Number">
               {getFieldDecorator('voice_forward_number', {
                 rules: [{ required: true, message: 'Please enter Voice Forward Number input' }],
+                initialValue:data.voice_forward_number,
               })(<Input />)}
             </Form.Item>
 
@@ -60,22 +66,33 @@ const CollectionCreateForm = Form.create({ name: 'add_phone_number' })(
   },
 );
 
-class AddPhoneNumber extends React.Component {
-  state = {
-    visible: false,
-  };
+class EditPhoneNumber extends React.Component {
+  constructor(props){
+    super(props);
+    const {visibleEdit} = this.props;
+    this.state ={
+      visible: visibleEdit
+    }
+  }
+
+  static getDerivedStateFromProps(props, state){
+    const {visibleEdit} = props;
+    state.visible = visibleEdit;
+  }
 
   showModal = () => {
     this.setState({ visible: true });
   };
 
   handleCancel = () => {
+    const {handleCancel} = this.props;
+    handleCancel();
     this.setState({ visible: false });
   };
 
-  handleCreate = () => {
+  handleUpdate = () => {
     const { form } = this.formRef.props;
-    const {handleSave} = this.props;
+    const {handleUpdate} = this.props;
     form.validateFields((err, values) => {
       if (err) {
         return;
@@ -84,7 +101,7 @@ class AddPhoneNumber extends React.Component {
       console.log('Received values of form: ', values);
       form.resetFields();
       this.setState({ visible: false });
-      handleSave(values);
+      handleUpdate(values);
     });
   };
 
@@ -94,25 +111,21 @@ class AddPhoneNumber extends React.Component {
 
   render() {
     const {visible} = this.state;
-    const buttonStyle = {
-      right: 0,
-      marginBottom: '10px',
-      display: 'flex',
-    }
+    const {editData} = this.props;
+    console.log(editData,"editData","edit.js");
+    console.log(this.state);
     return (
       <div>
-        <Button type="primary" onClick={this.showModal} style={buttonStyle}>
-          Add New
-        </Button>
         <CollectionCreateForm
           wrappedComponentRef={this.saveFormRef}
           visible={visible}
           onCancel={this.handleCancel}
-          onCreate={this.handleCreate}
+          onCreate={this.handleUpdate}
+          data={editData}
         />
       </div>
     );
   }
 }
 
-export default AddPhoneNumber
+export default EditPhoneNumber
