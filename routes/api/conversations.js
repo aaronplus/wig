@@ -3,18 +3,30 @@ const twilio = require('twilio');
 
 const Contact = require('../../models/Contact');
 const Conversation = require('../../models/Conversation');
+const SentMessages = require('../../models/SentMessages');
+const Keyword = require('../../models/Keyword');
 
 router.post('/sms', async (req, res) => {
   const messageReceived = req.body;
   console.log('Received Message: ', messageReceived);
   const { From, To, MessageSid, Body } = messageReceived;
   const conversationExists = await Conversation.findOne({ from: From, to: To });
+  const keywords = Keyword.find({ type: false });
+  let Pass = true;
+  for (let i = 0; i < keywords.length; i++) {
+    if (Body.includes(keywords[i])) {
+      Pass = false;
+      break;
+    }
+  }
+  const newMessage = {
+    message: Body,
+    sid: MessageSid,
+    received: true,
+    status: Pass ? 'PASS' : 'FAIL',
+  };
   if (conversationExists) {
-    conversationExists.messages.push({
-      message: Body,
-      sid: MessageSid,
-      received: true,
-    });
+    conversationExists.messages.push(newMessage);
     const conversation = await conversationExists.save();
     global.socket.emit('new_sms', conversation);
   } else {
@@ -37,7 +49,7 @@ router.post('/sms', async (req, res) => {
       from_name: 'Unknown',
       from: From,
       to: To,
-      messages: [{ message: Body, sid: MessageSid, received: true }],
+      messages: [newMessage],
     };
     if (contact) {
       console.log('Contact: ', JSON.stringify(contact, undefined, 2));
@@ -55,11 +67,36 @@ router.post('/sms', async (req, res) => {
       if (name && name.trim().length > 0) {
         conv.from_name = name.trim();
       }
+      if (!Pass) {
+        await Contact.findByIdAndUpdate(contact._id, {
+          $set: { status: 'DO NOT CALL' },
+        });
+      }
     }
     const conversation = await Conversation.create(conv);
     global.socket.emit('new_sms', conversation);
   }
-  res.sendStatus(200);
+  res.writeHead(200, { 'Content-Type': 'text/xml' });
+  res.end('<Response></Response>');
+});
+
+router.post('/sms/callback', async (req, res) => {
+  const messageStatus = req.body;
+  const { SmsSid, SmsStatus } = messageStatus;
+  console.log('Message Status: ', new Date().toISOString());
+  console.log(JSON.stringify(messageStatus, undefined, 2));
+  try {
+    if (SmsStatus && SmsSid) {
+      await SentMessages.update(
+        { 'message_status.sid': SmsSid },
+        { $set: { 'message_status.$.status': SmsStatus } },
+      );
+    }
+  } catch (error) {
+    console.log('Error: ', error);
+  }
+  res.writeHead(200, { 'Content-Type': 'text/xml' });
+  res.end('<Response></Response>');
 });
 
 router.post('/reply/:conversationId', async (req, res) => {
