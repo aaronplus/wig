@@ -47,9 +47,8 @@ class Messaging extends React.Component {
       name: conv.from_name,
       from: conv.from,
       to: conv.to,
-      avatar: 'resources/images/avatars/1.jpg',
+      avatar: 'resources/images/avatars/avatar-2.png',
       unread: conv.messages.filter(x => !x.read).length,
-      position: '',
     }
     result.messages = conv.messages.map(msg => {
       const r = {
@@ -119,15 +118,15 @@ class Messaging extends React.Component {
 
   render() {
     const { activeId, conversations, conversation, msg } = this.state
-    const { name, position, messages, avatar } = conversation
+    const { name, messages, avatar } = conversation
     return (
       <div>
         <Helmet title="Apps: Messaging" />
         <div className="air__utils__heading">
-          <h5>Apps: Messaging</h5>
+          <h5>Messages</h5>
         </div>
         <div className="row">
-          <div className="col-12 col-md-4">
+          <div className="col-12 col-md-5">
             <div className="mb-4">
               <Input
                 prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
@@ -154,7 +153,8 @@ class Messaging extends React.Component {
                     href="javascript: void(0);"
                     onClick={e => this.changeDialog(e, item.id)}
                     key={item.name}
-                    className={`${style.item} ${
+                    hidden={!item.unread}
+                    className={`${style.item} ${style.unread} ${
                       item.id === activeId ? style.current : ''
                     } d-flex flex-nowrap align-items-center`}
                   >
@@ -163,9 +163,9 @@ class Messaging extends React.Component {
                     </div>
                     <div className={`${style.info} flex-grow-1`}>
                       <div className="text-uppercase font-size-12 text-truncate text-gray-6">
-                        {item.position}
+                        Campaign Name
                       </div>
-                      <div className="text-dark font-size-18 font-weight-bold text-truncate">
+                      <div className="text-dark font-size-16 font-weight-normal text-truncate">
                         {item.name}
                       </div>
                     </div>
@@ -180,28 +180,34 @@ class Messaging extends React.Component {
               </Scrollbars>
             </div>
           </div>
-          <div className="col-12 col-md-8">
+          <div className="col-12 col-md-7">
             <div className="card">
               <div className="card-header card-header-flex align-items-center">
                 <div className="d-flex flex-column justify-content-center mr-auto">
                   <h5 className="mb-0 mr-2 font-size-18">
-                    {name} <span className="font-size-14 text-gray-6">({position})</span>
+                    {name} <br />
+                    <span className="font-size-14 text-gray-6">Address</span>
                   </h5>
                 </div>
                 <div>
-                  <Tooltip placement="top" title="Unlock Account">
+                  <Tooltip placement="top" title="View Original Message">
                     <a href="javascript: void(0);" className="btn btn-sm btn-light mr-2">
-                      <i className="fe fe-unlock" />
+                      <i className="fe fe-eye" />
                     </a>
                   </Tooltip>
-                  <Tooltip placement="top" title="Mark as important">
+                  <Tooltip placement="top" title="Voice Mail Received">
                     <a href="javascript: void(0);" className="btn btn-sm btn-light mr-2">
-                      <i className="fe fe-star" />
+                      <i className="fe fe-phone-call" />
                     </a>
                   </Tooltip>
-                  <Tooltip placement="top" title="Delete user">
+                  <Tooltip placement="top" title="Do Not Call">
+                    <a href="javascript: void(0);" className="btn btn-sm btn-light mr-2">
+                      <i className="fe fe-thumbs-down" />
+                    </a>
+                  </Tooltip>
+                  <Tooltip placement="top" title="Qualify Lead">
                     <a href="javascript: void(0);" className="btn btn-sm btn-light">
-                      <i className="fe fe-trash" />
+                      <i className="fe fe-thumbs-up" />
                     </a>
                   </Tooltip>
                 </div>
@@ -239,9 +245,7 @@ class Messaging extends React.Component {
                           <div className={`${style.messageAvatar} air__utils__avatar`}>
                             <img
                               src={`${
-                                message.owner !== 'you'
-                                  ? avatar
-                                  : 'resources/images/avatars/avatar-2.png'
+                                message.owner !== 'you' ? avatar : 'resources/images/avatars/1.jpg'
                               }`}
                               alt={name}
                             />

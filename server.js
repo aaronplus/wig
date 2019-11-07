@@ -84,7 +84,7 @@ io.of('/api').on('connection', socket => {
 // Initialize cronJob
 const CronJob = cron.CronJob;
 const job = new CronJob(
-  '1 * * * * *',
+  '* * * * * *',
   () => {
     messageCronJob().catch(console.error);
   },

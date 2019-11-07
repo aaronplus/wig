@@ -24,7 +24,7 @@ class AppsMessaging extends React.Component {
       <div>
         <Helmet title="Apps: Messaging" />
         <div className="air__utils__heading">
-          <h5>Apps: Messaging</h5>
+          <h5>Message</h5>
         </div>
         <div className="row">
           <div className="col-12 col-md-4">
