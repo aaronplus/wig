@@ -136,6 +136,9 @@ async function getContactsAndSendMessages({
     const from = await PhoneNumber.findById(phone_number_id);
     const to = [];
     for (let i = 0; i < contacts.length; i++) {
+      if (contacts[i].status === 'DO NOT CALL') {
+        continue;
+      }
       if (contacts[i].phoneOne) {
         to.push(contacts[i].phoneOne);
       }
@@ -255,6 +258,7 @@ async function sendMessage(from, to, body) {
     const response = await client.messages.create({
       body,
       from: from.replace(/\s/g, ''),
+      statusCallback: process.env.SMS_STATUS_CALLBACK,
       to: `+${to}`.replace(/\s/g, ''),
     });
     return response;
