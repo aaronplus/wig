@@ -33,6 +33,7 @@ export default async function getMenuData() {
         {
           title: 'Messages',
           key: 'messages',
+          url: '/messages',
         },
         {
           title: 'Phone Numbers',

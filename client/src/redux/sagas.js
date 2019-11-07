@@ -4,7 +4,8 @@ import contacts from './contacts/sagas'
 import menu from './menu/sagas'
 import settings from './settings/sagas'
 import phoneNumbers from './phone/sagas'
+import messages from './messages/sagas'
 
 export default function* rootSaga() {
-  yield all([user(), menu(), settings(), contacts(), phoneNumbers()])
+  yield all([user(), menu(), settings(), contacts(), phoneNumbers(), messages()])
 }

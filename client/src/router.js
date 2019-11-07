@@ -356,6 +356,11 @@ const routes = [
     Component: loadable(() => import('pages/phone/add')),
     exact: true,
   },
+  {
+    path: '/messages',
+    Component: loadable(() => import('pages/messages')),
+    exact: true,
+  },
 ]
 
 const mapStateToProps = ({ settings }) => ({ settings })
