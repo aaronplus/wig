@@ -4,7 +4,7 @@ const validateToken = require('../validateToken').validateToken;
 const validateMessageInput = require("../../validation/message");
 
 const Message = require('../../models/Message');
-
+const mongoose = require('mongoose');
 /**
  * Get all Messages
  */
@@ -24,6 +24,7 @@ router.get('/all', validateToken, async (req, res) => {
 */
 
 router.post('/', validateToken, async (req, res) => {
+  var userId = req.decoded.id;
   const { errors, isValid } = validateMessageInput(req.body);
   // Check validation
     if (!isValid) {
@@ -31,6 +32,7 @@ router.post('/', validateToken, async (req, res) => {
       return res.status(400).json(errors);
     }else {
       try {
+        req.body['userId'] = mongoose.Types.ObjectId(userId);
         var requestData = new Message(req.body);
         const data = await requestData.save();
         return res.json(data);
@@ -67,7 +69,9 @@ router.delete('/:id', validateToken, async (req, res) => {
 */
 
 router.put('/:id', validateToken, async (req, res) => {
+  var userId = req.decoded.id;
   const _id = req.params.id;
+  req.body['userId'] = mongoose.Types.ObjectId(userId);
   Message.findOneAndUpdate({ _id },
     req.body,
     { new: true },
