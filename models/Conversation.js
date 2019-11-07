@@ -15,6 +15,10 @@ const messageSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    status: {
+      type: String,
+      enum: ['PASS', 'FAIL'],
+    },
   },
   { timestamps: true },
 );
