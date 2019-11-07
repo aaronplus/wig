@@ -1,5 +1,5 @@
 import React from 'react'
-import { Table, Divider } from 'antd'
+import { Table, Divider, Popconfirm } from 'antd'
 import EditPhoneNumber from './edit'
 
 const { Column } = Table;
@@ -73,7 +73,14 @@ class PhoneList extends React.Component {
               <span>
                 <a href="javascript:;" onClick={() => this.handleEdit(record._id)}>Edit</a>
                 <Divider type="vertical" />
-                <a href="javascript:;" onClick={() => this.handleDelete(record._id)}>Delete</a>
+                <Popconfirm
+                  title="Are you sure delete this?"
+                  onConfirm={() => this.handleDelete(record._id)}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <a href="javascript:;">Delete</a>
+                </Popconfirm>
               </span>
             )}
           />
