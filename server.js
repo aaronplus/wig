@@ -6,6 +6,8 @@ const cron = require('cron');
 const path = require('path');
 
 const app = express();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
 
 const passport = require('passport');
 const users = require('./routes/api/users');
@@ -67,7 +69,17 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
-app.listen(port, () => console.log(`Server up and running on port ${port} !`));
+server.listen(port, () =>
+  console.log(`Server up and running on port ${port} !`),
+);
+
+io.of('/api').on('connection', socket => {
+  console.log('Client connected');
+  global.socket = socket;
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
 
 // Initialize cronJob
 const CronJob = cron.CronJob;

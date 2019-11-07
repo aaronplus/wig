@@ -15,7 +15,8 @@ router.post('/sms', async (req, res) => {
       sid: MessageSid,
       received: true,
     });
-    console.log(await conversationExists.save());
+    const conversation = await conversationExists.save();
+    global.socket.emit('new_sms', conversation);
   } else {
     const phone = `${From}`.substring(1);
     const contact = await Contact.findOne({
@@ -55,7 +56,8 @@ router.post('/sms', async (req, res) => {
         conv.from_name = name.trim();
       }
     }
-    console.log(await Conversation.create(conv));
+    const conversation = await Conversation.create(conv);
+    global.socket.emit('new_sms', conversation);
   }
   res.sendStatus(200);
 });
