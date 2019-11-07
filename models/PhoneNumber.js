@@ -12,7 +12,7 @@ const PhoneNumberSchema = new Schema({
   },
   phone_number:{
     type: String,
-    required: false
+    required: false,
   },
   voice_forward_number:{
     type: String,
