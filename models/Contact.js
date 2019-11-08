@@ -14,6 +14,7 @@ const ContactSchema = new Schema({
   },
   campaign: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'campaigns',
     required: [true, 'Campaign is Required'],
   },
   firstNameOne: {

@@ -17,6 +17,7 @@ const messages = require('./routes/api/messages');
 const campaigns = require('./routes/api/campaigns');
 const phoneNumbers = require('./routes/api/phoneNumbers');
 const conversations = require('./routes/api/conversations');
+const keywords = require('./routes/api/keywords');
 const cors = require('cors');
 const User = require('./models/User');
 const Message = require('./models/Message');
@@ -41,9 +42,13 @@ const ip = 'localhost';
 const portNumber = process.env.portNumber || 27017;
 const appDB = 'wig';
 mongoose
-    .connect( process.env.MONGODB_URI || 'mongodb://' + ip + ':' + portNumber + '/' + appDB, {
-    useNewUrlParser: true,
-  })
+  .connect(
+    process.env.MONGODB_URI ||
+      'mongodb://' + ip + ':' + portNumber + '/' + appDB,
+    {
+      useNewUrlParser: true,
+    },
+  )
   .then(() => console.log('MongoDB successfully connected'))
   .catch(err => console.log(err));
 
@@ -59,9 +64,10 @@ app.use('/api/messages', messages);
 app.use('/api/campaigns', campaigns);
 app.use('/api/phoneNumbers', phoneNumbers);
 app.use('/api/twilio', conversations);
+app.use('/api/keywords', keywords);
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static( 'client/build' ))
+  app.use(express.static('client/build'));
 
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
@@ -84,7 +90,7 @@ io.of('/api').on('connection', socket => {
 // Initialize cronJob
 const CronJob = cron.CronJob;
 const job = new CronJob(
-  '* * * * * *',
+  '1 * * * * *',
   () => {
     messageCronJob().catch(console.error);
   },
@@ -194,6 +200,12 @@ PhoneNumber.countDocuments({}, function(err, count) {
         type: 'twilio',
         phone_number: '+61 427 287 920',
         voice_forward_number: 'PN5959bb608ccf2e743b2f33d213b99558',
+      },
+      {
+        name: 'third',
+        type: 'twilio',
+        phone_number: '+1 201 584 4231',
+        voice_forward_number: 'PN051df1818e851e49e733d8d7eaae956f',
       },
     ];
     PhoneNumber.insertMany(newRecord, function(error, docs) {
