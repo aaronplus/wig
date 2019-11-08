@@ -5,6 +5,8 @@ const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
 
+const { AREA_CODE } = require('../config/keys');
+
 // Models
 const Contact = require('../models/Contact');
 const Schedule = require('../models/Schedule');
@@ -259,7 +261,7 @@ async function sendMessage(from, to, body) {
       body,
       from: from.replace(/\s/g, ''),
       statusCallback: process.env.SMS_STATUS_CALLBACK,
-      to: `+${to}`.replace(/\s/g, ''),
+      to: `+${AREA_CODE}${to}`.replace(/\s/g, ''),
     });
     return response;
   } catch (error) {

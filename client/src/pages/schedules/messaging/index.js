@@ -24,27 +24,35 @@ class Messaging extends React.Component {
     this.getConversations()
     const socket = socketIO(SERVER_ADDRESS, { forceNew: true })
     socket.on('new_sms', data => {
-      const { conversations, activeId, conversation } = this.state
-      const index = conversations.findIndex(conv => conv.id.toString() === data._id.toString())
-      if (index === -1) {
-        this.setState({ conversations: [...conversations, this.formatConversation(data)] })
-      } else {
-        const newConv = this.formatConversation(data)
-        const newConvs = conversations
-        newConvs[index] = newConv
-        this.setState({
-          conversations: newConvs,
-          conversation: newConv.id === activeId ? newConv : conversation,
-        })
-      }
+      this.updateConversations(data)
       console.log('New Message Received', data)
     })
+  }
+
+  updateConversations = data => {
+    const { conversations, activeId, conversation } = this.state
+    const index = conversations.findIndex(conv => conv.id.toString() === data._id.toString())
+    if (index === -1) {
+      this.setState({ conversations: [...conversations, this.formatConversation(data)] })
+    } else {
+      const newConv = this.formatConversation(data)
+      const newConvs = conversations
+      newConvs[index] = newConv
+      this.setState({
+        conversations: newConvs,
+        conversation: newConv.id === activeId ? newConv : conversation,
+      })
+    }
   }
 
   formatConversation = conv => {
     const result = {
       id: conv._id,
-      name: conv.from_name,
+      campaign: conv.contact && conv.contact.campaign ? conv.contact.campaign.campaign : 'Unknown',
+      name: conv.contact ? `${conv.contact.firstNameOne} ${conv.contact.lastNameOne}` : 'Unknown',
+      address: conv.contact
+        ? `${conv.contact.propertyAddress}, ${conv.contact.propertyCity}, ${conv.contact.propertyState}, ${conv.contact.propertyZipCode}`
+        : 'Unknown',
       from: conv.from,
       to: conv.to,
       avatar: 'resources/images/avatars/avatar-2.png',
@@ -64,6 +72,7 @@ class Messaging extends React.Component {
   getConversations = async () => {
     try {
       const response = await axios.get(`${SERVER_ADDRESS}/twilio/conversations`)
+      console.log(response.data)
       const conversations = response.data.map(conv => this.formatConversation(conv))
       this.setState({ conversations })
     } catch (error) {
@@ -103,14 +112,10 @@ class Messaging extends React.Component {
   markConversationRead = async conversationId => {
     try {
       const response = await axios.put(`${SERVER_ADDRESS}/twilio/conversations/${conversationId}`)
-      const conversations = response.data.map(conv => this.formatConversation(conv))
+      this.updateConversations(response.data)
+      const { conversations } = this.state
       const conversation = conversations.find(x => x.id === conversationId)
-      this.setState({
-        activeId: conversationId,
-        conversation,
-        conversations,
-      })
-      this.setState({})
+      this.setState({ activeId: conversationId, conversation })
     } catch (error) {
       console.log(error)
     }
@@ -118,7 +123,7 @@ class Messaging extends React.Component {
 
   render() {
     const { activeId, conversations, conversation, msg } = this.state
-    const { name, messages, avatar } = conversation
+    const { name, address, messages, avatar } = conversation
     return (
       <div>
         <Helmet title="Apps: Messaging" />
@@ -157,13 +162,14 @@ class Messaging extends React.Component {
                     className={`${style.item} ${style.unread} ${
                       item.id === activeId ? style.current : ''
                     } d-flex flex-nowrap align-items-center`}
+                    style={{ backgroundColor: item.unread ? '#ffffff' : 'transparent' }}
                   >
                     <div className="air__utils__avatar air__utils__avatar--size46 mr-3 flex-shrink-0">
                       <img src={item.avatar} alt={item.name} />
                     </div>
                     <div className={`${style.info} flex-grow-1`}>
                       <div className="text-uppercase font-size-12 text-truncate text-gray-6">
-                        Campaign Name
+                        {item.campaign}
                       </div>
                       <div className="text-dark font-size-16 font-weight-normal text-truncate">
                         {item.name}
@@ -186,7 +192,7 @@ class Messaging extends React.Component {
                 <div className="d-flex flex-column justify-content-center mr-auto">
                   <h5 className="mb-0 mr-2 font-size-18">
                     {name} <br />
-                    <span className="font-size-14 text-gray-6">Address</span>
+                    <span className="font-size-14 text-gray-6">{address}</span>
                   </h5>
                 </div>
                 <div>

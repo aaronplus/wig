@@ -25,8 +25,9 @@ const messageSchema = new Schema(
 
 const conversationSchema = new Schema(
   {
-    from_name: {
-      type: String,
+    contact: {
+      type: Schema.Types.ObjectId,
+      ref: 'contacts',
     },
     from: {
       type: String,

@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const twilio = require('twilio');
 
+const { AREA_CODE } = require('../../config/keys');
+
 const Contact = require('../../models/Contact');
 const Conversation = require('../../models/Conversation');
 const SentMessages = require('../../models/SentMessages');
@@ -10,11 +12,18 @@ router.post('/sms', async (req, res) => {
   const messageReceived = req.body;
   console.log('Received Message: ', messageReceived);
   const { From, To, MessageSid, Body } = messageReceived;
-  const conversationExists = await Conversation.findOne({ from: From, to: To });
-  const keywords = Keyword.find({ type: false });
+  const conversationExists = await Conversation.findOne({
+    from: From,
+    to: To,
+  }).populate({
+    path: 'contact',
+    populate: { path: 'campaign' },
+  });
+  const keywords = await Keyword.find({ type: false });
   let Pass = true;
   for (let i = 0; i < keywords.length; i++) {
-    if (Body.includes(keywords[i])) {
+    console.log('Keywords', keywords[i].keyword);
+    if (Body.toLowerCase().includes(keywords[i]._doc.keyword.toLowerCase())) {
       Pass = false;
       break;
     }
@@ -27,10 +36,15 @@ router.post('/sms', async (req, res) => {
   };
   if (conversationExists) {
     conversationExists.messages.push(newMessage);
+    if (!Pass) {
+      await Contact.findByIdAndUpdate(conversationExists.contact._id, {
+        $set: { status: 'DO NOT CALL' },
+      });
+    }
     const conversation = await conversationExists.save();
     global.socket.emit('new_sms', conversation);
   } else {
-    const phone = `${From}`.substring(1);
+    const phone = `${From}`.substring(AREA_CODE.toString().length + 1);
     const contact = await Contact.findOne({
       $or: [
         { phoneOne: phone },
@@ -46,34 +60,23 @@ router.post('/sms', async (req, res) => {
       ],
     });
     const conv = {
-      from_name: 'Unknown',
       from: From,
       to: To,
       messages: [newMessage],
     };
     if (contact) {
       console.log('Contact: ', JSON.stringify(contact, undefined, 2));
-      let name = null;
-      if (contact.firstNameTwo || contact.lastNameTwo) {
-        name = `${contact.firstNameTwo ? contact.firstNameTwo : ''} ${
-          contact.lastNameTwo ? contact.lastNameTwo : ''
-        }`;
-      }
-      if (contact.firstNameOne || contact.lastNameOne) {
-        name = `${contact.firstNameOne ? contact.firstNameOne : ''} ${
-          contact.lastNameOne ? contact.lastNameOne : ''
-        }`;
-      }
-      if (name && name.trim().length > 0) {
-        conv.from_name = name.trim();
-      }
+      conv.contact = contact._id;
       if (!Pass) {
         await Contact.findByIdAndUpdate(contact._id, {
           $set: { status: 'DO NOT CALL' },
         });
       }
     }
-    const conversation = await Conversation.create(conv);
+    const conversation = await Conversation.create(conv).populate({
+      path: 'contact',
+      populate: { path: 'campaign' },
+    });
     global.socket.emit('new_sms', conversation);
   }
   res.writeHead(200, { 'Content-Type': 'text/xml' });
@@ -126,7 +129,10 @@ router.post('/reply/:conversationId', async (req, res) => {
 
 router.get('/conversations', async (req, res) => {
   try {
-    const conversations = await Conversation.find();
+    const conversations = await Conversation.find().populate({
+      path: 'contact',
+      populate: { path: 'campaign' },
+    });
     res.json(conversations);
   } catch (error) {
     res.status(400).json(error);
@@ -136,7 +142,10 @@ router.get('/conversations', async (req, res) => {
 router.get('/conversations/:conversationId', async (req, res) => {
   const { conversationId } = req.params;
   try {
-    const conversation = await Conversation.findById(conversationId);
+    const conversation = await Conversation.findById(conversationId).populate({
+      path: 'contact',
+      populate: { path: 'campaign' },
+    });
     res.json(conversation);
   } catch (error) {
     console.log(error);
@@ -147,15 +156,17 @@ router.get('/conversations/:conversationId', async (req, res) => {
 router.put('/conversations/:conversationId', async (req, res) => {
   const { conversationId } = req.params;
   try {
-    await Conversation.updateMany(
-      { _id: conversationId, 'messages.read': false },
-      {
-        $set: { 'messages.$.read': true },
-      },
-      { new: true, multi: true },
-    );
-    const conversations = await Conversation.find();
-    res.json(conversations);
+    const conv = await Conversation.findById(conversationId).populate({
+      path: 'contact',
+      populate: { path: 'campaign' },
+    });
+    for (let i = 0; i < conv.messages.length; i++) {
+      if (!conv.messages[i].read) {
+        conv.messages[i].read = true;
+      }
+    }
+    const conversation = await conv.save();
+    res.json(conversation);
   } catch (error) {
     console.log(error);
     res.status(400).json(error);
@@ -172,7 +183,7 @@ async function sendMessage(from, to, body) {
     const response = await client.messages.create({
       body,
       from: from.replace(/\s/g, ''),
-      to: to.replace(/\s/g, ''),
+      to: `${AREA_CODE}${to}`.replace(/\s/g, ''),
     });
     return response;
   } catch (error) {
