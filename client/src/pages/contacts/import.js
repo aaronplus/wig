@@ -4,8 +4,10 @@ import { connect } from 'react-redux'
 import { Form, Input, Upload, Button, Icon, Select, Radio, Modal, Spin,  message } from 'antd'
 import { SERVER_ADDRESS } from '../../config/constants'
 
+
 const { Option } = Select
 const axios = require('axios').default
+
 
 // @Form.create()
 const mapStateToProps = ({ contacts }) => ({ contacts })
@@ -254,7 +256,7 @@ class ImportContacts extends React.Component {
 
   handleSubmit(ev) {
     axios.defaults.headers.common.Authorization = `${localStorage.getItem("jwtToken")}`;
-    const { form, skipTraced, handleUploadFile } = this.props;
+    const { form, skipTraced, handleUploadFile, hideModal } = this.props;
     console.log(this.props);
     const { campaignType, fileObj } = this.state;
 
@@ -298,8 +300,10 @@ class ImportContacts extends React.Component {
             data.append('skipTraced', skipTraced);
           }
           this.setState({
-            spinner: true
+            showModal: false,
+            spinner: false
           })
+          hideModal();
            axios
             .post(`${SERVER_ADDRESS}/contacts/upload`, data)
             .then((res) => {
@@ -315,18 +319,18 @@ class ImportContacts extends React.Component {
                 })
               }
 
-            }).catch((error) =>{
-              if (error.response.data.code && error.response.data.code === 11000) {
-                  message.error("Duplicate entry detected");
-              }else if (error.response.data.message) {
-                message.error(error.response.data.message);
-              }else {
-                const errors=  Object.keys(error.response.data.errors).map((er)=>{
-                    return error.response.data.errors[er].message;
-                  });
-                  console.log(errors);
-                  message.error(errors[0]);
-              }
+            }).catch(() =>{
+              // if (error.response.data.code && error.response.data.code === 11000) {
+              //     message.error("Duplicate entry detected");
+              // }else if (error.response.data.message) {
+              //   message.error(error.response.data.message);
+              // }else {
+              //   const errors=  Object.keys(error.response.data.errors).map((er)=>{
+              //       return error.response.data.errors[er].message;
+              //     });
+              //     console.log(errors);
+              //     message.error(errors[0]);
+              // }
 
               this.setState({
                 spinner: false

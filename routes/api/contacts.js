@@ -180,9 +180,17 @@ const fileRows=await csvtoJson().fromFile(csvFilePath);
 var fileHeader;
 var headers = JSON.parse(req.body.headers);
 var rowData = [];
+
+global.socket.emit('import_status', {total:fileRows.length});
+var insertedCount = 0;
+var updatedCount = 0;
+var skippedCount = 0;
 //skipTraced
 if (req.body.skipTraced) {
-  fileRows.map((row,index)=>{
+  var promises = fileRows.map((row,index)=>{
+    if (index % 100 === 0) {
+      global.socket.emit('import_status', {total:fileRows.length, index});
+    }
     let data = {};
 
     data['lastNameOne'] = row[`${headers['lastName']}`] || row['INPUT_LAST_NAME'];
@@ -229,17 +237,23 @@ if (req.body.skipTraced) {
     data['phoneTenScore']=row['PHONE10_PHONE_SCORE'];
 
     //let campaign = campaignId._id? mongoose.Types.ObjectId(campaignId._id): campaignId;
-    Contact.updateOne({internal: data['internal']}, data, {upsert: true}, function (err,docs) {
+
+    Contact.findOneAndUpdate({internal: data['internal']}, data, {upsert: true, new: true,rawResult:true}, function (err,docs) {
       if (err) {
         return res.status(500).json({'error': err});
-      }else {
-        //return res.status(200).json(docs);
       }
-
+      if (docs.lastErrorObject.updatedExisting) {
+        updatedCount++;
+      }else {
+        insertedCount++;
+      }
+      skippedCount++;
+      return docs;
       });
-
-    rowData.push(data);
   });
+  Promise.all(promises).then(function(results) {
+    global.socket.emit('import_status_success', {total:fileRows.length, insertedCount,updatedCount,skippedCount});
+ })
   return res.json({'message':'Updated Successfully'});
   // let campaign = campaignId._id? mongoose.Types.ObjectId(campaignId._id): campaignId;
   // Contact.updateMany({userId: mongoose.Types.ObjectId(userId), campaign: mongoose.Types.ObjectId(campaign)}, rowData, {$upsert: true}, function (err,docs) {
@@ -266,12 +280,17 @@ if (req.body.skipTraced) {
    //   .on('end', () => {
        /*Create contacts*/
 
+
        var promises = fileRows.map((row,index)=>{
+         if (index % 100 === 0) {
+           global.socket.emit('import_status', {total:fileRows.length, index});
+         }
+
          let data = {};
          data['lastNameOne'] = row[`${headers['lastName']}`] || row['OWNER 1 LAST NAME'];
          data['propertyAddress'] = row[`${headers['propertyAddress']}`] || row['SITUS STREET ADDRESS'];
 
-         let uniqueStr = data['propertyAddress'].concat(data['lastNameOne']);
+         let uniqueStr = data['propertyAddress'] ? data['propertyAddress'].concat(data['lastNameOne']): '';
          data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
          data['userId'] = mongoose.Types.ObjectId(userId);
         // data['internal'] = row['MAILING_STREET_ADDRESS'] || row['MAILING STREET ADDRESS'];
@@ -377,10 +396,16 @@ if (req.body.skipTraced) {
          data['sellerLead']='';
 
          rowData.push(data);
-         return Contact.updateOne({internal: data['internal']}, data, {upsert: true}, function(err, row){
+         return Contact.findOneAndUpdate({internal: data['internal']}, data, {upsert: true, new: true,rawResult:true}, function(err, row){
            if (err) {
              return err;
            }
+           if (row.lastErrorObject.updatedExisting) {
+             updatedCount++;
+           }else {
+             insertedCount++;
+           }
+
            return row;
          });
 
@@ -388,6 +413,7 @@ if (req.body.skipTraced) {
        });
 
        Promise.all(promises).then(function(results) {
+         global.socket.emit('import_status_success', {total:fileRows.length, insertedCount,updatedCount,skippedCount});
           return res.json(results);
       })
 

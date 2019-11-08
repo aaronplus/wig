@@ -410,7 +410,7 @@ const ContactSchema = new Schema({
   },
   status: {
     type: String,
-    enum: 'DO NOT CALL',
+    default: 'New',
   },
 });
 module.exports = Contact = mongoose.model('contacts', ContactSchema);

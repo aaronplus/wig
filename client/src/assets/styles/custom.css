@@ -17,3 +17,12 @@
 .map-d {
   margin-bottom: 0px!important;
 }
+
+.prgs-card {
+  text-align: center;
+}
+.prgs-card p {
+  font-size: 18px;
+    font-weight: bold;
+    margin-bottom: -4px;
+}

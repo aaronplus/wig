@@ -1,7 +1,10 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Table, Button, Modal, Form, Select } from 'antd'
+import socketIO from 'socket.io-client'
 import ImportContacts from './import'
+import ProgressBar from '../../components/contacts/ProgressBar';
+import { SERVER_ADDRESS } from '../../config/constants'
 
 const { Option } = Select
 // import data from './data.json'
@@ -16,6 +19,7 @@ class ContactsList extends React.Component {
     visible: false,
     visibleImportComponent: false,
     visibleImportSkipTracedComponent: false,
+    showProgressBar: false
   }
 
   componentDidMount() {
@@ -28,6 +32,21 @@ class ContactsList extends React.Component {
       type: 'contacts/GET_CAMPAIGN_LIST',
       payload: false,
     })
+
+    const socket = socketIO(SERVER_ADDRESS, { forceNew: true })
+    socket.on('import_status', data => {
+      this.setState({
+        showProgressBar: true,
+        progressData: data
+      })
+      console.log(data, "Import Status");
+    });
+    socket.on('import_status_success', data => {
+      console.log(data, "Import Status");
+      this.setState({
+        progressData: data
+      })
+    });
   }
 
   handleChange = (pagination, filters, sorter) => {
@@ -108,6 +127,13 @@ class ContactsList extends React.Component {
     })
   }
 
+  hideModal = () =>{
+    this.setState({
+      visibleImportComponent:false,
+      visibleImportSkipTracedComponent: false
+    })
+  }
+
   render() {
     const {
       contacts: { campaignList, list, countObj },
@@ -134,7 +160,7 @@ class ContactsList extends React.Component {
         console.log(cityFilterOptions);
     const data = list;
     let { sortedInfo, filteredInfo } = this.state
-    const { visible, visibleImportComponent, visibleImportSkipTracedComponent } = this.state
+    const { progressData, visible, visibleImportComponent, visibleImportSkipTracedComponent, showProgressBar } = this.state
     sortedInfo = sortedInfo || {}
     filteredInfo = filteredInfo || {}
     console.log(filteredInfo)
@@ -207,7 +233,45 @@ class ContactsList extends React.Component {
 
     return (
       <div>
+        {showProgressBar ?
+          <div className="card">
+            <div className="card-body prgrs-bar">
+              <div className="row justify-content-between">
+                <div className="col-md-5 prgs-card">
+                  <ProgressBar data={progressData} />
+                </div>
+                <div className="col-auto">
+                  <div className="row">
+                    <div className="col-md prgs-card">
+                      <p className="text-success">{progressData.insertedCount}</p>
+                      Inserted
+                    </div>
+                    <div className="col-md prgs-card">
+                      <p className="text-default">{progressData.updatedCount}</p>
+                      Updated
+                    </div>
+                    <div className="col-md prgs-card">
+                      <p className="text-danger">{progressData.skippedCount}</p>
+                      Skipped
+                    </div>
+                  </div>
+                </div>
+                <div className="col-auto d-flex align-items-center justify-content-end">
+                  <span className="d-block mr-3">Send To Skip</span>
+                  <Button className="mr-2" type="danger" ghost size='small' onClick={() => this.setState({showProgressBar: false})}>
+                    No
+                  </Button>
+                  <Button type="button" className="btn-success text-success" ghost size='small' onClick={() => this.setState({showProgressBar: false})}>
+                    Yes
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        :''}
         <div className="row">
+
+
           <div className="col-md-3">
             <div className="air__utils__heading">
               <h5>Contacts</h5>
@@ -330,7 +394,7 @@ class ContactsList extends React.Component {
                 </Button>
             ]}
             >
-              <ImportContacts skipTraced={false} handleUploadFile={this.handleUploadFile} />
+              <ImportContacts skipTraced={false} handleUploadFile={this.handleUploadFile} hideModal={this.hideModal} />
             </Modal>
             <Modal
               title="Import Skip traced Contacts"
@@ -344,7 +408,7 @@ class ContactsList extends React.Component {
                 </Button>
             ]}
             >
-              <ImportContacts skipTraced handleUploadFile={this.handleUploadFile} />
+              <ImportContacts skipTraced handleUploadFile={this.handleUploadFile} hideModal={this.hideModal} />
             </Modal>
           </div>
         </div>
