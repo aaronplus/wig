@@ -41,6 +41,12 @@ class ContactsList extends React.Component {
       })
       console.log(data, "Import Status");
     });
+    socket.on('import_status_progress', data => {
+      this.setState({
+        progressData: data
+      })
+      console.log(data, "Import Status");
+    });
     socket.on('import_status_success', data => {
       console.log(data, "Import Status");
       this.setState({
@@ -123,7 +129,8 @@ class ContactsList extends React.Component {
     })
     this.setState({
       visibleImportComponent:false,
-      visibleImportSkipTracedComponent: false
+      visibleImportSkipTracedComponent: false,
+      // progressData:null
     })
   }
 

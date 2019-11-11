@@ -310,7 +310,7 @@ class ImportContacts extends React.Component {
               console.log(res);
               if (res.status === 200) {
                 message.success("Uploaded Successfully");
-                form.resetFields(['campaign']);
+                form.resetFields();
 
                 handleUploadFile();
                 this.setState({

@@ -86,7 +86,7 @@ router.post('/export', validateToken, function(req, res, next){
      var campaignId = req.body.campaign;
      qry = {userId:mongoose.Types.ObjectId(userId), campaign: mongoose.Types.ObjectId(campaignId)}
    }
-   console.log(JSON.stringify(qry));
+   // console.log(JSON.stringify(qry));
 
    var filename   = "contacts.csv";
    var dataArray;
@@ -145,7 +145,7 @@ if (req.body.campaignType == 'new') {
     }
 
   } catch (e) {
-    console.log(e);
+    // console.log(e);
     return res.status(500).json({error: "Error in save Campaign"});
   }
 }else {
@@ -176,7 +176,7 @@ const fileRows=await csvtoJson().fromFile(csvFilePath);
 
 
 
-
+//return res.json(fileRows);
 var fileHeader;
 var headers = JSON.parse(req.body.headers);
 var rowData = [];
@@ -189,7 +189,7 @@ var skippedCount = 0;
 if (req.body.skipTraced) {
   var promises = fileRows.map((row,index)=>{
     if (index % 100 === 0) {
-      global.socket.emit('import_status', {total:fileRows.length, index});
+      global.socket.emit('import_status_progress', {total:fileRows.length, index});
     }
     let data = {};
 
@@ -200,10 +200,10 @@ if (req.body.skipTraced) {
     data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
     data['userId'] = mongoose.Types.ObjectId(userId);
   //  data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
-    data['firstNameOne'] = row[`${headers['firstName']}`] || row['INPUT_FIRST_NAME'];
-    data['propertyCity'] = row[`${headers['propertyCity']}`] || row['INPUT_ADDRESS_CITY'];
-    data['propertyState'] = row[`${headers['propertyState']}`] || row['INPUT_ADDRESS_STATE'];
-    data['propertyZipCode'] = row[`${headers['propertyZip']}`] || row['INPUT_ADDRESS_ZIP'];
+    // data['firstNameOne'] = row[`${headers['firstName']}`] || row['INPUT_FIRST_NAME'];
+    // data['propertyCity'] = row[`${headers['propertyCity']}`] || row['INPUT_ADDRESS_CITY'];
+    // data['propertyState'] = row[`${headers['propertyState']}`] || row['INPUT_ADDRESS_STATE'];
+    // data['propertyZipCode'] = row[`${headers['propertyZip']}`] || row['INPUT_ADDRESS_ZIP'];
 
     data['phoneOne']= row['PHONE1_PHONE'];
     data['phoneOneType']=row['PHONE1_PHONE_TYPE'];
@@ -238,23 +238,23 @@ if (req.body.skipTraced) {
 
     //let campaign = campaignId._id? mongoose.Types.ObjectId(campaignId._id): campaignId;
 
-    Contact.findOneAndUpdate({internal: data['internal']}, data, {upsert: true, new: true,rawResult:true}, function (err,docs) {
+    return Contact.update({internal: data['internal']}, {...data}, function (err, affected, resp) {
       if (err) {
         return res.status(500).json({'error': err});
       }
-      if (docs.lastErrorObject.updatedExisting) {
+      if (affected.n >= 1 && affected.nModified > 0) {
         updatedCount++;
-      }else {
-        insertedCount++;
       }
-      skippedCount++;
-      return docs;
+
+      return affected;
       });
   });
   Promise.all(promises).then(function(results) {
-    global.socket.emit('import_status_success', {total:fileRows.length, insertedCount,updatedCount,skippedCount});
+    // console.log(results);
+    global.socket.emit('import_status_success', {total:fileRows.length, insertedCount,updatedCount,skippedCount, index:fileRows.length});
+    return res.json({'message':'Updated Successfully'});
  })
-  return res.json({'message':'Updated Successfully'});
+
   // let campaign = campaignId._id? mongoose.Types.ObjectId(campaignId._id): campaignId;
   // Contact.updateMany({userId: mongoose.Types.ObjectId(userId), campaign: mongoose.Types.ObjectId(campaign)}, rowData, {$upsert: true}, function (err,docs) {
   //   if (err) {
@@ -280,10 +280,12 @@ if (req.body.skipTraced) {
    //   .on('end', () => {
        /*Create contacts*/
 
-
+       var percent = 1;
        var promises = fileRows.map((row,index)=>{
-         if (index % 100 === 0) {
-           global.socket.emit('import_status', {total:fileRows.length, index});
+         let filePercent = Math.ceil((fileRows.length*percent)/100);
+         if (index == filePercent) {
+           global.socket.emit('import_status_progress', {total:fileRows.length, index});
+           percent = parseInt(percent) + 10;
          }
 
          let data = {};
@@ -413,7 +415,7 @@ if (req.body.skipTraced) {
        });
 
        Promise.all(promises).then(function(results) {
-         global.socket.emit('import_status_success', {total:fileRows.length, insertedCount,updatedCount,skippedCount});
+         global.socket.emit('import_status_success', {total:fileRows.length, insertedCount,updatedCount,skippedCount, index:fileRows.length});
           return res.json(results);
       })
 
@@ -501,36 +503,36 @@ router.get('/getCounts', validateToken, async function (req, res, next) {
 
 
 // -> Import CSV File to MongoDB database
-function importCsvData2MongoDB(filePath){
-    csv()
-        .fromFile(filePath)
-        .then((jsonObj)=>{
-            console.log(jsonObj);
-            /**
-             [
-                { _id: '1', name: 'Jack Smith', address: 'Massachusetts', age: '23' },
-                { _id: '2', name: 'Adam Johnson', address: 'New York', age: '27' },
-                { _id: '3', name: 'Katherin Carter', address: 'Washington DC', age: '26' },
-                { _id: '4', name: 'Jack London', address: 'Nevada', age: '33' },
-                { _id: '5', name: 'Jason Bourne', address: 'California', age: '36' }
-             ]
-            */
-            // Insert Json-Object to MongoDB
-            // MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
-            //     if (err) throw err;
-            //     let dbo = db.db("gkzdb");
-            //     dbo.collection("customers").insertMany(jsonObj, (err, res) => {
-            //        if (err) throw err;
-            //        console.log("Number of documents inserted: " + res.insertedCount);
-            //        /**
-            //            Number of documents inserted: 5
-            //        */
-            //        db.close();
-            //     });
-            // });
-
-            fs.unlinkSync(filePath);
-        })
-}
+// function importCsvData2MongoDB(filePath){
+//     csv()
+//         .fromFile(filePath)
+//         .then((jsonObj)=>{
+//             console.log(jsonObj);
+//             /**
+//              [
+//                 { _id: '1', name: 'Jack Smith', address: 'Massachusetts', age: '23' },
+//                 { _id: '2', name: 'Adam Johnson', address: 'New York', age: '27' },
+//                 { _id: '3', name: 'Katherin Carter', address: 'Washington DC', age: '26' },
+//                 { _id: '4', name: 'Jack London', address: 'Nevada', age: '33' },
+//                 { _id: '5', name: 'Jason Bourne', address: 'California', age: '36' }
+//              ]
+//             */
+//             // Insert Json-Object to MongoDB
+//             // MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
+//             //     if (err) throw err;
+//             //     let dbo = db.db("gkzdb");
+//             //     dbo.collection("customers").insertMany(jsonObj, (err, res) => {
+//             //        if (err) throw err;
+//             //        console.log("Number of documents inserted: " + res.insertedCount);
+//             //        /**
+//             //            Number of documents inserted: 5
+//             //        */
+//             //        db.close();
+//             //     });
+//             // });
+//
+//             fs.unlinkSync(filePath);
+//         })
+// }
 
 module.exports = router;
