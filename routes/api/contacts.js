@@ -229,7 +229,7 @@ if (req.body.skipTraced) {
     data['phoneTenScore']=row['PHONE10_PHONE_SCORE'];
 
     //let campaign = campaignId._id? mongoose.Types.ObjectId(campaignId._id): campaignId;
-    Contact.updateOne({internal: data['internal']}, data, {upsert: true}, function (err,docs) {
+    Contact.updateOne({internal: data['internal']}, data, {upsert: false}, function (err,docs) {
       if (err) {
         return res.status(500).json({'error': err});
       }else {
@@ -278,7 +278,7 @@ if (req.body.skipTraced) {
          data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
          data['firstNameOne'] = row[`${headers['firstName']}`] || row['OWNER 1 FIRST NAME'];
 
-         data['phoneOne'] = row['phoneOne'];
+         // data['phoneOne'] = row['phoneOne'];
          data['correctPhone'] = '';
          data['firstNameTwo'] = row['FIRST_NAME_2'] || row['OWNER 2 FIRST NAME'];
          data['lastNameTwo'] = row['LAST_NAME_2'] || row['OWNER 2 LAST NAME'];
