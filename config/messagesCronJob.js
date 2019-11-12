@@ -41,11 +41,13 @@ module.exports = async () => {
         phone_number_id: activeSchedules[i].phone_number,
         campaign_id: activeSchedules[i].campaign,
         page: 0,
+        offset: 0,
         limit: 10,
         date: toDate,
       };
       if (status) {
         msg.page = status.pages;
+        msg.offset = status.pages * msg.limit;
         const sentToday = status.sent_messages.find(
           x =>
             new Date(x.date).toISOString() === new Date(toDate).toISOString(),
@@ -101,10 +103,10 @@ function filterActiveSchedules(schedules) {
   return activeSchedules;
 }
 
-async function getContacts(campaign_id, page = 0, limit = 5) {
+async function getContacts(campaign_id, page = 0, offset, limit = 5) {
   try {
     const contacts = await Contact.find({ campaign: campaign_id })
-      .skip(page * limit)
+      .skip(offset)
       .limit(limit);
     return contacts;
   } catch (error) {
@@ -126,11 +128,12 @@ async function getContactsAndSendMessages({
   phone_number_id,
   campaign_id,
   page,
+  offset,
   limit,
   date,
 }) {
   try {
-    const contacts = await getContacts(campaign_id, page, limit);
+    const contacts = await getContacts(campaign_id, page, offset, limit);
     if (contacts.length <= 0) {
       console.log('Message sent to all contacts.');
       return;
