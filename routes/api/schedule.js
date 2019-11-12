@@ -16,22 +16,78 @@ router.get('/all', validateToken, async (req, res) => {
     const schedules = await Schedule.find().populate('campaign');
     const sentMessages = await SentMessages.find();
     const contacts = await Contact.find();
-    const schedulesData = schedules.map(schedule => ({
-      ...schedule._doc,
-      total: contacts.filter(
-        contact =>
-          contact.campaign.toString() === schedule.campaign._id.toString(),
-      ).length,
-      sent: sentMessages.find(
-        sm => sm.schedule_id.toString() === schedule._id.toString(),
-      )
-        ? sentMessages.find(
-            sm => sm.schedule_id.toString() === schedule._id.toString(),
-          ).sent
-        : 0,
-    }));
+    const schedulesData = schedules.map(schedule => {
+      const result = {
+        ...schedule._doc,
+      };
+      const contactsMatched = contacts.filter(contact => {
+        if (contact.campaign && schedule.campaign && schedule.campaign._id) {
+          if (
+            contact.campaign.toString() === schedule.campaign._id.toString()
+          ) {
+            return true;
+          }
+        }
+        return false;
+      });
+      const sentMessagesStatus = sentMessages.find(sm => {
+        if (sm.schedule_id && schedule._id) {
+          if (sm.schedule_id.toString() === schedule._id.toString()) {
+            return sm;
+          }
+        }
+      });
+      result.total = Array.isArray(contactsMatched)
+        ? contactsMatched.length
+        : 0;
+      result.sent = sentMessagesStatus ? sentMessagesStatus.sent : 0;
+      return result;
+    });
     return res.json(schedulesData);
   } catch (error) {
+    console.log('Error Thrown...', error);
+    return res.status(500).json(error);
+  }
+});
+
+router.get('/all/status', async (req, res) => {
+  try {
+    const [schedules, sentMessages, contacts] = await Promise.all([
+      Schedule.find().populate('campaign'),
+      SentMessages.find(),
+      Contact.find(),
+    ]);
+    const schedulesData = schedules.map(schedule => {
+      const result = {
+        ...schedule._doc,
+      };
+      const contactsMatched = contacts.filter(contact => {
+        if (contact.campaign && schedule.campaign && schedule.campaign._id) {
+          if (
+            contact.campaign.toString() === schedule.campaign._id.toString()
+          ) {
+            return true;
+          }
+        }
+        return false;
+      });
+      const sentMessagesStatus = sentMessages.find(sm => {
+        if (sm.schedule_id && schedule._id) {
+          if (sm.schedule_id.toString() === schedule._id.toString()) {
+            return sm;
+          }
+        }
+      });
+      result.total = Array.isArray(contactsMatched)
+        ? contactsMatched.length
+        : 0;
+      result.sent = sentMessagesStatus ? sentMessagesStatus.sent : 0;
+      result.sentMessagesStatus = sentMessagesStatus;
+      return result;
+    });
+    return res.json(schedulesData);
+  } catch (error) {
+    console.log('Error thrown...', error);
     return res.status(500).json(error);
   }
 });
