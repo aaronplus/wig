@@ -12,15 +12,19 @@ function CampaignProgress({ campaign = { sent: 0, delivered: 0, failed: 0 } }) {
           <div className="col-auto">
             <div className="row">
               <div className="col-md prgs-card">
-                <p className="text-success">{campaign.sent}</p>
+                <p className="text-success">{campaign.totalPhoneNumbers}</p>
+                Total
+              </div>
+              <div className="col-md prgs-card">
+                <p className="text-success">{campaign.status.sent}</p>
                 Sent
               </div>
               <div className="col-md prgs-card">
-                <p className="text-default">{campaign.delivered}</p>
+                <p className="text-default">{campaign.status.delivered}</p>
                 Delivered
               </div>
               <div className="col-md prgs-card">
-                <p className="text-danger">{campaign.failed}</p>
+                <p className="text-danger">{campaign.status.failed}</p>
                 Failed
               </div>
             </div>

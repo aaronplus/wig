@@ -1,6 +1,7 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
 import axios from 'axios'
+import socketIO from 'socket.io-client'
 // import moment from 'moment'
 import { SERVER_ADDRESS } from 'config/constants'
 
@@ -13,32 +14,30 @@ class DashboardAnalytics extends React.Component {
 
   componentDidMount() {
     this.getSchedules()
+    const socket = socketIO(SERVER_ADDRESS, { forceNew: true })
+    socket.on('status_update', data => {
+      const { dataSource } = this.state
+      const index = dataSource.findIndex(ds => ds._id === data.schedule_id)
+      if (index !== -1) {
+        dataSource[index].status = data.status
+        this.setState({ dataSource })
+      }
+      // console.log('Status Updated', data, index, dataSource)
+    })
   }
 
   getSchedules = async () => {
-    const response = await axios(`${SERVER_ADDRESS}/schedule/all/status`, {
+    const response = await axios(`${SERVER_ADDRESS}/schedule/all`, {
       headers: {
         Authorization: localStorage.getItem('jwtToken'),
       },
     })
-    console.log('Schedules: ', response.data)
     const schedules = response.data.map(ds => {
-      console.log('ds', ds)
-      const result = {}
+      const result = { _id: ds._id }
       result.name = ds.campaign ? ds.campaign.campaign : 'Campaign Name missing'
-      result.total = ds.total
-      result.sent =
-        ds.sentMessagesStatus && ds.sentMessagesStatus.message_status
-          ? ds.sentMessagesStatus.message_status.filter(ms => ms.status === 'sent').length
-          : 0
-      result.delivered =
-        ds.sentMessagesStatus && ds.sentMessagesStatus.message_status
-          ? ds.sentMessagesStatus.message_status.filter(ms => ms.status === 'delivered').length
-          : 0
-      result.failed =
-        ds.sentMessagesStatus && ds.sentMessagesStatus.message_status
-          ? ds.sentMessagesStatus.message_status.filter(ms => ms.status === 'failed').length
-          : 0
+      result.totalContacts = ds.totalContacts
+      result.totalPhoneNumbers = ds.totalPhoneNumbers
+      result.status = ds.status
       return result
     })
     this.setState({ dataSource: schedules })
@@ -46,12 +45,11 @@ class DashboardAnalytics extends React.Component {
 
   render() {
     const { dataSource } = this.state
-    console.log(dataSource)
     return (
       <div>
         <Helmet title="Dashboard: Analytics" />
         {dataSource.map(campaign => (
-          <CampaignProgress key={campaign.name} campaign={campaign} />
+          <CampaignProgress key={campaign._id} campaign={campaign} />
         ))}
       </div>
     )

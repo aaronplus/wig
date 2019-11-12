@@ -36,8 +36,8 @@ multer({
 
 router.get('/list', validateToken, async function(req, res, next){
   var userId = req.decoded.id;
-  // let { page, limit} = req.query;
-
+  let { page, limit} = req.query;
+  let skip = page * limit;
   let contacts = await Contact.aggregate([
     {
       $match:{
@@ -51,12 +51,31 @@ router.get('/list', validateToken, async function(req, res, next){
     as: "campaign_info"
    }
  },
- // {$limit: parseInt(limit)},
- // {$skip: parseInt(page*limit)},
+ { "$limit": parseInt(skip + limit) },
+ { "$skip": parseInt(skip) },
  {
    $unwind: '$campaign_info'
  }
   ]);
+  console.log(JSON.stringify([
+    {
+      $match:{
+        userId:mongoose.Types.ObjectId(userId)
+      }
+    },
+    {$lookup: {
+    from:"campaigns",
+    localField: "campaign",
+    foreignField: "_id",
+    as: "campaign_info"
+   }
+ },
+ {$skip: parseInt(page*limit)},
+ {$limit: parseInt(limit)},
+ {
+   $unwind: '$campaign_info'
+ }
+  ]));
   return res.json(contacts);
 });
 
