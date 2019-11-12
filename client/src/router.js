@@ -397,7 +397,7 @@ class Router extends React.Component {
             <Route exact path="/" render={() => <Redirect to="/dashboard/analytics" />} />
             {routes.map(({ path, Component, exact }) => (
               <Route path={path} key={path} exact={exact}>
-                <Component />
+                <Component history={history} />
               </Route>
             ))}
             <Route component={NotFoundPage} />

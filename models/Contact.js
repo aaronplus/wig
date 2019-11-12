@@ -411,7 +411,11 @@ const ContactSchema = new Schema({
   },
   status: {
     type: String,
-    enum: 'DO NOT CALL',
+    default: 'New',
   },
+  groupId:{
+    type: String,
+    required: false
+  }
 });
 module.exports = Contact = mongoose.model('contacts', ContactSchema);
