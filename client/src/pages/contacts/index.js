@@ -204,7 +204,12 @@ class ContactsList extends React.Component {
     ]
 
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
-
+    const pagination = {
+      // ...this.paginationOptions,
+      total: 61,
+      current: 1,
+      pageSize: 50,
+    };
     return (
       <div>
         <div className="row">
@@ -296,6 +301,7 @@ class ContactsList extends React.Component {
                 dataSource={data}
                 scroll={{ x: '100%' }}
                 onChange={this.handleChange}
+                pagination={pagination}
               />
             </div>
             <Modal

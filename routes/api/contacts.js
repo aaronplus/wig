@@ -14,6 +14,7 @@ const validateToken = require("../validateToken").validateToken;
 const Campaign = require('../../models/Campaign');
 const Contact = require('../../models/Contact');
 const stringify = require('csv-stringify');
+const moment = require("moment");
 
 const upload = multer({ dest: 'uploads/' });
 multer({
@@ -45,6 +46,7 @@ router.get('/list', validateToken, async function(req, res, next){
     as: "campaign_info"
    }
  },
+ {$limit: parseInt(process.env.RECORDS_LIMIT)},
  {
    $unwind: '$campaign_info'
  }
@@ -192,11 +194,11 @@ if (req.body.skipTraced) {
     data['internal'] = uniqueStr.replace(/[^A-Z0-9]/ig, "");
     data['userId'] = mongoose.Types.ObjectId(userId);
   //  data['campaign'] = campaignId._id? mongoose.Types.ObjectId(campaignId._id): mongoose.Types.ObjectId(campaignId);
-    data['firstNameOne'] = row[`${headers['firstName']}`] || row['INPUT_FIRST_NAME'];
-    data['propertyCity'] = row[`${headers['propertyCity']}`] || row['INPUT_ADDRESS_CITY'];
-    data['propertyState'] = row[`${headers['propertyState']}`] || row['INPUT_ADDRESS_STATE'];
-    data['propertyZipCode'] = row[`${headers['propertyZip']}`] || row['INPUT_ADDRESS_ZIP'];
-
+    // data['firstNameOne'] = row[`${headers['firstName']}`] || row['INPUT_FIRST_NAME'];
+    // data['propertyCity'] = row[`${headers['propertyCity']}`] || row['INPUT_ADDRESS_CITY'];
+    // data['propertyState'] = row[`${headers['propertyState']}`] || row['INPUT_ADDRESS_STATE'];
+    // data['propertyZipCode'] = row[`${headers['propertyZip']}`] || row['INPUT_ADDRESS_ZIP'];
+    data['skippedDate']=moment();
     data['phoneOne']= row['PHONE1_PHONE'];
     data['phoneOneType']=row['PHONE1_PHONE_TYPE'];
     data['phoneOneScore']=row['PHONE1_PHONE_SCORE'];
@@ -358,7 +360,7 @@ if (req.body.skipTraced) {
          data['FB']='';
          data['IG']='';
          data['currentStatus']='';
-         data['skippedDate']='';
+         // data['skippedDate']='';
          data['Qualifier']='';
          data['Acquisitions']='';
          data['followUpDate']='';
