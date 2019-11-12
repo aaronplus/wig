@@ -1,11 +1,11 @@
 const nodemailer = require('nodemailer');
 var transporter = nodemailer.createTransport({
 host: "smtp.gmail.com",
-port: 587,
+port: 465,
 secure: false, // upgrade later with STARTTLS
 auth: {
-  user: 'testtalentelgia@gmail.com',
-  pass: 'talentelgia'
+  user: 'accounts@innsite.com.au',
+  pass: 'Social112//++'
 }
 });
 
