@@ -204,12 +204,12 @@ class ContactsList extends React.Component {
     ]
 
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
-    const pagination = {
-      // ...this.paginationOptions,
-      total: 61,
-      current: 1,
-      pageSize: 10,
-    };
+    // const pagination = {
+    //   // ...this.paginationOptions,
+    //   total: 61,
+    //   current: 1,
+    //   pageSize: 10,
+    // };
     return (
       <div>
         <div className="row">
