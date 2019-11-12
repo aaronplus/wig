@@ -59,21 +59,22 @@ router.post('/sms', async (req, res) => {
         { phoneTen: phone },
       ],
     });
-    const conv = {
+    const newConv = {
       from: From,
       to: To,
       messages: [newMessage],
     };
     if (contact) {
       console.log('Contact: ', JSON.stringify(contact, undefined, 2));
-      conv.contact = contact._id;
+      newConv.contact = contact._id;
       if (!Pass) {
         await Contact.findByIdAndUpdate(contact._id, {
           $set: { status: 'DO NOT CALL' },
         });
       }
     }
-    const conversation = await Conversation.create(conv).populate({
+    const conv = await Conversation.create(newConv);
+    const conversation = await Conversation.populate(conv, {
       path: 'contact',
       populate: { path: 'campaign' },
     });
@@ -183,7 +184,7 @@ async function sendMessage(from, to, body) {
     const response = await client.messages.create({
       body,
       from: from.replace(/\s/g, ''),
-      to: `${AREA_CODE}${to}`.replace(/\s/g, ''),
+      to: `${to}`.replace(/\s/g, ''),
     });
     return response;
   } catch (error) {
