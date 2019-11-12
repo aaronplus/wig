@@ -5,6 +5,7 @@ const sentMessageSchema = new Schema(
     schedule_id: {
       type: Schema.Types.ObjectId,
       ref: 'Schedule',
+      required: true,
     },
     pages: {
       type: Number,
