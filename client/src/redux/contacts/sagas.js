@@ -5,14 +5,32 @@ import actions from './actions'
 
 
 
-export function* GET_CONTACTS() {
-  const success = yield call(getContacts);
+export function* GET_CONTACTS(data) {
+  yield put({
+    type: 'contacts/SET_STATE',
+    payload: {
+      loading: true,
+    },
+  })
+  const{ payload: {page, limit}} = data;
+  console.log(page, limit,"JKKN");
+  const success = yield call(getContacts, page, limit);
+
   const success1 =  yield call(getCounts);
+  console.log(success1,"success1");
   yield put({
     type: 'contacts/SET_STATE',
     payload: {
       list: success,
-      countObj: success1
+      countObj: success1,
+      loading: false,
+      meta: {
+        page,
+        pageSize: 50,
+        pageTotal: success1.contactCount/50,
+        total: success1.contactCount,
+
+      }
     },
   })
 }

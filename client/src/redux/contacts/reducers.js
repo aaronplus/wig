@@ -1,15 +1,18 @@
 import actions from './actions'
 
+const INDEX_PAGE_SIZE_DEFAULT = 50;
+
 const initialState = {
   list:'',
   authorized: false,
   loading: false,
   schema: false,
   countObj: false,
-  listObj:{
-    pageSize: 50,
-    total:1,
-    current:1
+  meta: {
+    page: 0,
+    pageSize: INDEX_PAGE_SIZE_DEFAULT,
+    pageTotal: 1,
+    total: 0,
   }
 }
 

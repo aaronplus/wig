@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Table, Button, Modal, Form, Select, notification } from 'antd'
+import { Table, Button, Modal, Form, Select, notification, Spin } from 'antd'
 import socketIO from 'socket.io-client'
 // import {Redirect} from 'react-router-dom';
 import ImportContacts from './import'
@@ -9,6 +9,8 @@ import { SERVER_ADDRESS } from '../../config/constants'
 
 const { Option } = Select
 const axios = require('axios').default
+
+const RECORD_LIMIT = 50;
 // import data from './data.json'
 
 const mapStateToProps = ({ contacts }) => ({ contacts })
@@ -32,11 +34,36 @@ class ContactsList extends React.Component {
     // }
   }
 
-  componentDidMount() {
+  paginationOptions = {
+    // showSizeChanger: true,
+    // showQuickJumper: true,
+    // onShowSizeChange: (_, pageSize) => {
+    //   this.props.dispatch($pageSize(pageSize));
+    //   this.props.dispatch($fetchIndex())));
+    // },
+    onChange: (page) => {
+      const { dispatch } = this.props
+      dispatch({
+        type: 'contacts/GET_CONTACTS',
+        payload: {
+          page,
+          limit:RECORD_LIMIT
+        }
+      })
+    },
+    // pageSizeOptions: this.props.meta.pageSizeOptions,
+    total: this.props.meta ? this.props.meta.total: '',
+    showTotal: (total, range) => `${range[0]} to ${range[1]} of ${total}`,
+  };
+
+  componentWillMount() {
     const { dispatch } = this.props
     dispatch({
       type: 'contacts/GET_CONTACTS',
-      payload: localStorage.getItem('jwtToken'),
+      payload: {
+        page:1,
+        limit:RECORD_LIMIT
+      }
     })
     dispatch({
       type: 'contacts/GET_CAMPAIGN_LIST',
@@ -67,13 +94,13 @@ class ContactsList extends React.Component {
     });
   }
 
-  handleChange = (pagination, filters, sorter) => {
-    console.log('Various parameters', pagination, filters, sorter)
-    this.setState({
-      filteredInfo: filters,
-      sortedInfo: sorter,
-    })
-  }
+  // handleChange = (pagination, filters, sorter) => {
+  //   console.log('Various parameters', pagination, filters, sorter)
+  //   this.setState({
+  //     filteredInfo: filters,
+  //     sortedInfo: sorter,
+  //   })
+  // }
 
   clearFilters = () => {
     this.setState({ filteredInfo: null })
@@ -188,9 +215,11 @@ class ContactsList extends React.Component {
      })
   }
 
+
+
   render() {
     const {
-      contacts: { campaignList, list, countObj },
+      contacts: { campaignList, list, countObj, meta, loading },
       form,
     } = this.props
     console.log(campaignList, 'campaignList')
@@ -284,12 +313,13 @@ class ContactsList extends React.Component {
     ]
 
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
-    // const pagination = {
-    //   // ...this.paginationOptions,
-    //   total: 61,
-    //   current: 1,
-    //   pageSize: 10,
-    // };
+    const pagination = {
+      ...this.paginationOptions,
+      total: meta.contactCount,
+      current: meta.page,
+      pageSize: meta.pageSize,
+    };
+    console.log(pagination);
     return (
       <div>
         {showProgressBar ?
@@ -425,15 +455,22 @@ class ContactsList extends React.Component {
                 </div>
               </div>
             </div>
-            <div className="mb-4 air__utils__scrollTable">
-              <Table
-                columns={columns}
-                dataSource={data}
-                scroll={{ x: '100%' }}
-                onChange={this.handleChange}
-                // pagination={pagination}
-              />
-            </div>
+            {loading?
+              <div className="example">
+                <Spin />
+              </div>
+              :
+              <div className="mb-4 air__utils__scrollTable">
+                <Table
+                  columns={columns}
+                  dataSource={data}
+                  scroll={{ x: '100%' }}
+                  onChange={this.handleChange}
+                  pagination={pagination}
+                />
+              </div>
+            }
+
             <Modal
               title="Export Contacts"
               visible={visible}
