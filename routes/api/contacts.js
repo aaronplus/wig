@@ -36,6 +36,8 @@ multer({
 
 router.get('/list', validateToken, async function(req, res, next){
   var userId = req.decoded.id;
+  // let { page, limit} = req.query;
+
   let contacts = await Contact.aggregate([
     {
       $match:{
@@ -49,7 +51,8 @@ router.get('/list', validateToken, async function(req, res, next){
     as: "campaign_info"
    }
  },
- {$limit: parseInt(process.env.RECORDS_LIMIT)},
+ // {$limit: parseInt(limit)},
+ // {$skip: parseInt(page*limit)},
  {
    $unwind: '$campaign_info'
  }
