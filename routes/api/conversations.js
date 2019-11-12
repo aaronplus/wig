@@ -91,10 +91,35 @@ router.post('/sms/callback', async (req, res) => {
   console.log(JSON.stringify(messageStatus, undefined, 2));
   try {
     if (SmsStatus && SmsSid) {
-      await SentMessages.update(
+      const sentMessagesStatus = await SentMessages.findOneAndUpdate(
         { 'message_status.sid': SmsSid },
         { $set: { 'message_status.$.status': SmsStatus } },
+        { new: true },
       );
+      const data = {
+        schedule_id: sentMessagesStatus.schedule_id,
+        status: {
+          sent:
+            sentMessagesStatus && sentMessagesStatus.message_status
+              ? sentMessagesStatus.message_status.filter(
+                  ms => ms.status === 'sent',
+                ).length
+              : 0,
+          delivered:
+            sentMessagesStatus && sentMessagesStatus.message_status
+              ? sentMessagesStatus.message_status.filter(
+                  ms => ms.status === 'delivered',
+                ).length
+              : 0,
+          failed:
+            sentMessagesStatus && sentMessagesStatus.message_status
+              ? sentMessagesStatus.message_status.filter(
+                  ms => ms.status === 'failed',
+                ).length
+              : 0,
+        },
+      };
+      global.socket.emit('status_update', data);
     }
   } catch (error) {
     console.log('Error: ', error);
