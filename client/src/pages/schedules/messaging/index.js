@@ -24,7 +24,12 @@ class Messaging extends React.Component {
     this.getConversations()
     const socket = socketIO(SERVER_ADDRESS, { forceNew: true })
     socket.on('new_sms', data => {
-      this.updateConversations(data)
+      const { activeId } = this.state
+      if (data._id === activeId) {
+        this.markConversationRead(data._id)
+      } else {
+        this.updateConversations(data)
+      }
       console.log('New Message Received', data)
     })
   }
