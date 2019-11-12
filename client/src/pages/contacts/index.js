@@ -208,7 +208,7 @@ class ContactsList extends React.Component {
       // ...this.paginationOptions,
       total: 61,
       current: 1,
-      pageSize: 50,
+      pageSize: 10,
     };
     return (
       <div>
@@ -301,7 +301,7 @@ class ContactsList extends React.Component {
                 dataSource={data}
                 scroll={{ x: '100%' }}
                 onChange={this.handleChange}
-                pagination={pagination}
+                // pagination={pagination}
               />
             </div>
             <Modal
