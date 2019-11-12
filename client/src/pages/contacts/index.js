@@ -1,12 +1,13 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Table, Button, Modal, Form, Select } from 'antd'
+import { Table, Button, Modal, Form, Select, notification } from 'antd'
 import socketIO from 'socket.io-client'
 import ImportContacts from './import'
 import ProgressBar from '../../components/contacts/ProgressBar';
 import { SERVER_ADDRESS } from '../../config/constants'
 
 const { Option } = Select
+const axios = require('axios').default
 // import data from './data.json'
 
 const mapStateToProps = ({ contacts }) => ({ contacts })
@@ -19,7 +20,14 @@ class ContactsList extends React.Component {
     visible: false,
     visibleImportComponent: false,
     visibleImportSkipTracedComponent: false,
-    showProgressBar: false
+    showProgressBar: false,
+    isLoading: false
+    // progressData : {
+    //   insertedCount:0,
+    //   updatedCount:0,
+    //   skippedCount:0,
+    //   index:100
+    // }
   }
 
   componentDidMount() {
@@ -121,7 +129,8 @@ class ContactsList extends React.Component {
     }
   }
 
-  handleUploadFile = () => {
+  handleUploadFile = (dataObj) => {
+    const{groupId} = dataObj;
     const { dispatch } = this.props;
     dispatch({
       type: 'contacts/GET_CONTACTS',
@@ -130,7 +139,7 @@ class ContactsList extends React.Component {
     this.setState({
       visibleImportComponent:false,
       visibleImportSkipTracedComponent: false,
-      // progressData:null
+      groupId
     })
   }
 
@@ -139,6 +148,31 @@ class ContactsList extends React.Component {
       visibleImportComponent:false,
       visibleImportSkipTracedComponent: false
     })
+  }
+
+  handleClickedYes = () =>{
+    const {groupId} = this.state;
+    this.setState({
+      isLoading: true
+    })
+    axios.defaults.headers.common.Authorization = `${localStorage.getItem("jwtToken")}`;
+
+    axios
+     .post(`${SERVER_ADDRESS}/contacts/send_to_export`, {groupId})
+     .then((res) => {
+       notification.success({
+         message:'Email Sent',
+         description: 'Exported csv has been sent to your email id, please check'
+       })
+       console.log(res);
+       if (res.status === 200) {
+         console.log(res);
+       }
+       this.setState({showProgressBar: false, isLoading: false})
+     }).catch((err)=>{
+       console.log(err.response.data.message);
+       this.setState({showProgressBar: false, isLoading: false})
+     })
   }
 
   render() {
@@ -167,7 +201,7 @@ class ContactsList extends React.Component {
         console.log(cityFilterOptions);
     const data = list;
     let { sortedInfo, filteredInfo } = this.state
-    const { progressData, visible, visibleImportComponent, visibleImportSkipTracedComponent, showProgressBar } = this.state
+    const { progressData, visible, isLoading, visibleImportComponent, visibleImportSkipTracedComponent, showProgressBar } = this.state
     sortedInfo = sortedInfo || {}
     filteredInfo = filteredInfo || {}
     console.log(filteredInfo)
@@ -268,7 +302,7 @@ class ContactsList extends React.Component {
                   <Button className="mr-2" type="danger" ghost size='small' onClick={() => this.setState({showProgressBar: false})}>
                     No
                   </Button>
-                  <Button type="button" className="btn-success text-success" ghost size='small' onClick={() => this.setState({showProgressBar: false})}>
+                  <Button type="button" className="btn-success text-success" ghost size='small' onClick={() => this.handleClickedYes()} loading={isLoading}>
                     Yes
                   </Button>
                 </div>
@@ -401,7 +435,7 @@ class ContactsList extends React.Component {
                 </Button>
             ]}
             >
-              <ImportContacts skipTraced={false} handleUploadFile={this.handleUploadFile} hideModal={this.hideModal} />
+              <ImportContacts skipTraced={false} handleUploadFile={(dataObj)=> this.handleUploadFile(dataObj)} hideModal={this.hideModal} />
             </Modal>
             <Modal
               title="Import Skip traced Contacts"
@@ -415,7 +449,7 @@ class ContactsList extends React.Component {
                 </Button>
             ]}
             >
-              <ImportContacts skipTraced handleUploadFile={this.handleUploadFile} hideModal={this.hideModal} />
+              <ImportContacts skipTraced handleUploadFile={(dataObj)=> this.handleUploadFile(dataObj)} hideModal={this.hideModal} />
             </Modal>
           </div>
         </div>

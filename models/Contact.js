@@ -412,5 +412,9 @@ const ContactSchema = new Schema({
     type: String,
     default: 'New',
   },
+  groupId:{
+    type: String,
+    required: false
+  }
 });
 module.exports = Contact = mongoose.model('contacts', ContactSchema);

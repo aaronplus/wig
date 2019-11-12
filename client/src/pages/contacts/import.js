@@ -312,7 +312,7 @@ class ImportContacts extends React.Component {
                 message.success("Uploaded Successfully");
                 form.resetFields();
 
-                handleUploadFile();
+                handleUploadFile(res.data);
                 this.setState({
                   showModal: false,
                   spinner: false
