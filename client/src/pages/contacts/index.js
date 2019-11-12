@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Table, Button, Modal, Form, Select, notification } from 'antd'
 import socketIO from 'socket.io-client'
+// import {Redirect} from 'react-router-dom';
 import ImportContacts from './import'
 import ProgressBar from '../../components/contacts/ProgressBar';
 import { SERVER_ADDRESS } from '../../config/constants'
@@ -21,7 +22,8 @@ class ContactsList extends React.Component {
     visibleImportComponent: false,
     visibleImportSkipTracedComponent: false,
     showProgressBar: false,
-    isLoading: false
+    isLoading: false,
+    showProgressBarSkip: false
     // progressData : {
     //   insertedCount:0,
     //   updatedCount:0,
@@ -45,10 +47,12 @@ class ContactsList extends React.Component {
     socket.on('import_status', data => {
       this.setState({
         showProgressBar: true,
-        progressData: data
+        progressData: data,
+        showProgressBarSkip: data.skip
       })
       console.log(data, "Import Status");
     });
+
     socket.on('import_status_progress', data => {
       this.setState({
         progressData: data
@@ -150,6 +154,15 @@ class ContactsList extends React.Component {
     })
   }
 
+  handleClickedYesSkip = () =>{
+    const { history }=  this.props;
+    history.push('/schedules/create')
+    // this.setState({
+    //   showProgressBarSkip: false,
+    //   showProgressBar : false
+    // })
+  }
+
   handleClickedYes = () =>{
     const {groupId} = this.state;
     this.setState({
@@ -201,7 +214,7 @@ class ContactsList extends React.Component {
         console.log(cityFilterOptions);
     const data = list;
     let { sortedInfo, filteredInfo } = this.state
-    const { progressData, visible, isLoading, visibleImportComponent, visibleImportSkipTracedComponent, showProgressBar } = this.state
+    const { progressData, visible, isLoading, visibleImportComponent, visibleImportSkipTracedComponent, showProgressBar, showProgressBarSkip } = this.state
     sortedInfo = sortedInfo || {}
     filteredInfo = filteredInfo || {}
     console.log(filteredInfo)
@@ -297,15 +310,27 @@ class ContactsList extends React.Component {
                     </div>
                   </div>
                 </div>
-                <div className="col-auto d-flex align-items-center justify-content-end">
-                  <span className="d-block mr-3">Send To Skip</span>
-                  <Button className="mr-2" type="danger" ghost size='small' onClick={() => this.setState({showProgressBar: false})}>
-                    No
-                  </Button>
-                  <Button type="button" className="btn-success text-success" ghost size='small' onClick={() => this.handleClickedYes()} loading={isLoading}>
-                    Yes
-                  </Button>
-                </div>
+                {showProgressBarSkip?
+                  <div className="col-auto d-flex align-items-center justify-content-end">
+                    <span className="d-block mr-3">Schedule a campaign now? </span>
+                    <Button className="mr-2" type="danger" ghost size='small' onClick={() => this.setState({showProgressBarSkip: false})}>
+                      No
+                    </Button>
+                    <Button type="button" className="btn-success text-success" ghost size='small' onClick={() => this.handleClickedYesSkip()} loading={isLoading}>
+                      Yes
+                    </Button>
+                  </div>:
+                  <div className="col-auto d-flex align-items-center justify-content-end">
+                    <span className="d-block mr-3">Send To Skip</span>
+                    <Button className="mr-2" type="danger" ghost size='small' onClick={() => this.setState({showProgressBar: false})}>
+                      No
+                    </Button>
+                    <Button type="button" className="btn-success text-success" ghost size='small' onClick={() => this.handleClickedYes()} loading={isLoading}>
+                      Yes
+                    </Button>
+                  </div>
+                }
+
               </div>
             </div>
           </div>

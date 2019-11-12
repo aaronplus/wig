@@ -5,7 +5,12 @@ const initialState = {
   authorized: false,
   loading: false,
   schema: false,
-  countObj: false
+  countObj: false,
+  listObj:{
+    pageSize: 50,
+    total:1,
+    current:1
+  }
 }
 
 export default function contactsReducer(state = initialState, action) {

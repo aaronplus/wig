@@ -185,7 +185,7 @@ var fileHeader;
 var headers = JSON.parse(req.body.headers);
 var rowData = [];
 
-global.socket.emit('import_status', {total:fileRows.length});
+global.socket.emit('import_status', {total:fileRows.length,skip:req.body.skipTraced});
 var insertedCount = 0;
 var updatedCount = 0;
 var skippedCount = 0;
