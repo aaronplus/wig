@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Table, Button, Modal, Form, Select, notification, Spin } from 'antd'
+import { Table, Button, Modal, Form, Select, notification } from 'antd'
 import socketIO from 'socket.io-client'
 // import {Redirect} from 'react-router-dom';
 import ImportContacts from './import'
@@ -165,7 +165,10 @@ class ContactsList extends React.Component {
     const { dispatch } = this.props;
     dispatch({
       type: 'contacts/GET_CONTACTS',
-      payload: localStorage.getItem('jwtToken'),
+      payload: {
+        page:1,
+        limit:RECORD_LIMIT
+      },
     })
     this.setState({
       visibleImportComponent:false,
@@ -348,7 +351,7 @@ class ContactsList extends React.Component {
                 {showProgressBarSkip?
                   <div className="col-auto d-flex align-items-center justify-content-end">
                     <span className="d-block mr-3">Schedule a campaign now? </span>
-                    <Button className="mr-2" type="danger" ghost size='small' onClick={() => this.setState({showProgressBarSkip: false})}>
+                    <Button className="mr-2" type="danger" ghost size='small' onClick={() => this.setState({showProgressBarSkip: false, showProgressBar:false})}>
                       No
                     </Button>
                     <Button type="button" className="btn-success text-success" ghost size='small' onClick={() => this.handleClickedYesSkip()} loading={isLoading}>
@@ -455,21 +458,17 @@ class ContactsList extends React.Component {
                 </div>
               </div>
             </div>
-            {loading?
-              <div className="example">
-                <Spin />
-              </div>
-              :
-              <div className="mb-4 air__utils__scrollTable">
-                <Table
-                  columns={columns}
-                  dataSource={data}
-                  scroll={{ x: '100%' }}
-                  onChange={this.handleChange}
-                  pagination={pagination}
-                />
-              </div>
-            }
+
+            <div className="mb-4 air__utils__scrollTable">
+              <Table
+                columns={columns}
+                dataSource={data}
+                scroll={{ x: '100%' }}
+                onChange={this.handleChange}
+                pagination={pagination}
+                loading={loading}
+              />
+            </div>
 
             <Modal
               title="Export Contacts"
