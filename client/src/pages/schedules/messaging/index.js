@@ -18,6 +18,9 @@ class Messaging extends React.Component {
       messages: [],
     },
     msg: '',
+    page: 1,
+    hasMore: true,
+    isFetching: true,
   }
 
   componentDidMount() {
@@ -50,11 +53,23 @@ class Messaging extends React.Component {
     }
   }
 
+  handleScroll = ({ top }) => {
+    console.log('Scrolling...', top)
+    const { hasMore } = this.state
+    if (top === 1 && hasMore) {
+      this.setState(prevState => ({ ...prevState, page: prevState.page + 1, isFetching: true }))
+      this.getConversations()
+    }
+  }
+
   formatConversation = conv => {
     const result = {
       id: conv._id,
       campaign: conv.contact && conv.contact.campaign ? conv.contact.campaign.campaign : 'Unknown',
-      name: conv.contact ? `${conv.contact.firstNameOne} ${conv.contact.lastNameOne}` : 'Unknown',
+      contactId: conv.contact ? `${conv.contact._id || undefined}` : undefined,
+      name: conv.contact
+        ? `${conv.contact.firstNameOne || ''} ${conv.contact.lastNameOne || ''}`.trim()
+        : 'Unknown',
       address: conv.contact
         ? `${conv.contact.propertyAddress}, ${conv.contact.propertyCity}, ${conv.contact.propertyState}, ${conv.contact.propertyZipCode}`
         : 'Unknown',
@@ -62,6 +77,7 @@ class Messaging extends React.Component {
       to: conv.to,
       avatar: 'resources/images/avatars/avatar-2.png',
       unread: conv.messages.filter(x => !x.read).length,
+      contactStatus: conv.contact ? `${conv.contact.status || undefined}` : undefined,
     }
     result.messages = conv.messages.map(msg => {
       const r = {
@@ -75,11 +91,22 @@ class Messaging extends React.Component {
   }
 
   getConversations = async () => {
+    const { page } = this.state
     try {
-      const response = await axios.get(`${SERVER_ADDRESS}/twilio/conversations`)
+      const response = await axios.get(`${SERVER_ADDRESS}/twilio/conversations?page=${page}`)
       console.log(response.data)
       const conversations = response.data.map(conv => this.formatConversation(conv))
-      this.setState({ conversations })
+      if (conversations.length <= 0) {
+        this.setState({
+          isFetching: false,
+          hasMore: false,
+        })
+      }
+      this.setState(prevState => ({
+        ...prevState,
+        conversations: [...prevState.conversations, ...conversations],
+        isFetching: false,
+      }))
     } catch (error) {
       console.log(error)
     }
@@ -126,9 +153,31 @@ class Messaging extends React.Component {
     }
   }
 
+  addContactToDoNotCall = async contactId => {
+    const response = await axios(`${SERVER_ADDRESS}/contacts/setStatus/${contactId}`, {
+      method: 'PUT',
+      data: { status: 'DO NOT CALL' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: localStorage.getItem('jwtToken'),
+      },
+    })
+    const contact = response.data
+    const { conversations, conversation } = this.state
+    const index = conversations.findIndex(x => x.contactId === contact._id)
+    if (index !== -1) {
+      conversations[index].contactStatus = contact.status
+      this.setState({
+        conversations,
+        conversation:
+          conversation.id === conversations[index].id ? conversations[index] : conversation,
+      })
+    }
+  }
+
   render() {
-    const { activeId, conversations, conversation, msg } = this.state
-    const { name, address, messages, avatar } = conversation
+    const { activeId, conversations, conversation, msg, isFetching } = this.state
+    const { name, messages, avatar, to, from, contactStatus, contactId } = conversation
     return (
       <div>
         <Helmet title="Apps: Messaging" />
@@ -145,6 +194,7 @@ class Messaging extends React.Component {
             </div>
             <div className={style.dialogs}>
               <Scrollbars
+                onScrollFrame={this.handleScroll}
                 autoHide
                 renderThumbVertical={({ ...props }) => (
                   <div
@@ -167,17 +217,18 @@ class Messaging extends React.Component {
                     className={`${style.item} ${style.unread} ${
                       item.id === activeId ? style.current : ''
                     } d-flex flex-nowrap align-items-center`}
-                    style={{ backgroundColor: item.unread ? '#ffffff' : 'transparent' }}
+                    style={{ backgroundColor: item.unread ? '#46be8a' : '#ffffff' }}
                   >
                     <div className="air__utils__avatar air__utils__avatar--size46 mr-3 flex-shrink-0">
                       <img src={item.avatar} alt={item.name} />
                     </div>
                     <div className={`${style.info} flex-grow-1`}>
                       <div className="text-uppercase font-size-12 text-truncate text-gray-6">
-                        {item.campaign}
+                        {item.address}
                       </div>
                       <div className="text-dark font-size-16 font-weight-normal text-truncate">
-                        {item.name}
+                        {item.name} -{' '}
+                        {item.messages[item.messages.length - 1].content.substring(0, 100)}
                       </div>
                     </div>
                     <div
@@ -188,16 +239,17 @@ class Messaging extends React.Component {
                     </div>
                   </a>
                 ))}
+                {isFetching && <div className="text-center">Loading...</div>}
               </Scrollbars>
             </div>
           </div>
           <div className="col-12 col-md-7">
-            <div className="card">
+            <div className="card mb-0">
               <div className="card-header card-header-flex align-items-center">
                 <div className="d-flex flex-column justify-content-center mr-auto">
                   <h5 className="mb-0 mr-2 font-size-18">
-                    {name} <br />
-                    <span className="font-size-14 text-gray-6">{address}</span>
+                    {name} {to} <br />
+                    <span className="font-size-14 text-gray-6">{from}</span>
                   </h5>
                 </div>
                 <div>
@@ -212,9 +264,17 @@ class Messaging extends React.Component {
                     </a>
                   </Tooltip>
                   <Tooltip placement="top" title="Do Not Call">
-                    <a href="javascript: void(0);" className="btn btn-sm btn-light mr-2">
-                      <i className="fe fe-thumbs-down" />
-                    </a>
+                    <button
+                      className="btn btn-light btn-sm mr-2"
+                      type="button"
+                      // disabled={contactStatus === 'DO NOT CALL'}
+                      onClick={() => this.addContactToDoNotCall(contactId)}
+                    >
+                      <i
+                        className="fe fe-thumbs-down"
+                        style={{ color: contactStatus === 'DO NOT CALL' && 'red' }}
+                      />
+                    </button>
                   </Tooltip>
                   <Tooltip placement="top" title="Qualify Lead">
                     <a href="javascript: void(0);" className="btn btn-sm btn-light">

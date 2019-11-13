@@ -16,7 +16,9 @@ function CampaignProgress({ campaign = { sent: 0, delivered: 0, failed: 0 } }) {
                 Total
               </div>
               <div className="col-md prgs-card">
-                <p className="text-success">{campaign.status.sent}</p>
+                <p className="text-success">
+                  {campaign.status.sent + campaign.status.delivered + campaign.status.failed}
+                </p>
                 Sent
               </div>
               <div className="col-md prgs-card">
