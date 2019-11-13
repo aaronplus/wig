@@ -132,7 +132,10 @@ router.post('/reply/:conversationId', async (req, res) => {
   const { conversationId } = req.params;
   const { message } = req.body;
   try {
-    const conversation = await Conversation.findById(conversationId);
+    const conversation = await Conversation.findById(conversationId).populate({
+      path: 'contact',
+      populate: { path: 'campaign' },
+    });
     if (!conversation) throw new Error('Bad request! conversation not found.');
     const response = await sendMessage(
       conversation.to,
@@ -144,6 +147,7 @@ router.post('/reply/:conversationId', async (req, res) => {
       message: response.body,
       sid: response.sid,
       received: false,
+      read: true,
     });
     const savedConversation = await conversation.save();
     res.status(200).json(savedConversation);
@@ -154,13 +158,19 @@ router.post('/reply/:conversationId', async (req, res) => {
 });
 
 router.get('/conversations', async (req, res) => {
+  const { page = 1 } = req.query;
   try {
-    const conversations = await Conversation.find().populate({
-      path: 'contact',
-      populate: { path: 'campaign' },
-    });
+    const conversations = await Conversation.find()
+      .sort({ updatedAt: 'desc' })
+      .skip(50 * (page - 1))
+      .limit(50)
+      .populate({
+        path: 'contact',
+        populate: { path: 'campaign' },
+      });
     res.json(conversations);
   } catch (error) {
+    console.log(error);
     res.status(400).json(error);
   }
 });
