@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 // Create Schema
 const ScheduleSchema = new Schema({
   campaign: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "campaigns",
+    ref: 'campaigns',
     required: false,
   },
   type: {
@@ -49,6 +49,14 @@ const ScheduleSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: false,
   },
+  totalPhoneNumbers: {
+    type: Number,
+    required: true,
+  },
+  totalContacts: {
+    type: Number,
+    required: true,
+  },
   // fail_message:{
   //   type: String,
   //   required: false
@@ -58,4 +66,4 @@ const ScheduleSchema = new Schema({
     default: Date.now,
   },
 });
-module.exports = Schedule = mongoose.model("schedules", ScheduleSchema);
+module.exports = Schedule = mongoose.model('schedules', ScheduleSchema);

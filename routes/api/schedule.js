@@ -13,29 +13,14 @@ const Contact = require('../../models/Contact');
 
 router.get('/all', validateToken, async (req, res) => {
   try {
-    const schedules = await Schedule.find().populate('campaign');
-    const sentMessages = await SentMessages.find();
-    const contacts = await Contact.find({ status: { $ne: 'DO NOT CALL' } });
+    const [schedules, sentMessages] = await Promise.all([
+      Schedule.find().populate('campaign'),
+      SentMessages.find(),
+    ]);
     const schedulesData = schedules.map(schedule => {
       const result = {
         ...schedule._doc,
       };
-      const contactsMatched = contacts.filter(contact => {
-        if (contact.campaign && schedule.campaign && schedule.campaign._id) {
-          if (
-            contact.campaign.toString() === schedule.campaign._id.toString()
-          ) {
-            return true;
-          }
-        }
-        return false;
-      });
-      result.totalPhoneNumbers = Array.isArray(contactsMatched)
-        ? filterPhoneNumbers(contactsMatched)
-        : 0;
-      result.totalContacts = Array.isArray(contactsMatched)
-        ? contactsMatched.length
-        : 0;
       const sentMessagesStatus = sentMessages.find(sm => {
         if (sm.schedule_id && schedule._id) {
           if (sm.schedule_id.toString() === schedule._id.toString()) {
@@ -91,6 +76,21 @@ router.post('/add', validateToken, async (req, res) => {
     phone_number,
   } = req.body;
   try {
+    const contacts = await Contact.find({ status: { $ne: 'DO NOT CALL' } });
+    const contactsMatched = contacts.filter(contact => {
+      if (contact.campaign && campaign) {
+        if (contact.campaign.toString() === campaign.toString()) {
+          return true;
+        }
+      }
+      return false;
+    });
+    const totalPhoneNumbers = Array.isArray(contactsMatched)
+      ? filterPhoneNumbers(contactsMatched)
+      : 0;
+    const totalContacts = Array.isArray(contactsMatched)
+      ? contactsMatched.length
+      : 0;
     const scheduleData = new Schedule({
       campaign,
       type,
@@ -103,10 +103,13 @@ router.post('/add', validateToken, async (req, res) => {
       time_zone,
       message,
       phone_number,
+      totalPhoneNumbers,
+      totalContacts,
     });
     const results = await scheduleData.save();
     return res.status(200).json(results);
   } catch (error) {
+    console.log(error);
     return res.status(400).json(error);
   }
 });
