@@ -69,6 +69,10 @@ class ContactsList extends React.Component {
     dispatch({
       type: 'contacts/GET_CAMPAIGN_LIST',
       payload: false,
+    });
+    dispatch({
+      type: 'contacts/GET_FILTERS',
+      payload: false
     })
 
     const socket = socketIO(SERVER_ADDRESS, { forceNew: true })
@@ -106,16 +110,36 @@ class ContactsList extends React.Component {
         filters
       },
     })
+    this.setState({
+     filteredInfo: filters,
+     sortedInfo: sorter,
+   });
   }
 
   clearFilters = () => {
+    const{dispatch} = this.props;
     this.setState({ filteredInfo: null })
+    dispatch({
+      type: 'contacts/GET_CONTACTS',
+      payload: {
+        page:1,
+        limit:RECORD_LIMIT
+      }
+    })
   }
 
   clearAll = () => {
+    const{dispatch} = this.props;
     this.setState({
       filteredInfo: null,
       sortedInfo: null,
+    })
+    dispatch({
+      type: 'contacts/GET_CONTACTS',
+      payload: {
+        page:1,
+        limit:RECORD_LIMIT
+      }
     })
   }
 
@@ -228,17 +252,18 @@ class ContactsList extends React.Component {
 
   render() {
     const {
-      contacts: { campaignList, list, countObj, meta, loading },
+      contacts: { campaignList, list, countObj, meta, loading, filters },
       form,
     } = this.props
     console.log(campaignList, 'campaignList')
+    console.log(filters,'filters');
     const campainFilterOptions = campaignList
       ? campaignList.map(item => {
           return { text: item.campaign, value: item._id }
         })
       : []
-    const statesArr = list ? [...new Set(list.map(x => x.propertyState))] : [];
-    const cityArr = list ? [...new Set(list.map(x => x.propertyCity))] : [];
+    const statesArr = list ? filters.stateFilter : [];
+    const cityArr = list ? filters.cityFilter : [];
     const stateFilterOptions = statesArr
       ? statesArr.map(item => {
           return { text: item, value: item }

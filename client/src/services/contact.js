@@ -82,3 +82,8 @@ export function getCounts() {
     return res.data
   })
 }
+export function getFilters(){
+  return axios.get(`${SERVER_ADDRESS}/contacts/getFilters`).then(res =>{
+    return res.data
+  })
+}

@@ -1,6 +1,6 @@
 import { all, takeEvery, put, call } from 'redux-saga/effects'
 
-import {getContacts, getCampaignList, importContacts, exportContacts, getSchema, getCounts} from 'services/contact'
+import {getContacts, getCampaignList, importContacts, exportContacts, getSchema, getCounts, getFilters} from 'services/contact'
 import actions from './actions'
 
 
@@ -72,6 +72,16 @@ export function* GET_COUNTS(){
   })
 }
 
+export function* GET_FILTERS(){
+  const success = yield call(getFilters);
+  yield put({
+    type: 'contacts/SET_STATE',
+    payload: {
+      filters: success
+    }
+  })
+}
+
 
 
 
@@ -82,6 +92,7 @@ export default function* rootSaga() {
     takeEvery(actions.IMPORT_CONTACTS, IMPORT_CONTACTS),
     takeEvery(actions.EXPORT_CONTACTS, EXPORT_CONTACTS),
     takeEvery(actions.GET_SCHEMA_COLUMNS, GET_SCHEMA_COLUMNS),
-    takeEvery(actions.GET_COUNTS, GET_COUNTS)
+    takeEvery(actions.GET_COUNTS, GET_COUNTS),
+    takeEvery(actions.GET_FILTERS, GET_FILTERS)
   ])
 }

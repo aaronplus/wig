@@ -665,6 +665,28 @@ router.post('/send_to_export', validateToken, async function (req, res, next) {
 });
 });
 
+/*
+**************
+@route: GET api/contacts/getFilters
+@description: Get list of the the filters required
+@access: Private
+**************
+*/
+
+router.get('/getFilters', validateToken, async function(req, res, next){
+  var userId = req.decoded.id;
+  try {
+    let cityFilter = await Contact.find({userId:mongoose.Types.ObjectId(userId)}).distinct('propertyCity');
+    let stateFilter = await Contact.find({userId:mongoose.Types.ObjectId(userId)}).distinct('propertyState');
+    return res.json({cityFilter,stateFilter});
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({message: "Error in fetching filters"})
+  }
+
+
+});
+
 
 
 
