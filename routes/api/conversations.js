@@ -1,8 +1,11 @@
 const router = require('express').Router();
 const twilio = require('twilio');
+const axios = require('axios');
 
+const validateToken = require('../validateToken').validateToken;
 const { AREA_CODE } = require('../../config/keys');
 
+const User = require('../../models/User');
 const Contact = require('../../models/Contact');
 const Conversation = require('../../models/Conversation');
 const SentMessages = require('../../models/SentMessages');
@@ -174,6 +177,113 @@ router.get('/conversations', async (req, res) => {
     res.status(400).json(error);
   }
 });
+
+router.post(
+  '/conversations/send/:conversationId',
+  validateToken,
+  async (req, res) => {
+    const { conversationId } = req.params;
+    try {
+      const conversation = await Conversation.findById(conversationId).populate(
+        {
+          path: 'contact',
+          populate: { path: 'campaign' },
+        },
+      );
+      const [user, sendMessagesSchedules] = await Promise.all([
+        User.findById(req.decoded.id),
+        SentMessages.find({
+          'message_status.to': conversation.from,
+        })
+          .sort({ createdAt: 'desc' })
+          .populate({ path: 'schedule_id' }),
+      ]);
+      /**
+       * 1. conatct first name
+       * 2. contact last name
+       * 3. address
+       * 4. city
+       * 5. postcode
+       * 6. state
+       * 7. phone number (one we receive message)
+       * 8. twilio number
+       * 9. conversation
+       */
+      const lastIndex = sendMessagesSchedules.length - 1;
+      if (lastIndex === -1) throw new Error("Original message doesn't exists");
+      const originalMessage = {
+        message: sendMessagesSchedules[lastIndex].schedule_id.message,
+        received: false,
+      };
+      const data = {
+        thapp3_qualifier: user
+          ? `${user.first_name} ${user.last_name}`.trim()
+          : '',
+        thapp3_first_name: conversation.contact
+          ? conversation.contact.firstNameOne
+          : undefined,
+        thapp3_last_name: conversation.contact
+          ? conversation.contact.lastNameOne
+          : undefined,
+        thapp3_address: `${
+          conversation.contact
+            ? conversation.contact.propertyAddress
+            : undefined
+        }, ${
+          conversation.contact ? conversation.contact.propertyCity : undefined
+        }, ${
+          conversation.contact ? conversation.contact.propertyState : undefined
+        } ${
+          conversation.contact
+            ? conversation.contact.propertyZipCode
+            : undefined
+        }, USA`,
+        thapp3_phone_number: conversation.from,
+        thapp3_twilio_number: conversation.to,
+        thapp3_conversation: [
+          { ...originalMessage },
+          ...conversation.messages.map(msg => ({
+            message: msg.message,
+            received: msg.received,
+            time: msg.createdAt,
+          })),
+        ],
+      };
+      let html = '';
+      for (let i = 0; i < data.thapp3_conversation.length; i++) {
+        const conv = data.thapp3_conversation[i];
+        if (conv.received) {
+          html += `${data.thapp3_first_name} ${data.thapp3_last_name}: ${conv.message}<br/>`;
+        } else {
+          html += `${data.thapp3_qualifier}: ${conv.message}<br/>`;
+        }
+      }
+      data.thapp3_conversation = html;
+      const response = await axios(
+        'https://secure.globiflow.com/catch/wvsrv054i4h2vj0',
+        {
+          method: 'POST',
+          data,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      const contact = await Contact.findByIdAndUpdate(
+        conversation.contact._id,
+        {
+          $set: { status: 'Lead' },
+        },
+        { new: true },
+      );
+      console.log('Response from custom webhook: ', response.status);
+      return res.json(contact);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error);
+    }
+  },
+);
 
 router.get('/conversations/:conversationId', async (req, res) => {
   const { conversationId } = req.params;
