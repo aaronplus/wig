@@ -35,51 +35,44 @@ multer({
 
 router.get('/list', validateToken, async function(req, res, next) {
   var userId = req.decoded.id;
-  let { page, limit } = req.query;
-  let skip = page * limit;
-  let contacts = await Contact.aggregate([
-    {
-      $match: {
-        userId: mongoose.Types.ObjectId(userId),
-      },
-    },
-    {
-      $lookup: {
-        from: 'campaigns',
-        localField: 'campaign',
-        foreignField: '_id',
-        as: 'campaign_info',
-      },
-    },
-    { $limit: parseInt(skip + limit) },
-    { $skip: parseInt(skip) },
-    {
-      $unwind: '$campaign_info',
-    },
-  ]);
-  console.log(
-    JSON.stringify([
-      {
-        $match: {
-          userId: mongoose.Types.ObjectId(userId),
-        },
-      },
-      {
-        $lookup: {
-          from: 'campaigns',
-          localField: 'campaign',
-          foreignField: '_id',
-          as: 'campaign_info',
-        },
-      },
-      { $skip: parseInt(page * limit) },
-      { $limit: parseInt(limit) },
-      {
-        $unwind: '$campaign_info',
-      },
-    ]),
-  );
-  return res.json(contacts);
+
+  let { page, limit, filters} = req.query;
+  page = parseInt(page);
+  limit = parseInt(limit);
+  let skip = (page == 1)? 0 : page * limit;
+
+  var matchQry = {
+    userId:mongoose.Types.ObjectId(userId)
+  }
+  if (filters) {
+    var filterParams = JSON.parse(filters);
+    if (filterParams.propertyCity) {
+        matchQry['propertyCity'] = {$in:filterParams.propertyCity};
+    }
+    if (filterParams.propertyState) {
+      matchQry['propertyState'] = {$in:filterParams.propertyState};
+    }
+    if (filterParams.campaign) {
+      matchQry['campaign'] = {$in:filterParams.campaign.map((rec)=>{
+        return mongoose.Types.ObjectId(rec);
+      })};
+    }
+  }
+console.log(matchQry);
+  let contacts = await Contact.find(matchQry)
+    .skip(parseInt(skip + limit))
+    .limit(parseInt(limit))
+    .populate({
+      path: 'campaign',
+    });
+
+// Get Count
+var contactCount = await Contact.count(matchQry);
+var skipContactCount = await Contact.count(Object.assign({},matchQry,{skippedDate:{$exists: true}}));
+var campaignCount = await Campaign.count(matchQry);
+
+return res.json({results:contacts,countObj:{contactCount,skipContactCount,campaignCount}});
+
 });
 
 router.put('/setStatus/:contactId', validateToken, async (req, res) => {
@@ -750,6 +743,28 @@ router.post('/send_to_export', validateToken, async function(req, res, next) {
       }
     }
   });
+});
+
+/*
+**************
+@route: GET api/contacts/getFilters
+@description: Get list of the the filters required
+@access: Private
+**************
+*/
+
+router.get('/getFilters', validateToken, async function(req, res, next){
+  var userId = req.decoded.id;
+  try {
+    let cityFilter = await Contact.find({userId:mongoose.Types.ObjectId(userId)}).distinct('propertyCity');
+    let stateFilter = await Contact.find({userId:mongoose.Types.ObjectId(userId)}).distinct('propertyState');
+    return res.json({cityFilter,stateFilter});
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({message: "Error in fetching filters"})
+  }
+
+
 });
 
 // -> Import CSV File to MongoDB database

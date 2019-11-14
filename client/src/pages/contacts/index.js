@@ -41,16 +41,17 @@ class ContactsList extends React.Component {
     //   this.props.dispatch($pageSize(pageSize));
     //   this.props.dispatch($fetchIndex())));
     // },
-    onChange: (page) => {
-      const { dispatch } = this.props
-      dispatch({
-        type: 'contacts/GET_CONTACTS',
-        payload: {
-          page,
-          limit:RECORD_LIMIT
-        }
-      })
-    },
+    // onChange: (page, pageSize) => {
+    //   alert(page, pageSize)
+    //   const { dispatch } = this.props
+    //   dispatch({
+    //     type: 'contacts/GET_CONTACTS',
+    //     payload: {
+    //       page,
+    //       limit:RECORD_LIMIT
+    //     }
+    //   })
+    // },
     // pageSizeOptions: this.props.meta.pageSizeOptions,
     total: this.props.meta ? this.props.meta.total: '',
     showTotal: (total, range) => `${range[0]} to ${range[1]} of ${total}`,
@@ -68,6 +69,10 @@ class ContactsList extends React.Component {
     dispatch({
       type: 'contacts/GET_CAMPAIGN_LIST',
       payload: false,
+    });
+    dispatch({
+      type: 'contacts/GET_FILTERS',
+      payload: false
     })
 
     const socket = socketIO(SERVER_ADDRESS, { forceNew: true })
@@ -94,22 +99,47 @@ class ContactsList extends React.Component {
     });
   }
 
-  // handleChange = (pagination, filters, sorter) => {
-  //   console.log('Various parameters', pagination, filters, sorter)
-  //   this.setState({
-  //     filteredInfo: filters,
-  //     sortedInfo: sorter,
-  //   })
-  // }
+  handleChange = (pagination, filters, sorter) => {
+    console.log('Various parameters', pagination, filters, sorter)
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'contacts/GET_CONTACTS',
+      payload: {
+        page:pagination.current,
+        limit:pagination.pageSize,
+        filters
+      },
+    })
+    this.setState({
+     filteredInfo: filters,
+     sortedInfo: sorter,
+   });
+  }
 
   clearFilters = () => {
+    const{dispatch} = this.props;
     this.setState({ filteredInfo: null })
+    dispatch({
+      type: 'contacts/GET_CONTACTS',
+      payload: {
+        page:1,
+        limit:RECORD_LIMIT
+      }
+    })
   }
 
   clearAll = () => {
+    const{dispatch} = this.props;
     this.setState({
       filteredInfo: null,
       sortedInfo: null,
+    })
+    dispatch({
+      type: 'contacts/GET_CONTACTS',
+      payload: {
+        page:1,
+        limit:RECORD_LIMIT
+      }
     })
   }
 
@@ -222,17 +252,18 @@ class ContactsList extends React.Component {
 
   render() {
     const {
-      contacts: { campaignList, list, countObj, meta, loading },
+      contacts: { campaignList, list, countObj, meta, loading, filters },
       form,
     } = this.props
     console.log(campaignList, 'campaignList')
+    console.log(filters,'filters');
     const campainFilterOptions = campaignList
       ? campaignList.map(item => {
           return { text: item.campaign, value: item._id }
         })
       : []
-    const statesArr = list ? [...new Set(list.map(x => x.propertyState))] : [];
-    const cityArr = list ? [...new Set(list.map(x => x.propertyCity))] : [];
+    const statesArr = list ? filters.stateFilter : [];
+    const cityArr = list ? filters.cityFilter : [];
     const stateFilterOptions = statesArr
       ? statesArr.map(item => {
           return { text: item, value: item }
@@ -253,11 +284,11 @@ class ContactsList extends React.Component {
     const columns = [
       {
         title: 'Campaign',
-        dataIndex: 'campaign_info.campaign',
+        dataIndex: 'campaign.campaign',
         key: 'campaign',
         filters: campainFilterOptions,
         filterMultiple: true,
-        onFilter: (value, record) => record.campaign_info._id.includes(value),
+        onFilter: (value, record) => record.campaign._id.includes(value),
         filteredValue: filteredInfo.campaign || null,
         // sorter: (a, b) => a.mailingName.length - b.mailingName.length,
         // sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
@@ -318,11 +349,11 @@ class ContactsList extends React.Component {
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
     const pagination = {
       ...this.paginationOptions,
-      total: meta.contactCount,
+      total: meta.total,
       current: meta.page,
       pageSize: meta.pageSize,
     };
-    console.log(pagination);
+    console.log(pagination,"Pagination");
     return (
       <div>
         {showProgressBar ?
@@ -467,6 +498,7 @@ class ContactsList extends React.Component {
                 onChange={this.handleChange}
                 pagination={pagination}
                 loading={loading}
+                rowKey={row => row._id}
               />
             </div>
 
