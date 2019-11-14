@@ -41,16 +41,17 @@ class ContactsList extends React.Component {
     //   this.props.dispatch($pageSize(pageSize));
     //   this.props.dispatch($fetchIndex())));
     // },
-    onChange: (page) => {
-      const { dispatch } = this.props
-      dispatch({
-        type: 'contacts/GET_CONTACTS',
-        payload: {
-          page,
-          limit:RECORD_LIMIT
-        }
-      })
-    },
+    // onChange: (page, pageSize) => {
+    //   alert(page, pageSize)
+    //   const { dispatch } = this.props
+    //   dispatch({
+    //     type: 'contacts/GET_CONTACTS',
+    //     payload: {
+    //       page,
+    //       limit:RECORD_LIMIT
+    //     }
+    //   })
+    // },
     // pageSizeOptions: this.props.meta.pageSizeOptions,
     total: this.props.meta ? this.props.meta.total: '',
     showTotal: (total, range) => `${range[0]} to ${range[1]} of ${total}`,
@@ -94,13 +95,18 @@ class ContactsList extends React.Component {
     });
   }
 
-  // handleChange = (pagination, filters, sorter) => {
-  //   console.log('Various parameters', pagination, filters, sorter)
-  //   this.setState({
-  //     filteredInfo: filters,
-  //     sortedInfo: sorter,
-  //   })
-  // }
+  handleChange = (pagination, filters, sorter) => {
+    console.log('Various parameters', pagination, filters, sorter)
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'contacts/GET_CONTACTS',
+      payload: {
+        page:pagination.current,
+        limit:pagination.pageSize,
+        filters
+      },
+    })
+  }
 
   clearFilters = () => {
     this.setState({ filteredInfo: null })
@@ -318,11 +324,11 @@ class ContactsList extends React.Component {
     const listData = campaignList?campaignList.map((item) => <Option key={item._id} value={item._id}>{item.campaign}</Option>):'';
     const pagination = {
       ...this.paginationOptions,
-      total: meta.contactCount,
+      total: meta.total,
       current: meta.page,
       pageSize: meta.pageSize,
     };
-    console.log(pagination);
+    console.log(pagination,"Pagination");
     return (
       <div>
         {showProgressBar ?
@@ -467,6 +473,7 @@ class ContactsList extends React.Component {
                 onChange={this.handleChange}
                 pagination={pagination}
                 loading={loading}
+                rowKey={row => row._id}
               />
             </div>
 

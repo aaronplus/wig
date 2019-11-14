@@ -9,8 +9,9 @@ const fileDownload = require('js-file-download')
 // };
 axios.defaults.headers.common.Authorization = `${localStorage.getItem('jwtToken')}`
 
-export function getContacts(page, limit) {
-  return axios.get(`${SERVER_ADDRESS}/contacts/list?page=${page}&limit=${limit}`).then(res => {
+export function getContacts(page, limit, filters) {
+  const requestUrl = !filters? `${SERVER_ADDRESS}/contacts/list?page=${page}&limit=${limit}` : `${SERVER_ADDRESS}/contacts/list?page=${page}&limit=${limit}&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+  return axios.get(requestUrl).then(res => {
     return res.data
   })
 }

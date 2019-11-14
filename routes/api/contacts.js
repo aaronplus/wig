@@ -36,12 +36,36 @@ multer({
 
 router.get('/list', validateToken, async function(req, res, next){
   var userId = req.decoded.id;
-  let { page, limit} = req.query;
-  let skip = page * limit;
+  let { page, limit, filters} = req.query;
+  page = parseInt(page);
+  limit = parseInt(limit);
+  let skip = (page == 1)? 0 : page * limit;
+
+  var matchQry = {
+    userId:mongoose.Types.ObjectId(userId)
+  }
+  if (filters) {
+    var filterParams = JSON.parse(filters);
+    if (filterParams.propertyCity) {
+        matchQry['propertyCity'] = {$in:filterParams.propertyCity};
+    }
+    if (filterParams.propertyState) {
+      matchQry['propertyState'] = {$in:filterParams.propertyState};
+    }
+    if (filterParams.campaign) {
+      matchQry['campaign'] = {$in:filterParams.campaign.map((rec)=>{
+        return mongoose.Types.ObjectId(rec);
+      })};
+    }
+  }
+
+
+  console.log(skip,limit);
+  console.log(matchQry);
   let contacts = await Contact.aggregate([
     {
       $match:{
-        userId:mongoose.Types.ObjectId(userId)
+        ...matchQry
       }
     },
     {$lookup: {
@@ -57,26 +81,20 @@ router.get('/list', validateToken, async function(req, res, next){
    $unwind: '$campaign_info'
  }
   ]);
-  console.log(JSON.stringify([
-    {
-      $match:{
-        userId:mongoose.Types.ObjectId(userId)
-      }
-    },
-    {$lookup: {
-    from:"campaigns",
-    localField: "campaign",
-    foreignField: "_id",
-    as: "campaign_info"
-   }
- },
- {$skip: parseInt(page*limit)},
- {$limit: parseInt(limit)},
- {
-   $unwind: '$campaign_info'
- }
-  ]));
-  return res.json(contacts);
+
+// Get Count
+var contactCount = await Contact.count(matchQry);
+var skipContactCount = await Contact.count(Object.assign({},matchQry,{skippedDate:{$exists: true}}));
+var campaignCount = await Campaign.count(matchQry);
+
+
+
+
+
+
+
+
+  return res.json({results:contacts,countObj:{contactCount,skipContactCount,campaignCount}});
 });
 
 /*
