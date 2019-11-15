@@ -17,7 +17,7 @@ const messageSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['PASS', 'FAIL'],
+      enum: ['PASS', 'FAIL', 'REVIEW'],
     },
   },
   { timestamps: true },
@@ -36,6 +36,10 @@ const conversationSchema = new Schema(
       type: String,
     },
     messages: [messageSchema],
+    status: {
+      type: String,
+      enum: ['REVIEW', 'PASS', 'FAIL'],
+    },
   },
   {
     timestamps: true,
