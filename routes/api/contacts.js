@@ -58,9 +58,9 @@ router.get('/list', validateToken, async function(req, res, next) {
       })};
     }
   }
-console.log(matchQry);
+console.log(matchQry,'skip:'+parseInt(skip + limit),'limit:'+limit);
   let contacts = await Contact.find(matchQry)
-    .skip(parseInt(skip + limit))
+    .skip(parseInt(skip))
     .limit(parseInt(limit))
     .populate({
       path: 'campaign',
