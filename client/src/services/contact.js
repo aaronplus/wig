@@ -1,3 +1,4 @@
+import { notification } from 'antd';
 import { SERVER_ADDRESS } from '../config/constants'
 
 const axios = require('axios').default
@@ -9,8 +10,9 @@ const fileDownload = require('js-file-download')
 // };
 axios.defaults.headers.common.Authorization = `${localStorage.getItem('jwtToken')}`
 
-export function getContacts(page, limit) {
-  return axios.get(`${SERVER_ADDRESS}/contacts/list?page=${page}&limit=${limit}`).then(res => {
+export function getContacts(page, limit, filters) {
+  const requestUrl = !filters? `${SERVER_ADDRESS}/contacts/list?page=${page}&limit=${limit}` : `${SERVER_ADDRESS}/contacts/list?page=${page}&limit=${limit}&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+  return axios.get(requestUrl).then(res => {
     return res.data
   })
 }
@@ -45,6 +47,8 @@ export async function exportContacts(postData) {
   data: {...postObj},
   // responseType: 'stream'
 }).then((response) => {
+  if (response.data && response.data.length) {
+
   const headers = Object.keys(response.data[0]);
   delete(headers[0]);
   response.data.unshift(headers);
@@ -69,6 +73,12 @@ export async function exportContacts(postData) {
         .toString(36)
         .substring(7)}.csv`,
     )
+  }else {
+    notification.warning({
+      message: "Failed Export",
+      description: "No data found for this export",
+    })
+  }
   })
 }
 export function getSchema() {
@@ -78,6 +88,11 @@ export function getSchema() {
 }
 export function getCounts() {
   return axios.get(`${SERVER_ADDRESS}/contacts/getCounts`).then(res => {
+    return res.data
+  })
+}
+export function getFilters(){
+  return axios.get(`${SERVER_ADDRESS}/contacts/getFilters`).then(res =>{
     return res.data
   })
 }

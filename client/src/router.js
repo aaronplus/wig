@@ -361,6 +361,11 @@ const routes = [
     Component: loadable(() => import('pages/messages')),
     exact: true,
   },
+  {
+    path: '/keywords',
+    Component: loadable(() => import('pages/keywords')),
+    exact: true,
+  }
 ]
 
 const mapStateToProps = ({ settings }) => ({ settings })

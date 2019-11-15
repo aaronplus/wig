@@ -40,6 +40,11 @@ export default async function getMenuData() {
           key: 'phone-numbers',
           url: '/phone_numbers',
         },
+        {
+          title: 'Keywords',
+          key: 'keywords',
+          url: '/keywords',
+        }
       ],
     },
     {

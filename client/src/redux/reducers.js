@@ -6,6 +6,7 @@ import settings from './settings/reducers'
 import contacts from './contacts/reducers'
 import phoneNumbers from './phone/reducers'
 import messages from './messages/reducers'
+import keywords from './keywords/reducers'
 
 export default history =>
   combineReducers({
@@ -15,5 +16,6 @@ export default history =>
     settings,
     contacts,
     phoneNumbers,
-    messages
+    messages,
+    keywords
   })

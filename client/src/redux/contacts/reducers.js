@@ -8,6 +8,7 @@ const initialState = {
   loading: false,
   schema: false,
   countObj: false,
+  filters: {},
   meta: {
     page: 0,
     pageSize: INDEX_PAGE_SIZE_DEFAULT,
