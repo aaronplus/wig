@@ -54,7 +54,6 @@ class Messaging extends React.Component {
   }
 
   handleScroll = ({ top }) => {
-    console.log('Scrolling...', top)
     const { hasMore } = this.state
     if (top === 1 && hasMore) {
       this.setState(prevState => ({ ...prevState, page: prevState.page + 1, isFetching: true }))
@@ -175,9 +174,30 @@ class Messaging extends React.Component {
     }
   }
 
+  sendConversation = async conversationId => {
+    const response = await axios(`${SERVER_ADDRESS}/twilio/conversations/send/${conversationId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: localStorage.getItem('jwtToken'),
+      },
+    })
+    const contact = response.data
+    const { conversations, conversation } = this.state
+    const index = conversations.findIndex(x => x.contactId === contact._id)
+    if (index !== -1) {
+      conversations[index].contactStatus = contact.status
+      this.setState({
+        conversations,
+        conversation:
+          conversation.id === conversations[index].id ? conversations[index] : conversation,
+      })
+    }
+  }
+
   render() {
     const { activeId, conversations, conversation, msg, isFetching } = this.state
-    const { name, messages, avatar, to, from, contactStatus, contactId } = conversation
+    const { id, name, messages, avatar, to, from, contactStatus, contactId } = conversation
     return (
       <div>
         <Helmet title="Apps: Messaging" />
@@ -248,8 +268,8 @@ class Messaging extends React.Component {
               <div className="card-header card-header-flex align-items-center">
                 <div className="d-flex flex-column justify-content-center mr-auto">
                   <h5 className="mb-0 mr-2 font-size-18">
-                    {name} {to} <br />
-                    <span className="font-size-14 text-gray-6">{from}</span>
+                    {name} {from} <br />
+                    <span className="font-size-14 text-gray-6">{to}</span>
                   </h5>
                 </div>
                 <div>
@@ -267,7 +287,7 @@ class Messaging extends React.Component {
                     <button
                       className="btn btn-light btn-sm mr-2"
                       type="button"
-                      // disabled={contactStatus === 'DO NOT CALL'}
+                      disabled={contactStatus === 'DO NOT CALL'}
                       onClick={() => this.addContactToDoNotCall(contactId)}
                     >
                       <i
@@ -277,9 +297,17 @@ class Messaging extends React.Component {
                     </button>
                   </Tooltip>
                   <Tooltip placement="top" title="Qualify Lead">
-                    <a href="javascript: void(0);" className="btn btn-sm btn-light">
-                      <i className="fe fe-thumbs-up" />
-                    </a>
+                    <button
+                      className="btn btn-sm btn-light"
+                      type="button"
+                      disabled={contactStatus === 'Lead'}
+                      onClick={() => this.sendConversation(id)}
+                    >
+                      <i
+                        className="fe fe-thumbs-up"
+                        style={{ color: contactStatus === 'Lead' && 'green' }}
+                      />
+                    </button>
                   </Tooltip>
                 </div>
               </div>
