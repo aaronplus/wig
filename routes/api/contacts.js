@@ -68,7 +68,7 @@ console.log(matchQry);
 
 // Get Count
 var contactCount = await Contact.count(matchQry);
-var skipContactCount = await Contact.count(Object.assign({},matchQry,{skippedDate:{$exists: true}}));
+var skipContactCount = await Contact.count(Object.assign({},matchQry,{skippedDate:{$exists: false}}));
 var campaignCount = await Campaign.count(matchQry);
 
 return res.json({results:contacts,countObj:{contactCount,skipContactCount,campaignCount}});
@@ -607,7 +607,7 @@ router.get('/getCounts', validateToken, async function(req, res, next) {
     });
     var skipContactCount = await Contact.count({
       userId: mongoose.Types.ObjectId(userId),
-      skippedDate: { $exists: true },
+      skippedDate: { $exists: false },
     });
     var campaignCount = await Campaign.count({
       userId: mongoose.Types.ObjectId(userId),
