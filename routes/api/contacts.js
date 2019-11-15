@@ -39,7 +39,7 @@ router.get('/list', validateToken, async function(req, res, next) {
   let { page, limit, filters} = req.query;
   page = parseInt(page);
   limit = parseInt(limit);
-  let skip = (page == 1)? 0 : page * limit;
+  let skip = (page == 1)? 0 : limit * (page - 1);
 
   var matchQry = {
     userId:mongoose.Types.ObjectId(userId)
