@@ -39,7 +39,7 @@ router.get('/list', validateToken, async function(req, res, next) {
   let { page, limit, filters} = req.query;
   page = parseInt(page);
   limit = parseInt(limit);
-  let skip = (page == 1)? 0 : page * limit;
+  let skip = (page == 1)? 0 : limit * (page - 1);
 
   var matchQry = {
     userId:mongoose.Types.ObjectId(userId)
@@ -58,9 +58,9 @@ router.get('/list', validateToken, async function(req, res, next) {
       })};
     }
   }
-console.log(matchQry);
+console.log(matchQry,'skip:'+parseInt(skip + limit),'limit:'+limit);
   let contacts = await Contact.find(matchQry)
-    .skip(parseInt(skip + limit))
+    .skip(parseInt(skip))
     .limit(parseInt(limit))
     .populate({
       path: 'campaign',
@@ -68,7 +68,7 @@ console.log(matchQry);
 
 // Get Count
 var contactCount = await Contact.count(matchQry);
-var skipContactCount = await Contact.count(Object.assign({},matchQry,{skippedDate:{$exists: true}}));
+var skipContactCount = await Contact.count(Object.assign({},matchQry,{skippedDate:{$exists: false}}));
 var campaignCount = await Campaign.count(matchQry);
 
 return res.json({results:contacts,countObj:{contactCount,skipContactCount,campaignCount}});
@@ -607,7 +607,7 @@ router.get('/getCounts', validateToken, async function(req, res, next) {
     });
     var skipContactCount = await Contact.count({
       userId: mongoose.Types.ObjectId(userId),
-      skippedDate: { $exists: true },
+      skippedDate: { $exists: false },
     });
     var campaignCount = await Campaign.count({
       userId: mongoose.Types.ObjectId(userId),
