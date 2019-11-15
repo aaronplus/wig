@@ -22,24 +22,31 @@ router.post('/sms', async (req, res) => {
     path: 'contact',
     populate: { path: 'campaign' },
   });
-  const keywords = await Keyword.find({ type: false });
-  let Pass = true;
+  const keywords = await Keyword.find();
+  let Pass = false;
+  let Fail = false;
   for (let i = 0; i < keywords.length; i++) {
     console.log('Keywords', keywords[i].keyword);
     if (Body.toLowerCase().includes(keywords[i]._doc.keyword.toLowerCase())) {
-      Pass = false;
-      break;
+      if (keywords[i]._doc.type) {
+        Pass = true;
+      } else {
+        Fail = true;
+      }
     }
   }
+  let status = 'REVIEW';
+  if (Pass && !Fail) status = 'PASS';
+  if (!Pass && Fail) status = 'FAIL';
   const newMessage = {
     message: Body,
     sid: MessageSid,
     received: true,
-    status: Pass ? 'PASS' : 'FAIL',
+    status,
   };
   if (conversationExists) {
     conversationExists.messages.push(newMessage);
-    if (!Pass) {
+    if (Fail) {
       await Contact.findByIdAndUpdate(conversationExists.contact._id, {
         $set: { status: 'DO NOT CALL' },
       });
@@ -65,6 +72,7 @@ router.post('/sms', async (req, res) => {
     const newConv = {
       from: From,
       to: To,
+      status,
       messages: [newMessage],
     };
     if (contact) {

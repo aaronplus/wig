@@ -1,6 +1,6 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
-import { Input, Icon, Tooltip } from 'antd'
+import { Input, Icon, Tooltip, Tabs } from 'antd'
 import { Scrollbars } from 'react-custom-scrollbars'
 import axios from 'axios'
 import moment from 'moment'
@@ -9,6 +9,8 @@ import socketIO from 'socket.io-client'
 // import dialogs from './data.json'
 import style from './style.module.scss'
 import { SERVER_ADDRESS } from '../../../config/constants'
+
+const { TabPane } = Tabs
 
 class Messaging extends React.Component {
   state = {
@@ -77,6 +79,7 @@ class Messaging extends React.Component {
       avatar: 'resources/images/avatars/avatar-2.png',
       unread: conv.messages.filter(x => !x.read).length,
       contactStatus: conv.contact ? `${conv.contact.status || undefined}` : undefined,
+      status: conv.status,
     }
     result.messages = conv.messages.map(msg => {
       const r = {
@@ -198,6 +201,9 @@ class Messaging extends React.Component {
   render() {
     const { activeId, conversations, conversation, msg, isFetching } = this.state
     const { id, name, messages, avatar, to, from, contactStatus, contactId } = conversation
+    const passedConversations = conversations.filter(x => x.status === 'PASS')
+    const failedConversations = conversations.filter(x => x.status === 'FAIL')
+    const reviewConversations = conversations.filter(x => x.status === 'REVIEW')
     return (
       <div>
         <Helmet title="Apps: Messaging" />
@@ -228,37 +234,149 @@ class Messaging extends React.Component {
                   />
                 )}
               >
-                {conversations.map(item => (
-                  <a
-                    href="javascript: void(0);"
-                    onClick={e => this.changeDialog(e, item.id)}
-                    key={item.name}
-                    hidden={!item.unread}
-                    className={`${style.item} ${style.unread} ${
-                      item.id === activeId ? style.current : ''
-                    } d-flex flex-nowrap align-items-center`}
-                    style={{ backgroundColor: item.unread ? '#46be8a' : '#ffffff' }}
+                <Tabs defaultActiveKey="pass">
+                  <TabPane
+                    tab={
+                      <span>
+                        {' '}
+                        PASS
+                        <span
+                          hidden={passedConversations.reduce((acc, x) => acc + x.unread, 0) === 0}
+                          className="badge badge-success ml-2"
+                        >
+                          {passedConversations.reduce((acc, x) => acc + x.unread, 0)}
+                        </span>
+                      </span>
+                    }
+                    key="pass"
                   >
-                    <div className="air__utils__avatar air__utils__avatar--size46 mr-3 flex-shrink-0">
-                      <img src={item.avatar} alt={item.name} />
-                    </div>
-                    <div className={`${style.info} flex-grow-1`}>
-                      <div className="text-uppercase font-size-12 text-truncate text-gray-6">
-                        {item.address}
-                      </div>
-                      <div className="text-dark font-size-16 font-weight-normal text-truncate">
-                        {item.name} -{' '}
-                        {item.messages[item.messages.length - 1].content.substring(0, 100)}
-                      </div>
-                    </div>
-                    <div
-                      hidden={!item.unread}
-                      className={`${style.unread} flex-shrink-0 align-self-start`}
-                    >
-                      <div className="badge badge-success">{item.unread}</div>
-                    </div>
-                  </a>
-                ))}
+                    {passedConversations.map(item => (
+                      <a
+                        href="javascript: void(0);"
+                        onClick={e => this.changeDialog(e, item.id)}
+                        key={item.name}
+                        hidden={!item.unread}
+                        className={`${style.item} ${style.unread} ${
+                          item.id === activeId ? style.current : ''
+                        } d-flex flex-nowrap align-items-center`}
+                        style={{ backgroundColor: item.unread ? '#46be8a' : '#ffffff' }}
+                      >
+                        <div className="air__utils__avatar air__utils__avatar--size46 mr-3 flex-shrink-0">
+                          <img src={item.avatar} alt={item.name} />
+                        </div>
+                        <div className={`${style.info} flex-grow-1`}>
+                          <div className="text-uppercase font-size-12 text-truncate text-gray-6">
+                            {item.address}
+                          </div>
+                          <div className="text-dark font-size-16 font-weight-normal text-truncate">
+                            {item.name} -{' '}
+                            {item.messages[item.messages.length - 1].content.substring(0, 100)}
+                          </div>
+                        </div>
+                        <div
+                          hidden={!item.unread}
+                          className={`${style.unread} flex-shrink-0 align-self-start`}
+                        >
+                          <div className="badge badge-success">{item.unread}</div>
+                        </div>
+                      </a>
+                    ))}
+                  </TabPane>
+                  <TabPane
+                    tab={
+                      <span>
+                        {' '}
+                        REVIEW
+                        <span
+                          hidden={reviewConversations.reduce((acc, x) => acc + x.unread, 0) === 0}
+                          className="badge badge-success ml-2"
+                        >
+                          {reviewConversations.reduce((acc, x) => acc + x.unread, 0)}
+                        </span>
+                      </span>
+                    }
+                    key="review"
+                  >
+                    {reviewConversations.map(item => (
+                      <a
+                        href="javascript: void(0);"
+                        onClick={e => this.changeDialog(e, item.id)}
+                        key={item.name}
+                        hidden={!item.unread}
+                        className={`${style.item} ${style.unread} ${
+                          item.id === activeId ? style.current : ''
+                        } d-flex flex-nowrap align-items-center`}
+                        style={{ backgroundColor: item.unread ? '#46be8a' : '#ffffff' }}
+                      >
+                        <div className="air__utils__avatar air__utils__avatar--size46 mr-3 flex-shrink-0">
+                          <img src={item.avatar} alt={item.name} />
+                        </div>
+                        <div className={`${style.info} flex-grow-1`}>
+                          <div className="text-uppercase font-size-12 text-truncate text-gray-6">
+                            {item.address}
+                          </div>
+                          <div className="text-dark font-size-16 font-weight-normal text-truncate">
+                            {item.name} -{' '}
+                            {item.messages[item.messages.length - 1].content.substring(0, 100)}
+                          </div>
+                        </div>
+                        <div
+                          hidden={!item.unread}
+                          className={`${style.unread} flex-shrink-0 align-self-start`}
+                        >
+                          <div className="badge badge-success">{item.unread}</div>
+                        </div>
+                      </a>
+                    ))}
+                  </TabPane>
+                  <TabPane
+                    tab={
+                      <span>
+                        {' '}
+                        FAIL
+                        <span
+                          hidden={failedConversations.reduce((acc, x) => acc + x.unread, 0) === 0}
+                          className="badge badge-success ml-2"
+                        >
+                          {failedConversations.reduce((acc, x) => acc + x.unread, 0)}
+                        </span>
+                      </span>
+                    }
+                    key="fail"
+                  >
+                    {failedConversations.map(item => (
+                      <a
+                        href="javascript: void(0);"
+                        onClick={e => this.changeDialog(e, item.id)}
+                        key={item.name}
+                        hidden={!item.unread}
+                        className={`${style.item} ${style.unread} ${
+                          item.id === activeId ? style.current : ''
+                        } d-flex flex-nowrap align-items-center`}
+                        style={{ backgroundColor: item.unread ? '#46be8a' : '#ffffff' }}
+                      >
+                        <div className="air__utils__avatar air__utils__avatar--size46 mr-3 flex-shrink-0">
+                          <img src={item.avatar} alt={item.name} />
+                        </div>
+                        <div className={`${style.info} flex-grow-1`}>
+                          <div className="text-uppercase font-size-12 text-truncate text-gray-6">
+                            {item.address}
+                          </div>
+                          <div className="text-dark font-size-16 font-weight-normal text-truncate">
+                            {item.name} -{' '}
+                            {item.messages[item.messages.length - 1].content.substring(0, 100)}
+                          </div>
+                        </div>
+                        <div
+                          hidden={!item.unread}
+                          className={`${style.unread} flex-shrink-0 align-self-start`}
+                        >
+                          <div className="badge badge-success">{item.unread}</div>
+                        </div>
+                      </a>
+                    ))}
+                  </TabPane>
+                </Tabs>
                 {isFetching && <div className="text-center">Loading...</div>}
               </Scrollbars>
             </div>
