@@ -65,5 +65,9 @@ const ScheduleSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  isFromMultiple: {
+    type: Boolean,
+    default: true,
+  },
 });
 module.exports = Schedule = mongoose.model('schedules', ScheduleSchema);

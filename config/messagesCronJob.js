@@ -44,6 +44,7 @@ module.exports = async () => {
         offset: 0,
         limit: 10,
         date: toDate,
+        isFromMultiple: activeSchedules[i].isFromMultiple,
       };
       if (status) {
         msg.page = status.pages;
@@ -131,6 +132,7 @@ async function getContactsAndSendMessages({
   offset,
   limit,
   date,
+  isFromMultiple,
 }) {
   try {
     const contacts = await getContacts(campaign_id, page, offset, limit);
@@ -138,7 +140,14 @@ async function getContactsAndSendMessages({
       console.log('Message sent to all contacts.');
       return;
     }
-    const from = await PhoneNumber.findById(phone_number_id);
+
+    let from = process.env.MESSAGING_SERVICE_ID;
+
+    if (!isFromMultiple) {
+      const phoneNumber = await PhoneNumber.findById(phone_number_id);
+      from = phoneNumber.phone_number;
+    }
+
     const to = [];
     for (let i = 0; i < contacts.length; i++) {
       if (contacts[i].status === 'DO NOT CALL') {
@@ -178,7 +187,7 @@ async function getContactsAndSendMessages({
     const uniqueTo = Array.from(new Set(to));
     const msgPrimises = [];
     for (let i = 0; i < uniqueTo.length; i++) {
-      msgPrimises.push(sendMessage(from.phone_number, uniqueTo[i], message));
+      msgPrimises.push(sendMessage(from, uniqueTo[i], message));
     }
     if (msgPrimises.length <= 0) {
       console.log('Error Sending messages...');
