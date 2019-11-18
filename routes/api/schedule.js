@@ -74,6 +74,7 @@ router.post('/add', validateToken, async (req, res) => {
     time_zone,
     message,
     phone_number,
+    isFromMultiple,
   } = req.body;
   try {
     const contacts = await Contact.find({ status: { $ne: 'DO NOT CALL' } });
@@ -105,6 +106,7 @@ router.post('/add', validateToken, async (req, res) => {
       phone_number,
       totalPhoneNumbers,
       totalContacts,
+      isFromMultiple,
     });
     const results = await scheduleData.save();
     return res.status(200).json(results);
