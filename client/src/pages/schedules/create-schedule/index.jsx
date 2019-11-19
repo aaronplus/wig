@@ -106,7 +106,8 @@ class CreateSchedule extends React.Component {
     return {
       campaign: data.campaign,
       type: data.type,
-      phone_number: data.phoneNumber,
+      isFromMultiple: data.isFromMultiple === 'multiple',
+      phone_number: data.isFromMultiple === 'multiple' ? undefined : data.phoneNumber,
       day_limit: data.day_limit,
       start_date: moment(data.startDate).format('YYYY-MM-DD'),
       end_date: moment(data.endDate).format('YYYY-MM-DD'),
@@ -188,17 +189,29 @@ class CreateSchedule extends React.Component {
                   </Select>,
                 )}
               </Form.Item>
-              <Form.Item label="Select Phone Number">
-                {form.getFieldDecorator('phoneNumber', {
-                  rules: [{ message: 'Please select phone number!' }],
+              <Form.Item label="Send messages from">
+                {form.getFieldDecorator('isFromMultiple', {
+                  rules: [{ required: true, message: 'Please select an option!' }],
                 })(
-                  <Select placeholder="Select phone number" onChange={this.handleSelectChange}>
-                    {phoneNumbers.map(phone => (
-                      <Option value={phone._id}>{phone.phone_number}</Option>
-                    ))}
-                  </Select>,
+                  <Radio.Group>
+                    <Radio value="multiple">Multiple Numbers</Radio>
+                    <Radio value="single">Single Number</Radio>
+                  </Radio.Group>,
                 )}
               </Form.Item>
+              {form.getFieldValue('isFromMultiple') === 'single' && (
+                <Form.Item label="Select Phone Number">
+                  {form.getFieldDecorator('phoneNumber', {
+                    rules: [{ message: 'Please select phone number!' }],
+                  })(
+                    <Select placeholder="Select phone number" onChange={this.handleSelectChange}>
+                      {phoneNumbers.map(phone => (
+                        <Option value={phone._id}>{phone.phone_number}</Option>
+                      ))}
+                    </Select>,
+                  )}
+                </Form.Item>
+              )}
               <Form.Item label="Daily Limit">
                 {form.getFieldDecorator('day_limit', {
                   initialValue: 3000,
