@@ -289,8 +289,16 @@ async function sendMessage({ from, to, body, messagingServiceSid }) {
       statusCallback: process.env.SMS_STATUS_CALLBACK,
       to: `+${AREA_CODE}${to}`.replace(/\s/g, ''),
     });
+    console.log('Response sending message: ', response);
     return response;
   } catch (error) {
-    throw error;
+    console.log('Error Thrown Sending message: ', error);
+    const response = {
+      to: `+${AREA_CODE}${to}`.replace(/\s/g, ''),
+      status: 'failed',
+      sid: null,
+    };
+    return response;
+    // throw error;
   }
 }
