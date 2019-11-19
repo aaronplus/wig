@@ -14,7 +14,18 @@ const Keyword = require('../../models/Keyword');
 router.post('/sms', async (req, res) => {
   const messageReceived = req.body;
   console.log('Received Message: ', messageReceived);
-  const { From, To, MessageSid, Body } = messageReceived;
+  let { From, To, MessageSid, Body } = messageReceived;
+  const { CallSid, RecordingUrl, RecordingSid } = messageReceived;
+  if (CallSid) {
+    const accountSid = process.env.ACCOUNT_SID;
+    const authToken = process.env.AUTH_TOKEN;
+    const client = twilio(accountSid, authToken);
+    const call = await client.calls(CallSid).fetch();
+    From = call.from;
+    To = call.to;
+    MessageSid = RecordingSid;
+    Body = RecordingUrl;
+  }
   const conversationExists = await Conversation.findOne({
     from: From,
     to: To,
@@ -25,13 +36,15 @@ router.post('/sms', async (req, res) => {
   const keywords = await Keyword.find();
   let Pass = false;
   let Fail = false;
-  for (let i = 0; i < keywords.length; i++) {
-    console.log('Keywords', keywords[i].keyword);
-    if (Body.toLowerCase().includes(keywords[i]._doc.keyword.toLowerCase())) {
-      if (keywords[i]._doc.type) {
-        Pass = true;
-      } else {
-        Fail = true;
+  if (!CallSid) {
+    for (let i = 0; i < keywords.length; i++) {
+      console.log('Keywords', keywords[i].keyword);
+      if (Body.toLowerCase().includes(keywords[i]._doc.keyword.toLowerCase())) {
+        if (keywords[i]._doc.type) {
+          Pass = true;
+        } else {
+          Fail = true;
+        }
       }
     }
   }
@@ -43,7 +56,9 @@ router.post('/sms', async (req, res) => {
     sid: MessageSid,
     received: true,
     status,
+    isVoicemail: CallSid ? true : false,
   };
+  console.log('new message', newMessage);
   if (conversationExists) {
     conversationExists.messages.push(newMessage);
     if (Fail) {
@@ -137,6 +152,20 @@ router.post('/sms/callback', async (req, res) => {
   }
   res.writeHead(200, { 'Content-Type': 'text/xml' });
   res.end('<Response></Response>');
+});
+
+router.post('/voicemail', async (req, res) => {
+  console.log('Origin: ', req.hostname);
+  const VoiceResponse = twilio.twiml.VoiceResponse;
+  const response = new VoiceResponse();
+  response.say('Please leave your message after the beep.');
+  response.record({
+    timeout: 10,
+    recordingStatusCallback: `https://${req.hostname}/api/twilio/sms`,
+    recordingStatusCallbackEvent: 'completed',
+  });
+
+  res.send(response.toString());
 });
 
 router.post('/reply/:conversationId', async (req, res) => {
