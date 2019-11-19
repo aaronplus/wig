@@ -78,15 +78,20 @@ class Messaging extends React.Component {
       to: conv.to,
       avatar: 'resources/images/avatars/avatar-2.png',
       unread: conv.messages.filter(x => !x.read).length,
+      unreadVoicemails: conv.messages.filter(x => !x.read && x.isVoicemail).length,
       contactStatus: conv.contact ? `${conv.contact.status || undefined}` : undefined,
       status: conv.status,
     }
     result.messages = conv.messages.map(msg => {
       const r = {
-        owner: msg.received ? conv.from_name : 'you',
+        owner: msg.received ? result.name : 'you',
         sent_at: msg.createdAt,
         time: moment(msg.createdAt).format('HH:mm'),
         content: msg.message,
+        isVoicemail: msg.isVoicemail,
+      }
+      if (msg.isVoicemail) {
+        result.hasVoicemail = true
       }
       return r
     })
@@ -214,6 +219,7 @@ class Messaging extends React.Component {
     const passedConversations = sortedConversations.filter(x => x.status === 'PASS')
     const failedConversations = sortedConversations.filter(x => x.status === 'FAIL')
     const reviewConversations = sortedConversations.filter(x => x.status === 'REVIEW')
+    const voicemailConversations = sortedConversations.filter(x => x.hasVoicemail)
     return (
       <div>
         <Helmet title="Apps: Messaging" />
@@ -280,7 +286,9 @@ class Messaging extends React.Component {
                           </div>
                           <div className="text-dark font-size-16 font-weight-normal text-truncate">
                             {item.name} -{' '}
-                            {item.messages[item.messages.length - 1].content.substring(0, 100)}
+                            {item.messages[item.messages.length - 1].isVoicemail
+                              ? 'Sent voicemail'
+                              : item.messages[item.messages.length - 1].content.substring(0, 100)}
                           </div>
                         </div>
                         <div
@@ -327,7 +335,9 @@ class Messaging extends React.Component {
                           </div>
                           <div className="text-dark font-size-16 font-weight-normal text-truncate">
                             {item.name} -{' '}
-                            {item.messages[item.messages.length - 1].content.substring(0, 100)}
+                            {item.messages[item.messages.length - 1].isVoicemail
+                              ? 'Sent voicemail'
+                              : item.messages[item.messages.length - 1].content.substring(0, 100)}
                           </div>
                         </div>
                         <div
@@ -374,7 +384,63 @@ class Messaging extends React.Component {
                           </div>
                           <div className="text-dark font-size-16 font-weight-normal text-truncate">
                             {item.name} -{' '}
-                            {item.messages[item.messages.length - 1].content.substring(0, 100)}
+                            {item.messages[item.messages.length - 1].isVoicemail
+                              ? 'Sent voicemail'
+                              : item.messages[item.messages.length - 1].content.substring(0, 100)}
+                          </div>
+                        </div>
+                        <div
+                          hidden={!item.unread}
+                          className={`${style.unread} flex-shrink-0 align-self-start`}
+                        >
+                          <div className="badge badge-success">{item.unread}</div>
+                        </div>
+                      </a>
+                    ))}
+                  </TabPane>
+                  <TabPane
+                    tab={
+                      <span>
+                        {' '}
+                        Voicemails
+                        <span
+                          hidden={
+                            voicemailConversations.reduce(
+                              (acc, x) => acc + x.unreadVoicemails,
+                              0,
+                            ) === 0
+                          }
+                          className="badge badge-success ml-2"
+                        >
+                          {voicemailConversations.reduce((acc, x) => acc + x.unreadVoicemails, 0)}
+                        </span>
+                      </span>
+                    }
+                    key="voicemail"
+                  >
+                    {voicemailConversations.map(item => (
+                      <a
+                        href="javascript: void(0);"
+                        onClick={e => this.changeDialog(e, item.id)}
+                        key={item.name}
+                        hidden={!item.unread}
+                        className={`${style.item} ${style.unread} ${
+                          item.id === activeId ? style.current : ''
+                        } d-flex flex-nowrap align-items-center`}
+                        style={{ backgroundColor: item.unread ? '#46be8a' : '#ffffff' }}
+                      >
+                        <div className="air__utils__avatar air__utils__avatar--size46 mr-3 flex-shrink-0">
+                          <img src={item.avatar} alt={item.name} />
+                        </div>
+                        <div className={`${style.info} flex-grow-1`}>
+                          <div className="text-uppercase font-size-12 text-truncate text-gray-6">
+                            {item.address}
+                          </div>
+                          <div className="text-dark font-size-16 font-weight-normal text-truncate">
+                            {item.name} -{' '}
+                            {item.messages[item.messages.length - 1].isVoicemail
+                              ? 'Sent voicemail'
+                              : item.messages[item.messages.length - 1].content.substring(0, 100)}
                           </div>
                         </div>
                         <div
@@ -467,7 +533,15 @@ class Messaging extends React.Component {
                             <div className="text-gray-4 font-size-12 text-uppercase">
                               {message.owner}, {message.time}
                             </div>
-                            <div>{message.content}</div>
+                            {message.isVoicemail ? (
+                              // eslint-disable-next-line jsx-a11y/media-has-caption
+                              <audio controls>
+                                <source src={`${message.content}.mp3`} type="audio/mpeg" />
+                                Your browser does not support the audio element.
+                              </audio>
+                            ) : (
+                              <div>{message.content}</div>
+                            )}
                           </div>
                           <div className={`${style.messageAvatar} air__utils__avatar`}>
                             <img

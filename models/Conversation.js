@@ -19,6 +19,10 @@ const messageSchema = new Schema(
       type: String,
       enum: ['PASS', 'FAIL', 'REVIEW'],
     },
+    isVoicemail: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );
