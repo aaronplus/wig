@@ -77,21 +77,16 @@ router.post('/add', validateToken, async (req, res) => {
     isFromMultiple,
   } = req.body;
   try {
-    const contacts = await Contact.find({ status: { $ne: 'DO NOT CALL' } });
-    const contactsMatched = contacts.filter(contact => {
-      if (contact.campaign && campaign) {
-        if (contact.campaign.toString() === campaign.toString()) {
-          return true;
-        }
-      }
-      return false;
+    const contacts = await Contact.find({
+      campaign,
+      status: { $ne: 'DO NOT CALL' },
     });
-    const totalPhoneNumbers = Array.isArray(contactsMatched)
-      ? filterPhoneNumbers(contactsMatched)
+    if (contacts.length <= 0)
+      throw new Error('Contacts are not found against this campaign');
+    const totalPhoneNumbers = Array.isArray(contacts)
+      ? filterPhoneNumbers(contacts)
       : 0;
-    const totalContacts = Array.isArray(contactsMatched)
-      ? contactsMatched.length
-      : 0;
+    const totalContacts = Array.isArray(contacts) ? contacts.length : 0;
     const scheduleData = new Schedule({
       campaign,
       type,
