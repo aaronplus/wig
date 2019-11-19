@@ -44,6 +44,7 @@ module.exports = async () => {
         offset: 0,
         limit: 10,
         date: toDate,
+        isFromMultiple: activeSchedules[i].isFromMultiple,
       };
       if (status) {
         msg.page = status.pages;
@@ -131,6 +132,7 @@ async function getContactsAndSendMessages({
   offset,
   limit,
   date,
+  isFromMultiple,
 }) {
   try {
     const contacts = await getContacts(campaign_id, page, offset, limit);
@@ -138,7 +140,16 @@ async function getContactsAndSendMessages({
       console.log('Message sent to all contacts.');
       return;
     }
-    const from = await PhoneNumber.findById(phone_number_id);
+
+    let from = null;
+    let messagingServiceSid = null;
+    if (!isFromMultiple) {
+      const phoneNumber = await PhoneNumber.findById(phone_number_id);
+      from = phoneNumber.phone_number;
+    } else {
+      messagingServiceSid = process.env.MESSAGING_SERVICE_ID;
+    }
+
     const to = [];
     for (let i = 0; i < contacts.length; i++) {
       if (contacts[i].status === 'DO NOT CALL') {
@@ -177,8 +188,19 @@ async function getContactsAndSendMessages({
     }
     const uniqueTo = Array.from(new Set(to));
     const msgPrimises = [];
+    if (uniqueTo.length <= 0) {
+      console.log('No Valid number found...');
+      return;
+    }
     for (let i = 0; i < uniqueTo.length; i++) {
-      msgPrimises.push(sendMessage(from.phone_number, uniqueTo[i], message));
+      msgPrimises.push(
+        sendMessage({
+          from,
+          messagingServiceSid,
+          to: uniqueTo[i],
+          body: message,
+        }),
+      );
     }
     if (msgPrimises.length <= 0) {
       console.log('Error Sending messages...');
@@ -258,11 +280,12 @@ async function addMessageStatus({
   }
 }
 
-async function sendMessage(from, to, body) {
+async function sendMessage({ from, to, body, messagingServiceSid }) {
   try {
     const response = await client.messages.create({
       body,
-      from: from.replace(/\s/g, ''),
+      from: from ? from.replace(/\s/g, '') : undefined,
+      messagingServiceSid: messagingServiceSid || undefined,
       statusCallback: process.env.SMS_STATUS_CALLBACK,
       to: `+${AREA_CODE}${to}`.replace(/\s/g, ''),
     });
