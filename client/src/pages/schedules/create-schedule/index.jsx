@@ -95,7 +95,8 @@ class CreateSchedule extends React.Component {
             this.setState({ success: 'Schedule created successfully' })
           })
           .catch(error => {
-            this.setState({ error: error.message })
+            console.log('Error: ', error.response)
+            this.setState({ error: error.response.data.message })
           })
       }
     })
