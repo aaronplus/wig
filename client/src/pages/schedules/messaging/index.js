@@ -84,6 +84,7 @@ class Messaging extends React.Component {
     result.messages = conv.messages.map(msg => {
       const r = {
         owner: msg.received ? conv.from_name : 'you',
+        sent_at: msg.createdAt,
         time: moment(msg.createdAt).format('HH:mm'),
         content: msg.message,
       }
@@ -201,9 +202,18 @@ class Messaging extends React.Component {
   render() {
     const { activeId, conversations, conversation, msg, isFetching } = this.state
     const { id, name, messages, avatar, to, from, contactStatus, contactId } = conversation
-    const passedConversations = conversations.filter(x => x.status === 'PASS')
-    const failedConversations = conversations.filter(x => x.status === 'FAIL')
-    const reviewConversations = conversations.filter(x => x.status === 'REVIEW')
+    const sortedConversations = conversations.sort((a, b) => {
+      if (a.messages[a.messages.length - 1].sent_at < b.messages[b.messages.length - 1].sent_at) {
+        return 1
+      }
+      if (a.messages[a.messages.length - 1].sent_at > b.messages[b.messages.length - 1].sent_at) {
+        return -1
+      }
+      return 0
+    })
+    const passedConversations = sortedConversations.filter(x => x.status === 'PASS')
+    const failedConversations = sortedConversations.filter(x => x.status === 'FAIL')
+    const reviewConversations = sortedConversations.filter(x => x.status === 'REVIEW')
     return (
       <div>
         <Helmet title="Apps: Messaging" />
