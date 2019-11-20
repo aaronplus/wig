@@ -1,9 +1,15 @@
 import React from 'react'
 
-function ProgressBar({ campaign = { status: { sent: 0, delivered: 0, failed: 0 } } }) {
+function ProgressBar({
+  campaign = {
+    status: { queued: 0, accepted: 0, sent: 0, delivered: 0, undelivered: 0, failed: 0 },
+  },
+}) {
   console.log('Campaign ', campaign)
-  const { sent, delivered, failed } = campaign.status
-  const index = ((sent + delivered + failed) * 100) / campaign.totalPhoneNumbers
+  const { queued, accepted, sent, delivered, undelivered, failed } = campaign.status
+  const index =
+    ((queued + accepted + sent + delivered + undelivered + failed) * 100) /
+    campaign.totalPhoneNumbers
   return (
     <div>
       <div className="d-flex mb-1">
