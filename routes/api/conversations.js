@@ -122,28 +122,43 @@ router.post('/sms/callback', async (req, res) => {
         { $set: { 'message_status.$.status': SmsStatus } },
         { new: true },
       );
+      let queued = 0,
+        accepted = 0,
+        sent = 0,
+        delivered = 0,
+        undelivered = 0,
+        failed = 0;
+      for (let i = 0; i < sentMessagesStatus.message_status.length; i++) {
+        if (sentMessagesStatus.message_status[i].status === 'queued') {
+          queued++;
+        }
+        if (sentMessagesStatus.message_status[i].status === 'accepted') {
+          accepted++;
+        }
+        if (sentMessagesStatus.message_status[i].status === 'sent') {
+          sent++;
+        }
+        if (sentMessagesStatus.message_status[i].status === 'delivered') {
+          delivered++;
+        }
+        if (sentMessagesStatus.message_status[i].status === 'undelivered') {
+          undelivered++;
+        }
+        if (sentMessagesStatus.message_status[i].status === 'failed') {
+          failed++;
+        }
+      }
+      const status = {
+        queued,
+        accepted,
+        sent,
+        delivered,
+        undelivered,
+        failed,
+      };
       const data = {
         schedule_id: sentMessagesStatus.schedule_id,
-        status: {
-          sent:
-            sentMessagesStatus && sentMessagesStatus.message_status
-              ? sentMessagesStatus.message_status.filter(
-                  ms => ms.status === 'sent',
-                ).length
-              : 0,
-          delivered:
-            sentMessagesStatus && sentMessagesStatus.message_status
-              ? sentMessagesStatus.message_status.filter(
-                  ms => ms.status === 'delivered',
-                ).length
-              : 0,
-          failed:
-            sentMessagesStatus && sentMessagesStatus.message_status
-              ? sentMessagesStatus.message_status.filter(
-                  ms => ms.status === 'failed',
-                ).length
-              : 0,
-        },
+        status,
       };
       global.socket.emit('status_update', data);
     }
