@@ -11,7 +11,7 @@
     "eslint": "eslint --ext .js,jsx src",
     "stylelint": "stylelint \"src/**/*.{scss,less}\""
   },
-  "proxy": "http://localhost:5000",
+  "proxy": "https://thapp3.herokuapp.com",
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint-staged"
