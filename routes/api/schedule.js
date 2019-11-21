@@ -28,26 +28,46 @@ router.get('/all', validateToken, async (req, res) => {
           }
         }
       });
-      result.status = {
-        sent:
-          sentMessagesStatus && sentMessagesStatus.message_status
-            ? sentMessagesStatus.message_status.filter(
-                ms => ms.status === 'sent',
-              ).length
-            : 0,
-        delivered:
-          sentMessagesStatus && sentMessagesStatus.message_status
-            ? sentMessagesStatus.message_status.filter(
-                ms => ms.status === 'delivered',
-              ).length
-            : 0,
-        failed:
-          sentMessagesStatus && sentMessagesStatus.message_status
-            ? sentMessagesStatus.message_status.filter(
-                ms => ms.status === 'failed',
-              ).length
-            : 0,
-      };
+      if (
+        sentMessagesStatus &&
+        sentMessagesStatus.message_status &&
+        Array.isArray(sentMessagesStatus.message_status)
+      ) {
+        let queued = 0,
+          accepted = 0,
+          sent = 0,
+          delivered = 0,
+          undelivered = 0,
+          failed = 0;
+        for (let i = 0; i < sentMessagesStatus.message_status.length; i++) {
+          if (sentMessagesStatus.message_status[i].status === 'queued') {
+            queued++;
+          }
+          if (sentMessagesStatus.message_status[i].status === 'accepted') {
+            accepted++;
+          }
+          if (sentMessagesStatus.message_status[i].status === 'sent') {
+            sent++;
+          }
+          if (sentMessagesStatus.message_status[i].status === 'delivered') {
+            delivered++;
+          }
+          if (sentMessagesStatus.message_status[i].status === 'undelivered') {
+            undelivered++;
+          }
+          if (sentMessagesStatus.message_status[i].status === 'failed') {
+            failed++;
+          }
+        }
+        result.status = {
+          queued,
+          accepted,
+          sent,
+          delivered,
+          undelivered,
+          failed,
+        };
+      }
       return result;
     });
     return res.json(schedulesData);
