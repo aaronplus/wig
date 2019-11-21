@@ -34,9 +34,12 @@ class SchedulesList extends React.Component {
         'DD-MM-YYYY',
       )} - ${schedule.end_time.substring(0, 5)}`,
       dailyLimit: schedule.day_limit,
-      sent: `${schedule.status.sent + schedule.status.delivered + schedule.status.failed}/${
-        schedule.totalPhoneNumbers
-      }`,
+      sent: `${schedule.status.queued +
+        schedule.status.accepted +
+        schedule.status.sent +
+        schedule.status.delivered +
+        schedule.status.undelivered +
+        schedule.status.failed}/${schedule.totalPhoneNumbers}`,
       status: 'Pending Feature',
     }))
     this.setState({ dataSource: schedules })
