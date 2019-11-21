@@ -224,7 +224,7 @@ class Messaging extends React.Component {
       <div>
         <Helmet title="Apps: Messaging" />
         <div className="air__utils__heading">
-          <h5>Messages</h5>
+          <h5>Conversations</h5>
         </div>
         <div className="row">
           <div className="col-12 col-md-5">
@@ -402,7 +402,7 @@ class Messaging extends React.Component {
                     tab={
                       <span>
                         {' '}
-                        Voicemails
+                        VOICEMAIL
                         <span
                           hidden={
                             voicemailConversations.reduce(
@@ -481,12 +481,13 @@ class Messaging extends React.Component {
                     <button
                       className="btn btn-light btn-sm mr-2"
                       type="button"
-                      disabled={contactStatus === 'DO NOT CALL'}
+                      // disabled={contactStatus === 'DO NOT CALL'}
+                      style={{ background: contactStatus === 'DO NOT CALL' && 'red' }}
                       onClick={() => this.addContactToDoNotCall(contactId)}
                     >
                       <i
                         className="fe fe-thumbs-down"
-                        style={{ color: contactStatus === 'DO NOT CALL' && 'red' }}
+                        style={{ color: contactStatus === 'DO NOT CALL' && 'white' }}
                       />
                     </button>
                   </Tooltip>
@@ -494,19 +495,20 @@ class Messaging extends React.Component {
                     <button
                       className="btn btn-sm btn-light"
                       type="button"
-                      disabled={contactStatus === 'Lead'}
+                      style={{ background: contactStatus === 'Lead' && '#46be8a' }}
+                      // disabled={contactStatus === 'Lead'}
                       onClick={() => this.sendConversation(id)}
                     >
                       <i
                         className="fe fe-thumbs-up"
-                        style={{ color: contactStatus === 'Lead' && 'green' }}
+                        style={{ color: contactStatus === 'Lead' && 'white' }}
                       />
                     </button>
                   </Tooltip>
                 </div>
               </div>
               <div className="card-body">
-                <div className="height-700">
+                <div className="height-600">
                   <Scrollbars
                     autoHide
                     renderThumbVertical={({ ...props }) => (
